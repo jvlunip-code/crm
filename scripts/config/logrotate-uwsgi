@@ -1,0 +1,13 @@
+/var/log/uwsgi/*.log {
+    daily
+    missingok
+    rotate 14
+    compress
+    delaycompress
+    notifempty
+    create 0640 deploy deploy
+    sharedscripts
+    postrotate
+        /bin/systemctl reload crm-backend 2>/dev/null || true
+    endscript
+}
