@@ -1,0 +1,14 @@
+[project]
+name = "crm-backend"
+version = "0.1.0"
+description = "CRM Backend API"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "django>=5.1,<6.0",
+    "djangorestframework>=3.15,<4.0",
+    "psycopg[binary]>=3.1,<4.0",
+    "django-cors-headers>=4.3,<5.0",
+    "python-dotenv>=1.0,<2.0",
+    "uwsgi>=2.0,<3.0",
+]
