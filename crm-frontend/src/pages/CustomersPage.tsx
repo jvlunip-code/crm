@@ -58,6 +58,11 @@ import { CustomerDialog } from '@/components/customer/CustomerDialog'
 import type { Customer } from '@/types'
 import { toast } from 'sonner'
 
+const coreRowModel = getCoreRowModel()
+const filteredRowModel = getFilteredRowModel()
+const paginationRowModel = getPaginationRowModel()
+const sortedRowModel = getSortedRowModel()
+
 function createColumns(
   navigate: ReturnType<typeof useNavigate>,
   onEdit: (customer: Customer) => void,
@@ -174,8 +179,10 @@ export function CustomersPage() {
 
   const columns = React.useMemo(() => createColumns(navigate, handleEdit, handleDelete), [navigate])
 
+  const data = React.useMemo(() => customers ?? [], [customers])
+
   const table = useReactTable({
-    data: customers || [],
+    data,
     columns,
     state: {
       sorting,
@@ -185,10 +192,10 @@ export function CustomersPage() {
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     onPaginationChange: setPagination,
-    getCoreRowModel: getCoreRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    getSortedRowModel: getSortedRowModel(),
+    getCoreRowModel: coreRowModel,
+    getFilteredRowModel: filteredRowModel,
+    getPaginationRowModel: paginationRowModel,
+    getSortedRowModel: sortedRowModel,
   })
 
   if (isLoading) {
