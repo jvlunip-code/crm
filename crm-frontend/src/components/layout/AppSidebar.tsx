@@ -1,4 +1,4 @@
-import { useLocation, Link } from 'react-router-dom'
+import { useLocation, Link, useNavigate } from 'react-router-dom'
 import {
   LayoutDashboard,
   Users,
@@ -12,6 +12,7 @@ import {
   User,
   CircleDot,
 } from 'lucide-react'
+import { useAuth, useLogout } from '@/hooks/use-auth'
 import {
   Sidebar,
   SidebarContent,
@@ -33,7 +34,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { useNotifications } from '@/hooks/use-notifications'
 
 const navMain = [
@@ -49,16 +50,29 @@ const navSecondary = [
   { title: 'Ajuda', url: '#', icon: HelpCircle },
 ]
 
-const user = {
-  name: 'Admin User',
-  email: 'admin@example.com',
-  avatar: '',
-}
-
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const location = useLocation()
+  const navigate = useNavigate()
   const { data: notifications } = useNotifications()
   const unreadCount = notifications?.filter(n => n.status === 'unread').length || 0
+  const { user } = useAuth()
+  const logout = useLogout()
+
+  const displayName = user
+    ? (user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : user.username)
+    : ''
+  const displayEmail = user?.email ?? ''
+  const initials = user
+    ? (user.firstName && user.lastName
+        ? `${user.firstName[0]}${user.lastName[0]}`
+        : user.username.slice(0, 2).toUpperCase())
+    : ''
+
+  function handleLogout() {
+    logout.mutate(undefined, {
+      onSuccess: () => navigate('/login'),
+    })
+  }
 
   return (
     <Sidebar collapsible="offcanvas" {...props}>
@@ -128,13 +142,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
                 >
                   <Avatar className="h-8 w-8 rounded-lg">
-                    <AvatarImage src={user.avatar} alt={user.name} />
-                    <AvatarFallback className="rounded-lg">AU</AvatarFallback>
+                    <AvatarFallback className="rounded-lg">{initials}</AvatarFallback>
                   </Avatar>
                   <div className="grid flex-1 text-left text-sm leading-tight">
-                    <span className="truncate font-medium">{user.name}</span>
+                    <span className="truncate font-medium">{displayName}</span>
                     <span className="truncate text-xs text-muted-foreground">
-                      {user.email}
+                      {displayEmail}
                     </span>
                   </div>
                 </SidebarMenuButton>
@@ -148,13 +161,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 <DropdownMenuLabel className="p-0 font-normal">
                   <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                     <Avatar className="h-8 w-8 rounded-lg">
-                      <AvatarImage src={user.avatar} alt={user.name} />
-                      <AvatarFallback className="rounded-lg">AU</AvatarFallback>
+                      <AvatarFallback className="rounded-lg">{initials}</AvatarFallback>
                     </Avatar>
                     <div className="grid flex-1 text-left text-sm leading-tight">
-                      <span className="truncate font-medium">{user.name}</span>
+                      <span className="truncate font-medium">{displayName}</span>
                       <span className="truncate text-xs text-muted-foreground">
-                        {user.email}
+                        {displayEmail}
                       </span>
                     </div>
                   </div>
@@ -175,7 +187,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   </DropdownMenuItem>
                 </DropdownMenuGroup>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>
+                <DropdownMenuItem onClick={handleLogout}>
                   <LogOut className="mr-2 h-4 w-4" />
                   Terminar sessão
                 </DropdownMenuItem>

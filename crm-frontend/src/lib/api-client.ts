@@ -26,6 +26,11 @@ async function fetchWithAuth(url: string, options: RequestInit = {}): Promise<Re
     credentials: 'include', // Include cookies for session auth
   })
 
+  if (response.status === 401) {
+    window.location.href = '/login'
+    throw new Error('Sessão expirada')
+  }
+
   if (!response.ok) {
     const error = await response.json().catch(() => ({ detail: 'Request failed' }))
     throw new Error(error.detail || `HTTP ${response.status}`)

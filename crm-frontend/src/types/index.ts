@@ -46,9 +46,11 @@ export type NavItem = {
 }
 
 export type User = {
-  name: string
+  id: number
+  username: string
   email: string
-  avatar: string
+  firstName: string
+  lastName: string
 }
 
 /**
