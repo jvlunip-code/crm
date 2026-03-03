@@ -5,12 +5,12 @@
 set -euo pipefail
 
 # ─── Connection settings (edit these) ────────────────────────────────────────
-VM_HOST="YOUR_VM_IP_OR_HOSTNAME"
+VM_HOST="134.209.11.176"
 VM_USER="root"
-SSH_KEY="$HOME/.ssh/id_ed25519"
+SSH_KEY="$HOME/.ssh/januario_rsa"
 
 # ─── Git settings ────────────────────────────────────────────────────────────
-GIT_REPO_URL="YOUR_GIT_REPO_URL"
+GIT_REPO_URL="https://github.com/jvlunip-code/crm"
 GIT_BRANCH="main"
 
 # ─── Remote paths ────────────────────────────────────────────────────────────

@@ -20,6 +20,7 @@ error() { echo -e "\033[1;31m==>\033[0m \033[1m$*\033[0m" >&2; }
 # 1. Pull latest code
 info "Pulling latest code..."
 cd /opt/app/jvl
+git config --global --add safe.directory /opt/app/jvl
 git pull origin "$GIT_BRANCH"
 
 # 2. Install/update Python dependencies
