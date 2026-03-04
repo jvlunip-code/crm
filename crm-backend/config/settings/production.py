@@ -6,8 +6,9 @@ DEBUG = False
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '').split(',')
 
 # Security settings
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SECURE = True
+# Requires HTTPS — enable these once SSL/TLS is configured
+SESSION_COOKIE_SECURE = False
+CSRF_COOKIE_SECURE = False
 SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
 X_FRAME_OPTIONS = 'DENY'
