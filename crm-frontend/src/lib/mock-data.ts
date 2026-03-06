@@ -1,4 +1,4 @@
-import type { Customer, Service, Notification, Event, CustomerService, CustomerNote, CustomerDocument, CustomerAddress } from '@/types'
+import type { Customer, Service, Notification, Event, CustomerService, CustomerNote, CustomerDocument } from '@/types'
 
 const STORAGE_VERSION = '5' // Increment this to force a data refresh
 
@@ -10,7 +10,6 @@ const STORAGE_KEYS = {
   CUSTOMER_SERVICES: 'crm_customer_services',
   CUSTOMER_NOTES: 'crm_customer_notes',
   CUSTOMER_DOCUMENTS: 'crm_customer_documents',
-  CUSTOMER_ADDRESSES: 'crm_customer_addresses',
   VERSION: 'crm_data_version',
 }
 
@@ -118,13 +117,6 @@ const initialCustomerDocuments: CustomerDocument[] = [
   { id: 10, customerId: 7, name: 'Integration Specs.pdf', type: 'pdf', size: 156000, url: '#', uploadedAt: '2024-03-22T13:45:00Z' },
 ]
 
-// Initial Customer Addresses Data
-const initialCustomerAddresses: CustomerAddress[] = [
-  { id: 1, customerId: 1, street: 'Rua Augusta, 100', postalCode: '1100-053', city: 'Lisboa', district: 'Lisboa', country: 'Portugal' },
-  { id: 2, customerId: 2, street: 'Avenida dos Aliados, 45', postalCode: '4000-066', city: 'Porto', district: 'Porto', country: 'Portugal' },
-  { id: 3, customerId: 5, street: 'Rua de Santa Catarina, 200', postalCode: '4000-442', city: 'Porto', district: 'Porto', country: 'Portugal' },
-]
-
 export function initializeStorage() {
   const currentVersion = localStorage.getItem(STORAGE_KEYS.VERSION)
 
@@ -137,7 +129,6 @@ export function initializeStorage() {
     localStorage.removeItem(STORAGE_KEYS.CUSTOMER_SERVICES)
     localStorage.removeItem(STORAGE_KEYS.CUSTOMER_NOTES)
     localStorage.removeItem(STORAGE_KEYS.CUSTOMER_DOCUMENTS)
-    localStorage.removeItem(STORAGE_KEYS.CUSTOMER_ADDRESSES)
     localStorage.setItem(STORAGE_KEYS.VERSION, STORAGE_VERSION)
   }
 
@@ -161,9 +152,6 @@ export function initializeStorage() {
   }
   if (!localStorage.getItem(STORAGE_KEYS.CUSTOMER_DOCUMENTS)) {
     localStorage.setItem(STORAGE_KEYS.CUSTOMER_DOCUMENTS, JSON.stringify(initialCustomerDocuments))
-  }
-  if (!localStorage.getItem(STORAGE_KEYS.CUSTOMER_ADDRESSES)) {
-    localStorage.setItem(STORAGE_KEYS.CUSTOMER_ADDRESSES, JSON.stringify(initialCustomerAddresses))
   }
 }
 
@@ -426,35 +414,6 @@ export const customerDocumentsApi = {
       size: file.size,
       url: '#',
     })
-  },
-}
-
-// Customer Addresses API
-export const customerAddressApi = {
-  getByCustomerId: async (customerId: number): Promise<CustomerAddress | null> => {
-    await delay(200)
-    const data = localStorage.getItem(STORAGE_KEYS.CUSTOMER_ADDRESSES)
-    const addresses: CustomerAddress[] = data ? JSON.parse(data) : []
-    return addresses.find(a => a.customerId === customerId) ?? null
-  },
-  upsert: async (address: Omit<CustomerAddress, 'id'>): Promise<CustomerAddress> => {
-    await delay(300)
-    const data = localStorage.getItem(STORAGE_KEYS.CUSTOMER_ADDRESSES)
-    const addresses: CustomerAddress[] = data ? JSON.parse(data) : []
-    const existingIndex = addresses.findIndex(a => a.customerId === address.customerId)
-
-    if (existingIndex !== -1) {
-      addresses[existingIndex] = { ...addresses[existingIndex], ...address }
-      localStorage.setItem(STORAGE_KEYS.CUSTOMER_ADDRESSES, JSON.stringify(addresses))
-      return addresses[existingIndex]
-    }
-
-    const newAddress: CustomerAddress = {
-      ...address,
-      id: Math.max(...addresses.map(a => a.id), 0) + 1,
-    }
-    localStorage.setItem(STORAGE_KEYS.CUSTOMER_ADDRESSES, JSON.stringify([...addresses, newAddress]))
-    return newAddress
   },
 }
 

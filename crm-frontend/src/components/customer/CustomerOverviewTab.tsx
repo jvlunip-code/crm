@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Mail, Phone, Building2, Calendar, User, MapPin, Pencil, Plus } from 'lucide-react'
+import { Mail, Phone, Building2, Calendar, User, MapPin, Pencil, Plus, Check, X } from 'lucide-react'
 import {
   Card,
   CardContent,
@@ -10,9 +10,14 @@ import {
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
 import { CustomerAddressDialog } from './CustomerAddressDialog'
+import { useUpdateCustomer } from '@/hooks/use-customers'
 import type { Customer, CustomerAddress } from '@/types'
+import { toast } from 'sonner'
+
+type EditableField = 'email' | 'phone' | 'company'
 
 interface CustomerOverviewTabProps {
   customer: Customer
@@ -22,12 +27,101 @@ interface CustomerOverviewTabProps {
 
 export function CustomerOverviewTab({ customer, customerId, address }: CustomerOverviewTabProps) {
   const [addressDialogOpen, setAddressDialogOpen] = useState(false)
+  const [editingField, setEditingField] = useState<EditableField | null>(null)
+  const [editValue, setEditValue] = useState('')
+  const updateCustomer = useUpdateCustomer()
+
+  const startEditing = (field: EditableField) => {
+    setEditingField(field)
+    setEditValue(customer[field])
+  }
+
+  const cancelEditing = () => {
+    setEditingField(null)
+    setEditValue('')
+  }
+
+  const saveEdit = async () => {
+    if (!editingField) return
+    try {
+      await updateCustomer.mutateAsync({ id: customer.id, updates: { [editingField]: editValue } })
+      toast.success('Dados atualizados com sucesso')
+      setEditingField(null)
+      setEditValue('')
+    } catch {
+      toast.error('Erro ao atualizar dados')
+    }
+  }
 
   const initials = customer.name
     .split(' ')
     .map(n => n[0])
     .join('')
     .toUpperCase()
+
+  const renderEditableField = (
+    field: EditableField,
+    label: string,
+    icon: React.ReactNode,
+    displayValue: React.ReactNode,
+  ) => {
+    const isEditing = editingField === field
+
+    return (
+      <div className="flex items-center gap-3">
+        <div className="bg-muted flex h-9 w-9 shrink-0 items-center justify-center rounded-md">
+          {icon}
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="text-muted-foreground text-xs">{label}</p>
+          {isEditing ? (
+            <div className="flex items-center gap-1">
+              <Input
+                value={editValue}
+                onChange={e => setEditValue(e.target.value)}
+                className="h-7 text-sm"
+                autoFocus
+                onKeyDown={e => {
+                  if (e.key === 'Enter') saveEdit()
+                  if (e.key === 'Escape') cancelEditing()
+                }}
+              />
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7 shrink-0"
+                onClick={saveEdit}
+                disabled={updateCustomer.isPending}
+              >
+                <Check className="h-3.5 w-3.5" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7 shrink-0"
+                onClick={cancelEditing}
+                disabled={updateCustomer.isPending}
+              >
+                <X className="h-3.5 w-3.5" />
+              </Button>
+            </div>
+          ) : (
+            <div className="flex items-center gap-1">
+              <div className="min-w-0 flex-1">{displayValue}</div>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7 shrink-0 opacity-0 group-hover/field:opacity-100 transition-opacity"
+                onClick={() => startEditing(field)}
+              >
+                <Pencil className="h-3.5 w-3.5" />
+              </Button>
+            </div>
+          )}
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="grid gap-4 lg:grid-cols-2">
@@ -58,44 +152,35 @@ export function CustomerOverviewTab({ customer, customerId, address }: CustomerO
           <CardDescription>Como contactar este cliente</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex items-center gap-3">
-            <div className="bg-muted flex h-9 w-9 items-center justify-center rounded-md">
-              <Mail className="text-muted-foreground h-4 w-4" />
-            </div>
-            <div>
-              <p className="text-muted-foreground text-xs">Email</p>
-              <a
-                href={`mailto:${customer.email}`}
-                className="text-sm font-medium hover:underline"
-              >
+          <div className="group/field">
+            {renderEditableField(
+              'email',
+              'Email',
+              <Mail className="text-muted-foreground h-4 w-4" />,
+              <a href={`mailto:${customer.email}`} className="text-sm font-medium hover:underline">
                 {customer.email}
-              </a>
-            </div>
+              </a>,
+            )}
           </div>
           <Separator />
-          <div className="flex items-center gap-3">
-            <div className="bg-muted flex h-9 w-9 items-center justify-center rounded-md">
-              <Phone className="text-muted-foreground h-4 w-4" />
-            </div>
-            <div>
-              <p className="text-muted-foreground text-xs">Telefone</p>
-              <a
-                href={`tel:${customer.phone}`}
-                className="text-sm font-medium hover:underline"
-              >
+          <div className="group/field">
+            {renderEditableField(
+              'phone',
+              'Telefone',
+              <Phone className="text-muted-foreground h-4 w-4" />,
+              <a href={`tel:${customer.phone}`} className="text-sm font-medium hover:underline">
                 {customer.phone}
-              </a>
-            </div>
+              </a>,
+            )}
           </div>
           <Separator />
-          <div className="flex items-center gap-3">
-            <div className="bg-muted flex h-9 w-9 items-center justify-center rounded-md">
-              <Building2 className="text-muted-foreground h-4 w-4" />
-            </div>
-            <div>
-              <p className="text-muted-foreground text-xs">Empresa</p>
-              <p className="text-sm font-medium">{customer.company}</p>
-            </div>
+          <div className="group/field">
+            {renderEditableField(
+              'company',
+              'Empresa',
+              <Building2 className="text-muted-foreground h-4 w-4" />,
+              <p className="text-sm font-medium">{customer.company}</p>,
+            )}
           </div>
         </CardContent>
       </Card>
@@ -202,28 +287,32 @@ export function CustomerOverviewTab({ customer, customerId, address }: CustomerO
                     <Building2 className="text-muted-foreground h-4 w-4" />
                   </div>
                   <div>
-                    <p className="text-muted-foreground text-xs">Cidade</p>
-                    <p className="text-sm font-medium">{address.city}</p>
+                    <p className="text-muted-foreground text-xs">Concelho</p>
+                    <p className="text-sm font-medium">{address.municipality}</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-3">
-                  <div className="bg-muted flex h-9 w-9 items-center justify-center rounded-md">
-                    <MapPin className="text-muted-foreground h-4 w-4" />
+                {address.parish && (
+                  <div className="flex items-center gap-3">
+                    <div className="bg-muted flex h-9 w-9 items-center justify-center rounded-md">
+                      <MapPin className="text-muted-foreground h-4 w-4" />
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground text-xs">Freguesia ou Localidade</p>
+                      <p className="text-sm font-medium">{address.parish}</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-muted-foreground text-xs">Distrito</p>
-                    <p className="text-sm font-medium">{address.district}</p>
+                )}
+                {address.district && (
+                  <div className="flex items-center gap-3">
+                    <div className="bg-muted flex h-9 w-9 items-center justify-center rounded-md">
+                      <MapPin className="text-muted-foreground h-4 w-4" />
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground text-xs">Distrito</p>
+                      <p className="text-sm font-medium">{address.district}</p>
+                    </div>
                   </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="bg-muted flex h-9 w-9 items-center justify-center rounded-md">
-                    <MapPin className="text-muted-foreground h-4 w-4" />
-                  </div>
-                  <div>
-                    <p className="text-muted-foreground text-xs">País</p>
-                    <p className="text-sm font-medium">{address.country}</p>
-                  </div>
-                </div>
+                )}
               </div>
             </div>
           ) : (

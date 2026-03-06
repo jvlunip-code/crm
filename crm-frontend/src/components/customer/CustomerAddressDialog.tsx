@@ -10,13 +10,6 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
 import { useUpsertCustomerAddress } from '@/hooks/use-customer-address'
 import type { CustomerAddress } from '@/types'
 import { toast } from 'sonner'
@@ -41,12 +34,12 @@ export function CustomerAddressDialog({
   const [formData, setFormData] = React.useState({
     postalCode: '',
     street: '',
-    city: '',
+    municipality: '',
+    parish: '',
     district: '',
     country: 'Portugal',
   })
 
-  const [streetOptions, setStreetOptions] = React.useState<string[]>([])
   const [isFetchingPostalCode, setIsFetchingPostalCode] = React.useState(false)
   const abortControllerRef = React.useRef<AbortController | null>(null)
 
@@ -55,7 +48,8 @@ export function CustomerAddressDialog({
       setFormData({
         postalCode: address.postalCode,
         street: address.street,
-        city: address.city,
+        municipality: address.municipality,
+        parish: address.parish,
         district: address.district,
         country: address.country,
       })
@@ -63,12 +57,12 @@ export function CustomerAddressDialog({
       setFormData({
         postalCode: '',
         street: '',
-        city: '',
+        municipality: '',
+        parish: '',
         district: '',
         country: 'Portugal',
       })
     }
-    setStreetOptions([])
   }, [address, open])
 
   const applyPostalCodeMask = (value: string): string => {
@@ -78,10 +72,7 @@ export function CustomerAddressDialog({
   }
 
   const fetchPostalCodeData = React.useCallback(async (digits: string) => {
-    if (digits.length !== 7) {
-      setStreetOptions([])
-      return
-    }
+    if (digits.length !== 7) return
 
     abortControllerRef.current?.abort()
     const controller = new AbortController()
@@ -102,20 +93,14 @@ export function CustomerAddressDialog({
       const first = entries[0]
       if (!first) return
 
-      // Deduplicate street names
-      const uniqueStreets = [...new Set(entries.map((e: { Morada?: string }) => e.Morada).filter(Boolean))] as string[]
-
       setFormData(prev => ({
         ...prev,
-        street: uniqueStreets[0] ?? '',
-        city: first.Concelho ?? '',
+        municipality: first.Concelho ?? '',
+        parish: first.Localidade ?? first.Freguesia ?? '',
         district: first.Distrito ?? '',
       }))
-
-      setStreetOptions(uniqueStreets.length > 1 ? uniqueStreets : [])
     } catch (err) {
       if (err instanceof DOMException && err.name === 'AbortError') return
-      setStreetOptions([])
     } finally {
       if (!controller.signal.aborted) {
         setIsFetchingPostalCode(false)
@@ -142,7 +127,8 @@ export function CustomerAddressDialog({
         customerId,
         street: formData.street,
         postalCode: formData.postalCode,
-        city: formData.city,
+        municipality: formData.municipality,
+        parish: formData.parish,
         district: formData.district,
         country: formData.country,
       })
@@ -168,85 +154,63 @@ export function CustomerAddressDialog({
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="postalCode">Código Postal</Label>
-              <Input
-                id="postalCode"
-                value={formData.postalCode}
-                onChange={e => handlePostalCodeChange(e.target.value)}
-                placeholder="0000-000"
-                maxLength={8}
-                required
-              />
-              {isFetchingPostalCode && (
-                <p className="text-muted-foreground text-xs">A procurar...</p>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="country">País</Label>
-              <Input
-                id="country"
-                value={formData.country}
-                onChange={e => handleChange('country', e.target.value)}
-                placeholder="Ex: Portugal"
-                required
-              />
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="street">Morada</Label>
+            <Input
+              id="street"
+              value={formData.street}
+              onChange={e => handleChange('street', e.target.value)}
+              placeholder="Ex: Rua Augusta, 100"
+              required
+            />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="street">Morada</Label>
-            {streetOptions.length > 0 ? (
-              <Select
-                value={formData.street}
-                onValueChange={value => handleChange('street', value)}
-              >
-                <SelectTrigger id="street">
-                  <SelectValue placeholder="Selecionar morada" />
-                </SelectTrigger>
-                <SelectContent>
-                  {streetOptions.map(street => (
-                    <SelectItem key={street} value={street}>
-                      {street}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            ) : (
-              <Input
-                id="street"
-                value={formData.street}
-                onChange={e => handleChange('street', e.target.value)}
-                placeholder="Ex: Rua Augusta, 100"
-                required
-              />
+            <Label htmlFor="postalCode">Código Postal</Label>
+            <Input
+              id="postalCode"
+              value={formData.postalCode}
+              onChange={e => handlePostalCodeChange(e.target.value)}
+              placeholder="0000-000"
+              maxLength={8}
+              required
+            />
+            {isFetchingPostalCode && (
+              <p className="text-muted-foreground text-xs">A procurar...</p>
             )}
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="city">Cidade</Label>
+              <Label htmlFor="municipality">Concelho</Label>
               <Input
-                id="city"
-                value={formData.city}
-                onChange={e => handleChange('city', e.target.value)}
+                id="municipality"
+                value={formData.municipality}
+                onChange={e => handleChange('municipality', e.target.value)}
                 placeholder="Ex: Lisboa"
                 required
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="district">Distrito</Label>
+              <Label htmlFor="parish">Freguesia ou Localidade</Label>
               <Input
-                id="district"
-                value={formData.district}
-                onChange={e => handleChange('district', e.target.value)}
-                placeholder="Ex: Lisboa"
-                required
+                id="parish"
+                value={formData.parish}
+                onChange={e => handleChange('parish', e.target.value)}
+                placeholder="Ex: Santa Maria Maior"
               />
             </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="district">Distrito</Label>
+            <Input
+              id="district"
+              value={formData.district}
+              onChange={e => handleChange('district', e.target.value)}
+              placeholder="Ex: Lisboa"
+            />
           </div>
 
           <DialogFooter>

@@ -18,3 +18,19 @@ class Customer(models.Model):
 
     def __str__(self):
         return f"{self.name} ({self.company})"
+
+
+class CustomerAddress(models.Model):
+    customer = models.OneToOneField(Customer, on_delete=models.CASCADE, related_name='address')
+    street = models.CharField(max_length=255)
+    postal_code = models.CharField(max_length=10)
+    district = models.CharField(max_length=100, blank=True, default='')
+    municipality = models.CharField(max_length=100)
+    parish = models.CharField(max_length=100, blank=True, default='')
+    country = models.CharField(max_length=100, default='Portugal')
+
+    class Meta:
+        verbose_name_plural = 'customer addresses'
+
+    def __str__(self):
+        return f"{self.street}, {self.municipality}"

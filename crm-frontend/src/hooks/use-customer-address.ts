@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { customerAddressApi } from '@/lib/mock-data'
+import { customerAddressApi } from '@/lib/api-client'
 import type { CustomerAddress } from '@/types'
 
 export function useCustomerAddress(customerId: number) {

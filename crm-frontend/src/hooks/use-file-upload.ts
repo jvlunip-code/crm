@@ -3,6 +3,12 @@ import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { customerDocumentsApi } from '@/lib/api-client'
 
+function generateId(): string {
+  const bytes = new Uint8Array(16)
+  crypto.getRandomValues(bytes)
+  return Array.from(bytes, b => b.toString(16).padStart(2, '0')).join('')
+}
+
 const ALLOWED_EXTENSIONS = [
   '.pdf', '.png', '.jpg', '.jpeg',
   '.doc', '.docx', '.xls', '.xlsx',
@@ -81,7 +87,7 @@ export function useFileUpload(customerId: number) {
     if (validFiles.length === 0) return
 
     const newItems: UploadItem[] = validFiles.map((file) => ({
-      id: crypto.randomUUID(),
+      id: generateId(),
       fileName: file.name,
       fileSize: file.size,
       progress: 0,

@@ -1,4 +1,4 @@
-import type { Customer, CustomerService, CustomerDocument } from '@/types'
+import type { Customer, CustomerService, CustomerDocument, CustomerAddress } from '@/types'
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || '/api'
 
@@ -325,6 +325,34 @@ export const customerDocumentsApi = {
 
   getDownloadUrl: (customerId: number, documentId: number): string => {
     return `${API_BASE_URL}/customers/${customerId}/documents/${documentId}/download/`
+  },
+}
+
+// Customer Address API
+export const customerAddressApi = {
+  getByCustomerId: async (customerId: number): Promise<CustomerAddress | null> => {
+    try {
+      const response = await fetchWithAuth(`/customers/${customerId}/address/`)
+      const data = await response.json()
+      return toFrontend<CustomerAddress>(data)
+    } catch {
+      return null
+    }
+  },
+
+  upsert: async (address: Omit<CustomerAddress, 'id'>): Promise<CustomerAddress> => {
+    const response = await fetchWithAuth(`/customers/${address.customerId}/address/`, {
+      method: 'PUT',
+      body: JSON.stringify(toBackend(address)),
+    })
+    const data = await response.json()
+    return toFrontend<CustomerAddress>(data)
+  },
+
+  delete: async (customerId: number): Promise<void> => {
+    await fetchWithAuth(`/customers/${customerId}/address/`, {
+      method: 'DELETE',
+    })
   },
 }
 
