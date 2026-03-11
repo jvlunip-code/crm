@@ -11,6 +11,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { PhoneInput } from '@/components/ui/phone-input'
 import { Separator } from '@/components/ui/separator'
 import { CustomerAddressDialog } from './CustomerAddressDialog'
 import { useUpdateCustomer } from '@/hooks/use-customers'
@@ -76,16 +77,24 @@ export function CustomerOverviewTab({ customer, customerId, address }: CustomerO
           <p className="text-muted-foreground text-xs">{label}</p>
           {isEditing ? (
             <div className="flex items-center gap-1">
-              <Input
-                value={editValue}
-                onChange={e => setEditValue(e.target.value)}
-                className="h-7 text-sm"
-                autoFocus
-                onKeyDown={e => {
-                  if (e.key === 'Enter') saveEdit()
-                  if (e.key === 'Escape') cancelEditing()
-                }}
-              />
+              {field === 'phone' ? (
+                <PhoneInput
+                  value={editValue}
+                  onChange={setEditValue}
+                  className="flex-1"
+                />
+              ) : (
+                <Input
+                  value={editValue}
+                  onChange={e => setEditValue(e.target.value)}
+                  className="h-7 text-sm"
+                  autoFocus
+                  onKeyDown={e => {
+                    if (e.key === 'Enter') saveEdit()
+                    if (e.key === 'Escape') cancelEditing()
+                  }}
+                />
+              )}
               <Button
                 variant="ghost"
                 size="icon"

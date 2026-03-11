@@ -84,7 +84,7 @@ export type CustomerService = {
   /** CVP */
   cvp: string
   /** Data de fim do serviço */
-  dataFim: string
+  dataFim: string | null
   /** Número de cliente */
   numClient: string
   /** Número de serviço */

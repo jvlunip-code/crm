@@ -8,6 +8,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import { DatePicker } from '@/components/ui/date-picker'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import {
@@ -65,7 +66,7 @@ export function CustomerServiceDialog({
         moeda: service.moeda,
         conta: service.conta,
         cvp: service.cvp,
-        dataFim: service.dataFim,
+        dataFim: service.dataFim ?? '',
         numClient: service.numClient,
         numServico: service.numServico,
         observacoes: service.observacoes,
@@ -110,7 +111,7 @@ export function CustomerServiceDialog({
       moeda: formData.moeda,
       conta: formData.conta,
       cvp: formData.cvp,
-      dataFim: formData.dataFim,
+      dataFim: formData.dataFim || null,
       numClient: formData.numClient,
       numServico: formData.numServico,
       observacoes: formData.observacoes,
@@ -168,7 +169,6 @@ export function CustomerServiceDialog({
                 value={formData.tarifario}
                 onChange={e => handleChange('tarifario', e.target.value)}
                 placeholder="Ex: Empresarial Plus"
-                required
               />
             </div>
 
@@ -236,12 +236,10 @@ export function CustomerServiceDialog({
 
             <div className="space-y-2">
               <Label htmlFor="dataFim">Data de Fim</Label>
-              <Input
-                id="dataFim"
-                type="date"
+              <DatePicker
                 value={formData.dataFim}
-                onChange={e => handleChange('dataFim', e.target.value)}
-                required
+                onChange={v => handleChange('dataFim', v)}
+                placeholder="Selecionar data"
               />
             </div>
 
@@ -252,7 +250,6 @@ export function CustomerServiceDialog({
                 value={formData.numClient}
                 onChange={e => handleChange('numClient', e.target.value)}
                 placeholder="Ex: NC-5001"
-                required
               />
             </div>
 
@@ -263,7 +260,6 @@ export function CustomerServiceDialog({
                 value={formData.numServico}
                 onChange={e => handleChange('numServico', e.target.value)}
                 placeholder="Ex: NS-8001"
-                required
               />
             </div>
           </div>

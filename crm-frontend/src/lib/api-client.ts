@@ -101,7 +101,7 @@ type BackendCustomerService = {
   moeda: 'EUR'
   conta: string
   cvp: string
-  data_fim: string
+  data_fim: string | null
   num_client: string
   num_servico: string
   observacoes: string
@@ -239,7 +239,7 @@ export const customerServicesApi = {
       moeda: service.moeda,
       conta: service.conta,
       cvp: service.cvp,
-      data_fim: service.dataFim,
+      data_fim: service.dataFim || null,
       num_client: service.numClient,
       num_servico: service.numServico,
       observacoes: service.observacoes,
@@ -264,7 +264,7 @@ export const customerServicesApi = {
     if (updates.moeda !== undefined) backendPayload.moeda = updates.moeda
     if (updates.conta !== undefined) backendPayload.conta = updates.conta
     if (updates.cvp !== undefined) backendPayload.cvp = updates.cvp
-    if (updates.dataFim !== undefined) backendPayload.data_fim = updates.dataFim
+    if (updates.dataFim !== undefined) backendPayload.data_fim = updates.dataFim || null
     if (updates.numClient !== undefined) backendPayload.num_client = updates.numClient
     if (updates.numServico !== undefined) backendPayload.num_servico = updates.numServico
     if (updates.observacoes !== undefined) backendPayload.observacoes = updates.observacoes

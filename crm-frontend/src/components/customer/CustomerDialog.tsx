@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { PhoneInput } from '@/components/ui/phone-input'
 import {
   Select,
   SelectContent,
@@ -127,11 +128,9 @@ export function CustomerDialog({
 
           <div className="space-y-2">
             <Label htmlFor="phone">Telefone</Label>
-            <Input
-              id="phone"
+            <PhoneInput
               value={formData.phone}
-              onChange={e => handleChange('phone', e.target.value)}
-              placeholder="+351 912 345 678"
+              onChange={v => handleChange('phone', v)}
               required
             />
           </div>
