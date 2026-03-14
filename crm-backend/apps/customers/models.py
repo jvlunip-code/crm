@@ -10,6 +10,8 @@ class Customer(models.Model):
     email = models.EmailField()
     phone = models.CharField(max_length=50)
     company = models.CharField(max_length=255)
+    nif = models.CharField(max_length=9, unique=True, null=True, blank=True)
+    iban = models.CharField(max_length=255, null=True, blank=True)
     status = models.CharField(max_length=10, choices=Status.choices, default=Status.ACTIVE)
     created_at = models.DateTimeField(auto_now_add=True)
 

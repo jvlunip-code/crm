@@ -4,6 +4,8 @@ export type Customer = {
   email: string
   phone: string
   company: string
+  nif: string | null
+  iban: string | null
   status: 'active' | 'inactive'
   createdAt: string
 }

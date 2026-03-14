@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Mail, Phone, Building2, Calendar, User, MapPin, Pencil, Plus, Check, X } from 'lucide-react'
+import { Mail, Phone, Building2, Calendar, User, MapPin, Pencil, Plus, Check, X, CreditCard, FileText } from 'lucide-react'
 import {
   Card,
   CardContent,
@@ -13,12 +13,13 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { PhoneInput } from '@/components/ui/phone-input'
 import { Separator } from '@/components/ui/separator'
+import { Switch } from '@/components/ui/switch'
 import { CustomerAddressDialog } from './CustomerAddressDialog'
 import { useUpdateCustomer } from '@/hooks/use-customers'
 import type { Customer, CustomerAddress } from '@/types'
 import { toast } from 'sonner'
 
-type EditableField = 'email' | 'phone' | 'company'
+type EditableField = 'email' | 'phone' | 'company' | 'nif' | 'iban'
 
 interface CustomerOverviewTabProps {
   customer: Customer
@@ -34,7 +35,7 @@ export function CustomerOverviewTab({ customer, customerId, address }: CustomerO
 
   const startEditing = (field: EditableField) => {
     setEditingField(field)
-    setEditValue(customer[field])
+    setEditValue(customer[field] ?? '')
   }
 
   const cancelEditing = () => {
@@ -45,7 +46,7 @@ export function CustomerOverviewTab({ customer, customerId, address }: CustomerO
   const saveEdit = async () => {
     if (!editingField) return
     try {
-      await updateCustomer.mutateAsync({ id: customer.id, updates: { [editingField]: editValue } })
+      await updateCustomer.mutateAsync({ id: customer.id, updates: { [editingField]: editValue || null } })
       toast.success('Dados atualizados com sucesso')
       setEditingField(null)
       setEditValue('')
@@ -152,6 +153,25 @@ export function CustomerOverviewTab({ customer, customerId, address }: CustomerO
               </Badge>
             </div>
           </div>
+          <Separator className="my-4" />
+          <div className="space-y-3">
+            <div className="group/field">
+              {renderEditableField(
+                'nif',
+                'NIF',
+                <FileText className="text-muted-foreground h-4 w-4" />,
+                <p className="text-sm font-medium">{customer.nif ?? '—'}</p>,
+              )}
+            </div>
+            <div className="group/field">
+              {renderEditableField(
+                'iban',
+                'IBAN',
+                <CreditCard className="text-muted-foreground h-4 w-4" />,
+                <p className="text-sm font-medium">{customer.iban ?? '—'}</p>,
+              )}
+            </div>
+          </div>
         </CardContent>
       </Card>
 
@@ -206,8 +226,8 @@ export function CustomerOverviewTab({ customer, customerId, address }: CustomerO
                 <User className="text-muted-foreground h-4 w-4" />
               </div>
               <div>
-                <p className="text-muted-foreground text-xs">ID do Cliente</p>
-                <p className="text-sm font-medium">#{customer.id}</p>
+                <p className="text-muted-foreground text-xs">NIF</p>
+                <p className="text-sm font-medium">{customer.nif ?? '—'}</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
@@ -235,7 +255,24 @@ export function CustomerOverviewTab({ customer, customerId, address }: CustomerO
               </div>
               <div>
                 <p className="text-muted-foreground text-xs">Estado</p>
-                <p className="text-sm font-medium capitalize">{customer.status === 'active' ? 'Ativo' : 'Inativo'}</p>
+                <div className="flex items-center gap-2">
+                  <Switch
+                    checked={customer.status === 'active'}
+                    onCheckedChange={async (checked: boolean) => {
+                      try {
+                        await updateCustomer.mutateAsync({
+                          id: customer.id,
+                          updates: { status: checked ? 'active' : 'inactive' },
+                        })
+                        toast.success(checked ? 'Cliente ativado' : 'Cliente desativado')
+                      } catch {
+                        toast.error('Erro ao atualizar estado')
+                      }
+                    }}
+                    disabled={updateCustomer.isPending}
+                  />
+                  <span className="text-sm font-medium">{customer.status === 'active' ? 'Ativo' : 'Inativo'}</span>
+                </div>
               </div>
             </div>
           </div>

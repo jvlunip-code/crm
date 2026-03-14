@@ -86,6 +86,8 @@ type BackendCustomer = {
   email: string
   phone: string
   company: string
+  nif: string | null
+  iban: string | null
   status: 'active' | 'inactive'
   created_at: string
 }

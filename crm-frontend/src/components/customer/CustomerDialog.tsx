@@ -42,6 +42,8 @@ export function CustomerDialog({
     email: '',
     phone: '',
     company: '',
+    nif: null as string | null,
+    iban: null as string | null,
     status: 'active' as 'active' | 'inactive',
   })
 
@@ -52,6 +54,8 @@ export function CustomerDialog({
         email: customer.email,
         phone: customer.phone,
         company: customer.company,
+        nif: customer.nif,
+        iban: customer.iban,
         status: customer.status,
       })
     } else {
@@ -60,6 +64,8 @@ export function CustomerDialog({
         email: '',
         phone: '',
         company: '',
+        nif: null,
+        iban: null,
         status: 'active',
       })
     }
