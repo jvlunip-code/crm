@@ -1,7 +1,7 @@
 # ADR-001: Enable HTTPS with TLS termination
 
 **Date:** 2026-03-04
-**Status:** Pending
+**Status:** Accepted
 
 ## Context
 
