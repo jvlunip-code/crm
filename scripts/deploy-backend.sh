@@ -38,11 +38,16 @@ crm-backend/.venv/bin/python crm-backend/manage.py migrate --noinput
 info "Collecting static files..."
 crm-backend/.venv/bin/python crm-backend/manage.py collectstatic --noinput
 
-# 5. Graceful reload (SIGHUP via systemd, zero-downtime)
+# 5. Ensure log files exist with correct ownership
+info "Ensuring log files..."
+sudo touch /var/log/uwsgi/crm-django-errors.log
+sudo chown deploy:deploy /var/log/uwsgi/crm-django-errors.log
+
+# 6. Graceful reload (SIGHUP via systemd, zero-downtime)
 info "Reloading backend service..."
 sudo /bin/systemctl reload crm-backend
 
-# 6. Verify service is running
+# 7. Verify service is running
 sleep 2
 if sudo /bin/systemctl status crm-backend --no-pager | grep -q "active (running)"; then
     info "Backend service is running."

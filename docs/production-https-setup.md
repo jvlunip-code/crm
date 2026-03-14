@@ -139,7 +139,30 @@ tail -f /var/log/uwsgi/crm.log
 
 All logs in `/var/log/uwsgi/` are rotated daily (14 days retention) via logrotate.
 
-## Certificate Troubleshooting
+## Troubleshooting
+
+### 502 Bad Gateway — uWSGI crash loop
+
+**Symptom:** Nginx returns `502 Bad Gateway`. `systemctl status crm-backend` shows the service in `activating (auto-restart)` with exit code 22.
+
+**Root cause (2026-03-14):** The Django log file `/var/log/uwsgi/crm-django-errors.log` was owned by `root:root`. uWSGI runs as the `deploy` user and Django's `RotatingFileHandler` couldn't open the file for writing, which crashed the entire WSGI application on startup:
+
+```
+ValueError: Unable to configure handler 'file'
+*** no app loaded. GAME OVER ***
+```
+
+**Fix:**
+```bash
+sudo chown deploy:deploy /var/log/uwsgi/crm-django-errors.log
+sudo systemctl restart crm-backend
+```
+
+**Prevention:** The deploy script (`scripts/deploy-backend.sh`) now ensures the log file exists with correct ownership before reloading uWSGI. If a new log file is added to the Django `LOGGING` config, it must also be added to the deploy script.
+
+> **Note:** Logrotate is configured with `create 0640 deploy deploy` so rotated files get the right ownership, but the *initial* file creation (or manual `touch` as root) can still cause this issue.
+
+### Certificate Troubleshooting
 
 **Check certificate status:**
 ```bash
