@@ -27,7 +27,7 @@ const ALLOWED_MIME_TYPES = [
   'text/plain',
 ]
 
-const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10 MB
+const MAX_FILE_SIZE = 25 * 1024 * 1024 // 25 MB
 const MAX_FILES_PER_BATCH = 10
 
 export type UploadStatus = 'pending' | 'uploading' | 'success' | 'error'
@@ -48,7 +48,7 @@ function validateFile(file: File): string | null {
     return `"${file.name}" has an unsupported file type`
   }
   if (file.size > MAX_FILE_SIZE) {
-    return `"${file.name}" exceeds the 10 MB size limit`
+    return `"${file.name}" exceeds the 25 MB size limit`
   }
   return null
 }

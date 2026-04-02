@@ -25,7 +25,7 @@ def validate_file_not_video(file):
 
 def validate_file_size(file):
     """Validate file size against max limit."""
-    max_size = getattr(settings, 'DOCUMENT_MAX_FILE_SIZE', 10 * 1024 * 1024)
+    max_size = getattr(settings, 'DOCUMENT_MAX_FILE_SIZE', 25 * 1024 * 1024)
     if file.size > max_size:
         max_mb = max_size / (1024 * 1024)
         raise ValidationError(f'File size cannot exceed {max_mb:.0f}MB.')

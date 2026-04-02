@@ -81,7 +81,7 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.environ.get('MEDIA_ROOT', BASE_DIR / 'media')
-DOCUMENT_MAX_FILE_SIZE = int(os.environ.get('DOCUMENT_MAX_FILE_SIZE', 10 * 1024 * 1024))
+DOCUMENT_MAX_FILE_SIZE = int(os.environ.get('DOCUMENT_MAX_FILE_SIZE', 25 * 1024 * 1024))
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
