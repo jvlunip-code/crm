@@ -59,3 +59,9 @@ export const statusLabels: Record<string, string> = {
 export function getStatusLabel(status: string): string {
   return statusLabels[status] || status
 }
+
+export function formatNif(value: string | null | undefined): string {
+  if (!value) return '—'
+  const digits = value.replace(/\D/g, '')
+  return digits.replace(/(\d{3})(?=\d)/g, '$1 ').trim()
+}

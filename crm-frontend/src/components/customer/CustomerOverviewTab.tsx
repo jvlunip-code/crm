@@ -17,6 +17,7 @@ import { Switch } from '@/components/ui/switch'
 import { CustomerAddressDialog } from './CustomerAddressDialog'
 import { useUpdateCustomer } from '@/hooks/use-customers'
 import type { Customer, CustomerAddress } from '@/types'
+import { formatNif } from '@/lib/utils'
 import { toast } from 'sonner'
 
 type EditableField = 'email' | 'phone' | 'company' | 'nif' | 'iban'
@@ -83,6 +84,19 @@ export function CustomerOverviewTab({ customer, customerId, address }: CustomerO
                   value={editValue}
                   onChange={setEditValue}
                   className="flex-1"
+                />
+              ) : field === 'nif' ? (
+                <Input
+                  value={editValue}
+                  onChange={e => setEditValue(e.target.value.replace(/\D/g, '').slice(0, 9))}
+                  className="h-7 text-sm"
+                  maxLength={9}
+                  placeholder="123456789"
+                  autoFocus
+                  onKeyDown={e => {
+                    if (e.key === 'Enter') saveEdit()
+                    if (e.key === 'Escape') cancelEditing()
+                  }}
                 />
               ) : (
                 <Input
@@ -160,7 +174,7 @@ export function CustomerOverviewTab({ customer, customerId, address }: CustomerO
                 'nif',
                 'NIF',
                 <FileText className="text-muted-foreground h-4 w-4" />,
-                <p className="text-sm font-medium">{customer.nif ?? '—'}</p>,
+                <p className="text-sm font-medium">{formatNif(customer.nif)}</p>,
               )}
             </div>
             <div className="group/field">
@@ -169,6 +183,14 @@ export function CustomerOverviewTab({ customer, customerId, address }: CustomerO
                 'IBAN',
                 <CreditCard className="text-muted-foreground h-4 w-4" />,
                 <p className="text-sm font-medium">{customer.iban ?? '—'}</p>,
+              )}
+            </div>
+            <div className="group/field">
+              {renderEditableField(
+                'company',
+                'Empresa',
+                <Building2 className="text-muted-foreground h-4 w-4" />,
+                <p className="text-sm font-medium">{customer.company}</p>,
               )}
             </div>
           </div>
@@ -202,15 +224,6 @@ export function CustomerOverviewTab({ customer, customerId, address }: CustomerO
               </a>,
             )}
           </div>
-          <Separator />
-          <div className="group/field">
-            {renderEditableField(
-              'company',
-              'Empresa',
-              <Building2 className="text-muted-foreground h-4 w-4" />,
-              <p className="text-sm font-medium">{customer.company}</p>,
-            )}
-          </div>
         </CardContent>
       </Card>
 
@@ -227,7 +240,7 @@ export function CustomerOverviewTab({ customer, customerId, address }: CustomerO
               </div>
               <div>
                 <p className="text-muted-foreground text-xs">NIF</p>
-                <p className="text-sm font-medium">{customer.nif ?? '—'}</p>
+                <p className="text-sm font-medium">{formatNif(customer.nif)}</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
