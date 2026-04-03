@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from .models import Document
 from .validators import validate_file_not_video, validate_file_size, infer_document_type
-from .image_compression import compress_image
+from .file_compression import compress_uploaded_file
 
 
 class DocumentSerializer(serializers.ModelSerializer):
@@ -33,7 +33,7 @@ class DocumentUploadSerializer(serializers.Serializer):
         file = validated_data['file']
         customer = self.context['customer']
 
-        file = compress_image(file)
+        file = compress_uploaded_file(file)
         mime_type = file.content_type or 'application/octet-stream'
 
         document = Document.objects.create(
