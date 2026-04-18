@@ -1,8 +1,20 @@
+import re
+
 from django.contrib.postgres.indexes import GinIndex
 from django.contrib.postgres.search import SearchQuery, SearchRank, SearchVectorField
 from django.db import connection, models
 from django.db.models import F, Q
 from django.db.models.expressions import RawSQL
+
+_TSQUERY_TOKEN_RE = re.compile(r"[^\w\s]", re.UNICODE)
+
+
+def _build_prefix_tsquery(user_input: str) -> str | None:
+    cleaned = _TSQUERY_TOKEN_RE.sub(' ', user_input)
+    tokens = [t for t in cleaned.split() if t]
+    if not tokens:
+        return None
+    return ' & '.join(f'{t}:*' for t in tokens)
 
 
 def _customer_search_expression() -> RawSQL:
@@ -37,11 +49,16 @@ class CustomerQuerySet(models.QuerySet):
         query = (query or '').strip()
         if not query:
             return self
-        unaccented = _unaccent_text(query)
-        sq = SearchQuery(unaccented, config='simple', search_type='websearch')
+        tsq_text = _build_prefix_tsquery(_unaccent_text(query))
+        if not tsq_text:
+            return self
+        sq = SearchQuery(tsq_text, config='simple', search_type='raw')
         return (
             self.filter(Q(search_vector=sq) | Q(address__search_vector=sq))
-            .annotate(rank=SearchRank(F('search_vector'), sq))
+            .annotate(
+                rank=SearchRank(F('search_vector'), sq)
+                + SearchRank(F('address__search_vector'), sq)
+            )
             .order_by('-rank', '-created_at')
         )
 
