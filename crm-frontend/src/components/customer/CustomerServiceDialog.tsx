@@ -237,9 +237,9 @@ export function CustomerServiceDialog({
             <div className="space-y-2">
               <Label htmlFor="dataFim">Data de Fim</Label>
               <DatePicker
+                id="dataFim"
                 value={formData.dataFim}
                 onChange={v => handleChange('dataFim', v)}
-                placeholder="Selecionar data"
               />
             </div>
 

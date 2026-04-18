@@ -28,6 +28,12 @@ import { CustomerServiceDialog } from '@/components/customer/CustomerServiceDial
 import type { CustomerService } from '@/types'
 import { toast } from 'sonner'
 
+function formatServiceDate(value: string | null | undefined): string {
+  if (!value) return '—'
+  const [y, m, d] = value.split('-')
+  return y && m && d ? `${d}/${m}/${y}` : value
+}
+
 interface CustomerServicesTabProps {
   customerId: number
   services: CustomerService[]
@@ -133,7 +139,7 @@ export function CustomerServicesTab({ customerId, services, isLoading }: Custome
           <TableCell>{service.operadora}</TableCell>
           <TableCell>{formatCurrency(service.valor, service.moeda)}</TableCell>
           <TableCell>{service.conta}</TableCell>
-          <TableCell>{service.dataFim}</TableCell>
+          <TableCell>{formatServiceDate(service.dataFim)}</TableCell>
           <TableCell>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
