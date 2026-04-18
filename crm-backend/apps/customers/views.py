@@ -9,6 +9,9 @@ class CustomerViewSet(viewsets.ModelViewSet):
     queryset = Customer.objects.all()
     serializer_class = CustomerSerializer
 
+    def get_queryset(self):
+        return Customer.objects.search(self.request.query_params.get('search', ''))
+
 
 class CustomerAddressViewSet(viewsets.ViewSet):
     """

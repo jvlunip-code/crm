@@ -1,11 +1,12 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query'
 import { customersApi } from '@/lib/api-client'
 import type { Customer } from '@/types'
 
-export function useCustomers() {
+export function useCustomers(search?: string) {
   return useQuery({
-    queryKey: ['customers'],
-    queryFn: customersApi.getAll,
+    queryKey: ['customers', { search: search ?? '' }],
+    queryFn: () => customersApi.getAll(search),
+    placeholderData: keepPreviousData,
   })
 }
 

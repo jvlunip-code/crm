@@ -149,10 +149,11 @@ function flattenServices(services: BackendCustomerService[], customerId: number)
 
 // Customers API
 export const customersApi = {
-  getAll: async (): Promise<Customer[]> => {
+  getAll: async (search?: string): Promise<Customer[]> => {
     // Fetch all pages
     let allCustomers: Customer[] = []
-    let url = '/customers/'
+    const trimmed = search?.trim()
+    let url = trimmed ? `/customers/?search=${encodeURIComponent(trimmed)}` : '/customers/'
 
     while (url) {
       const response = await fetchWithAuth(url)
