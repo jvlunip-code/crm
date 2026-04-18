@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Mail, Phone, Building2, Calendar, User, MapPin, Pencil, Plus, Check, X, CreditCard, FileText } from 'lucide-react'
+import { Mail, Phone, Building2, Calendar, User, MapPin, Pencil, Plus, Check, X, CreditCard, FileText, UserCheck, Tag } from 'lucide-react'
 import {
   Card,
   CardContent,
@@ -20,7 +20,7 @@ import type { Customer, CustomerAddress } from '@/types'
 import { formatNif } from '@/lib/utils'
 import { toast } from 'sonner'
 
-type EditableField = 'email' | 'phone' | 'company' | 'nif' | 'iban'
+type EditableField = 'email' | 'phone' | 'company' | 'nif' | 'iban' | 'decisor' | 'segment'
 
 interface CustomerOverviewTabProps {
   customer: Customer
@@ -222,6 +222,24 @@ export function CustomerOverviewTab({ customer, customerId, address }: CustomerO
               <a href={`tel:${customer.phone}`} className="text-sm font-medium hover:underline">
                 {customer.phone}
               </a>,
+            )}
+          </div>
+          <Separator />
+          <div className="group/field">
+            {renderEditableField(
+              'decisor',
+              'Decisor',
+              <UserCheck className="text-muted-foreground h-4 w-4" />,
+              <p className="text-sm font-medium">{customer.decisor ?? '—'}</p>,
+            )}
+          </div>
+          <Separator />
+          <div className="group/field">
+            {renderEditableField(
+              'segment',
+              'Segmento',
+              <Tag className="text-muted-foreground h-4 w-4" />,
+              <p className="text-sm font-medium">{customer.segment ?? '—'}</p>,
             )}
           </div>
         </CardContent>

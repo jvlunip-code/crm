@@ -6,6 +6,8 @@ export type Customer = {
   company: string
   nif: string | null
   iban: string | null
+  decisor: string | null
+  segment: string | null
   status: 'active' | 'inactive'
   createdAt: string
 }

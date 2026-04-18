@@ -12,6 +12,8 @@ class Customer(models.Model):
     company = models.CharField(max_length=255)
     nif = models.CharField(max_length=9, unique=True, null=True, blank=True)
     iban = models.CharField(max_length=255, null=True, blank=True)
+    decisor = models.CharField(max_length=255, null=True, blank=True)
+    segment = models.CharField(max_length=255, null=True, blank=True)
     status = models.CharField(max_length=10, choices=Status.choices, default=Status.ACTIVE)
     created_at = models.DateTimeField(auto_now_add=True)
 

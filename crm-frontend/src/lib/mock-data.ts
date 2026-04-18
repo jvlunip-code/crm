@@ -15,21 +15,21 @@ const STORAGE_KEYS = {
 
 // Initial Customers Data
 const initialCustomers: Customer[] = [
-  { id: 1, name: 'John Smith', email: 'john.smith@techcorp.com', phone: '+1 (555) 123-4567', company: 'TechCorp Solutions', nif: null, iban: null, status: 'active', createdAt: '2024-01-15T10:30:00Z' },
-  { id: 2, name: 'Sarah Johnson', email: 'sarah.j@innovate.io', phone: '+1 (555) 234-5678', company: 'Innovate Digital', nif: null, iban: null, status: 'active', createdAt: '2024-02-20T14:45:00Z' },
-  { id: 3, name: 'Michael Chen', email: 'mchen@cloudventures.com', phone: '+1 (555) 345-6789', company: 'CloudVentures Inc', nif: null, iban: null, status: 'active', createdAt: '2024-03-10T09:15:00Z' },
-  { id: 4, name: 'Emily Rodriguez', email: 'emily.r@datastream.co', phone: '+1 (555) 456-7890', company: 'DataStream Analytics', nif: null, iban: null, status: 'inactive', createdAt: '2024-01-25T16:20:00Z' },
-  { id: 5, name: 'David Park', email: 'dpark@nexusgroup.com', phone: '+1 (555) 567-8901', company: 'Nexus Group', nif: null, iban: null, status: 'active', createdAt: '2024-04-05T11:00:00Z' },
-  { id: 6, name: 'Lisa Anderson', email: 'l.anderson@bizpro.com', phone: '+1 (555) 678-9012', company: 'BizPro Consulting', nif: null, iban: null, status: 'active', createdAt: '2024-02-14T08:30:00Z' },
-  { id: 7, name: 'James Wilson', email: 'jwilson@alphatech.io', phone: '+1 (555) 789-0123', company: 'AlphaTech Systems', nif: null, iban: null, status: 'active', createdAt: '2024-03-22T13:45:00Z' },
-  { id: 8, name: 'Maria Garcia', email: 'maria.g@globalsoft.com', phone: '+1 (555) 890-1234', company: 'GlobalSoft Industries', nif: null, iban: null, status: 'inactive', createdAt: '2024-01-30T15:10:00Z' },
-  { id: 9, name: 'Robert Taylor', email: 'rtaylor@velocity.co', phone: '+1 (555) 901-2345', company: 'Velocity Partners', nif: null, iban: null, status: 'active', createdAt: '2024-04-12T10:20:00Z' },
-  { id: 10, name: 'Jennifer Lee', email: 'jlee@summit.io', phone: '+1 (555) 012-3456', company: 'Summit Enterprises', nif: null, iban: null, status: 'active', createdAt: '2024-02-28T12:00:00Z' },
-  { id: 11, name: 'Christopher Brown', email: 'c.brown@primeware.com', phone: '+1 (555) 111-2222', company: 'PrimeWare Solutions', nif: null, iban: null, status: 'active', createdAt: '2024-03-18T09:30:00Z' },
-  { id: 12, name: 'Amanda Martinez', email: 'amartinez@fusiontech.io', phone: '+1 (555) 222-3333', company: 'FusionTech Labs', nif: null, iban: null, status: 'active', createdAt: '2024-01-08T14:15:00Z' },
-  { id: 13, name: 'Daniel Kim', email: 'dkim@horizonsoft.com', phone: '+1 (555) 333-4444', company: 'HorizonSoft Inc', nif: null, iban: null, status: 'inactive', createdAt: '2024-04-01T11:45:00Z' },
-  { id: 14, name: 'Jessica White', email: 'j.white@apex.co', phone: '+1 (555) 444-5555', company: 'Apex Digital', nif: null, iban: null, status: 'active', createdAt: '2024-02-09T16:30:00Z' },
-  { id: 15, name: 'Ryan Thompson', email: 'rthompson@zenith.io', phone: '+1 (555) 555-6666', company: 'Zenith Technologies', nif: null, iban: null, status: 'active', createdAt: '2024-03-05T08:00:00Z' },
+  { id: 1, name: 'John Smith', email: 'john.smith@techcorp.com', phone: '+1 (555) 123-4567', company: 'TechCorp Solutions', nif: null, iban: null, decisor: null, segment: null, status: 'active', createdAt: '2024-01-15T10:30:00Z' },
+  { id: 2, name: 'Sarah Johnson', email: 'sarah.j@innovate.io', phone: '+1 (555) 234-5678', company: 'Innovate Digital', nif: null, iban: null, decisor: null, segment: null, status: 'active', createdAt: '2024-02-20T14:45:00Z' },
+  { id: 3, name: 'Michael Chen', email: 'mchen@cloudventures.com', phone: '+1 (555) 345-6789', company: 'CloudVentures Inc', nif: null, iban: null, decisor: null, segment: null, status: 'active', createdAt: '2024-03-10T09:15:00Z' },
+  { id: 4, name: 'Emily Rodriguez', email: 'emily.r@datastream.co', phone: '+1 (555) 456-7890', company: 'DataStream Analytics', nif: null, iban: null, decisor: null, segment: null, status: 'inactive', createdAt: '2024-01-25T16:20:00Z' },
+  { id: 5, name: 'David Park', email: 'dpark@nexusgroup.com', phone: '+1 (555) 567-8901', company: 'Nexus Group', nif: null, iban: null, decisor: null, segment: null, status: 'active', createdAt: '2024-04-05T11:00:00Z' },
+  { id: 6, name: 'Lisa Anderson', email: 'l.anderson@bizpro.com', phone: '+1 (555) 678-9012', company: 'BizPro Consulting', nif: null, iban: null, decisor: null, segment: null, status: 'active', createdAt: '2024-02-14T08:30:00Z' },
+  { id: 7, name: 'James Wilson', email: 'jwilson@alphatech.io', phone: '+1 (555) 789-0123', company: 'AlphaTech Systems', nif: null, iban: null, decisor: null, segment: null, status: 'active', createdAt: '2024-03-22T13:45:00Z' },
+  { id: 8, name: 'Maria Garcia', email: 'maria.g@globalsoft.com', phone: '+1 (555) 890-1234', company: 'GlobalSoft Industries', nif: null, iban: null, decisor: null, segment: null, status: 'inactive', createdAt: '2024-01-30T15:10:00Z' },
+  { id: 9, name: 'Robert Taylor', email: 'rtaylor@velocity.co', phone: '+1 (555) 901-2345', company: 'Velocity Partners', nif: null, iban: null, decisor: null, segment: null, status: 'active', createdAt: '2024-04-12T10:20:00Z' },
+  { id: 10, name: 'Jennifer Lee', email: 'jlee@summit.io', phone: '+1 (555) 012-3456', company: 'Summit Enterprises', nif: null, iban: null, decisor: null, segment: null, status: 'active', createdAt: '2024-02-28T12:00:00Z' },
+  { id: 11, name: 'Christopher Brown', email: 'c.brown@primeware.com', phone: '+1 (555) 111-2222', company: 'PrimeWare Solutions', nif: null, iban: null, decisor: null, segment: null, status: 'active', createdAt: '2024-03-18T09:30:00Z' },
+  { id: 12, name: 'Amanda Martinez', email: 'amartinez@fusiontech.io', phone: '+1 (555) 222-3333', company: 'FusionTech Labs', nif: null, iban: null, decisor: null, segment: null, status: 'active', createdAt: '2024-01-08T14:15:00Z' },
+  { id: 13, name: 'Daniel Kim', email: 'dkim@horizonsoft.com', phone: '+1 (555) 333-4444', company: 'HorizonSoft Inc', nif: null, iban: null, decisor: null, segment: null, status: 'inactive', createdAt: '2024-04-01T11:45:00Z' },
+  { id: 14, name: 'Jessica White', email: 'j.white@apex.co', phone: '+1 (555) 444-5555', company: 'Apex Digital', nif: null, iban: null, decisor: null, segment: null, status: 'active', createdAt: '2024-02-09T16:30:00Z' },
+  { id: 15, name: 'Ryan Thompson', email: 'rthompson@zenith.io', phone: '+1 (555) 555-6666', company: 'Zenith Technologies', nif: null, iban: null, decisor: null, segment: null, status: 'active', createdAt: '2024-03-05T08:00:00Z' },
 ]
 
 // Initial Services Data
