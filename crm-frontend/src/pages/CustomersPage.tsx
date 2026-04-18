@@ -3,12 +3,10 @@ import { useNavigate } from 'react-router-dom'
 import {
   flexRender,
   getCoreRowModel,
-  getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
   useReactTable,
   type ColumnDef,
-  type ColumnFiltersState,
   type SortingState,
 } from '@tanstack/react-table'
 import {
@@ -59,7 +57,6 @@ import type { Customer } from '@/types'
 import { toast } from 'sonner'
 
 const coreRowModel = getCoreRowModel()
-const filteredRowModel = getFilteredRowModel()
 const paginationRowModel = getPaginationRowModel()
 const sortedRowModel = getSortedRowModel()
 
@@ -145,18 +142,23 @@ function createColumns(
 
 export function CustomersPage() {
   const navigate = useNavigate()
-  const { data: customers, isLoading } = useCustomers()
+  const [searchInput, setSearchInput] = React.useState('')
+  const [submittedSearch, setSubmittedSearch] = React.useState('')
+  const { data: customers, isLoading } = useCustomers(submittedSearch)
   const deleteCustomer = useDeleteCustomer()
   const [sorting, setSorting] = React.useState<SortingState>([])
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-    []
-  )
   const [pagination, setPagination] = React.useState({
     pageIndex: 0,
     pageSize: 10,
   })
   const [dialogOpen, setDialogOpen] = React.useState(false)
   const [editingCustomer, setEditingCustomer] = React.useState<Customer | undefined>()
+
+  const handleSubmitSearch = () => setSubmittedSearch(searchInput.trim())
+  const handleClearSearch = () => {
+    setSearchInput('')
+    setSubmittedSearch('')
+  }
 
   const handleCreate = () => {
     setEditingCustomer(undefined)
@@ -186,14 +188,11 @@ export function CustomersPage() {
     columns,
     state: {
       sorting,
-      columnFilters,
       pagination,
     },
     onSortingChange: setSorting,
-    onColumnFiltersChange: setColumnFilters,
     onPaginationChange: setPagination,
     getCoreRowModel: coreRowModel,
-    getFilteredRowModel: filteredRowModel,
     getPaginationRowModel: paginationRowModel,
     getSortedRowModel: sortedRowModel,
   })
@@ -224,21 +223,36 @@ export function CustomersPage() {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="mb-4 flex items-center gap-4">
+          <form
+            onSubmit={(event) => {
+              event.preventDefault()
+              handleSubmitSearch()
+            }}
+            className="mb-4 flex items-center gap-2"
+          >
             <div className="relative flex-1">
               <Search className="text-muted-foreground absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2" />
               <Input
                 placeholder="Pesquisar clientes..."
-                value={
-                  (table.getColumn('name')?.getFilterValue() as string) ?? ''
-                }
-                onChange={(event) =>
-                  table.getColumn('name')?.setFilterValue(event.target.value)
-                }
+                value={searchInput}
+                onChange={(event) => setSearchInput(event.target.value)}
                 className="pl-9"
               />
             </div>
-          </div>
+            <Button type="submit" size="sm">
+              Pesquisar
+            </Button>
+            {submittedSearch && (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={handleClearSearch}
+              >
+                Limpar
+              </Button>
+            )}
+          </form>
 
           <div className="overflow-hidden rounded-lg border">
             <Table>
