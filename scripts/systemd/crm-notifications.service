@@ -1,0 +1,16 @@
+[Unit]
+Description=CRM notifications — generate SERVICO_A_TERMINAR rows
+After=network.target crm-backend.service
+
+[Service]
+Type=oneshot
+User=deploy
+Group=deploy
+WorkingDirectory=/opt/app/jvl/crm-backend
+EnvironmentFile=/opt/app/crm-backend.env
+Environment=TZ=Europe/Lisbon
+ExecStart=/opt/app/jvl/crm-backend/.venv/bin/python manage.py generate_service_ending_notifications
+Nice=10
+
+[Install]
+WantedBy=multi-user.target

@@ -21,6 +21,7 @@ INSTALLED_APPS = [
     'apps.customers',
     'apps.services',
     'apps.documents',
+    'apps.notifications',
 ]
 
 MIDDLEWARE = [

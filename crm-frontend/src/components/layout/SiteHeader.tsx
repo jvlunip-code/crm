@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { SidebarTrigger } from '@/components/ui/sidebar'
 import { useEffect, useState } from 'react'
+import { NotificationsBell } from '@/components/layout/NotificationsBell'
 
 const pageTitles: Record<string, string> = {
   '/': 'Painel',
@@ -57,6 +58,7 @@ export function SiteHeader() {
         <Separator orientation="vertical" className="mx-2 h-4" />
         <h1 className="text-base font-medium">{title}</h1>
         <div className="ml-auto flex items-center gap-2">
+          <NotificationsBell />
           <ModeToggle />
         </div>
       </div>

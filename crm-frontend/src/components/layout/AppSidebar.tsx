@@ -35,7 +35,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { useNotifications } from '@/hooks/use-notifications'
+import { useUnreadCount } from '@/hooks/use-notifications'
 
 const navMain = [
   { title: 'Painel', url: '/', icon: LayoutDashboard },
@@ -53,8 +53,7 @@ const navSecondary = [
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const location = useLocation()
   const navigate = useNavigate()
-  const { data: notifications } = useNotifications()
-  const unreadCount = notifications?.filter(n => n.status === 'unread').length || 0
+  const { data: unreadCount = 0 } = useUnreadCount()
   const { user } = useAuth()
   const logout = useLogout()
 

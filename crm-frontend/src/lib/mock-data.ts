@@ -1,11 +1,10 @@
-import type { Customer, Service, Notification, Event, CustomerService, CustomerNote, CustomerDocument } from '@/types'
+import type { Customer, Service, Event, CustomerService, CustomerNote, CustomerDocument } from '@/types'
 
-const STORAGE_VERSION = '5' // Increment this to force a data refresh
+const STORAGE_VERSION = '6' // Increment this to force a data refresh
 
 const STORAGE_KEYS = {
   CUSTOMERS: 'crm_customers',
   SERVICES: 'crm_services',
-  NOTIFICATIONS: 'crm_notifications',
   EVENTS: 'crm_events',
   CUSTOMER_SERVICES: 'crm_customer_services',
   CUSTOMER_NOTES: 'crm_customer_notes',
@@ -42,20 +41,6 @@ const initialServices: Service[] = [
   { id: 6, name: 'Basic Plan', description: 'Essential features for individuals', price: 9.99, billingCycle: 'monthly', status: 'active', features: ['1 User', '1GB Storage', 'Email Support'], createdAt: '2024-01-01T00:00:00Z' },
   { id: 7, name: 'Team Plan', description: 'Collaboration features for teams', price: 149.99, billingCycle: 'monthly', status: 'active', features: ['50 Users', '250GB Storage', 'Priority Support', 'Advanced Analytics', 'API Access', 'Team Collaboration'], createdAt: '2024-02-01T00:00:00Z' },
   { id: 8, name: 'Legacy Plan', description: 'Discontinued plan', price: 49.99, billingCycle: 'monthly', status: 'inactive', features: ['10 Users', '25GB Storage', 'Email Support', 'Basic Analytics'], createdAt: '2023-06-01T00:00:00Z' },
-]
-
-// Initial Notifications Data
-const initialNotifications: Notification[] = [
-  { id: 1, title: 'New Customer Registration', message: 'John Smith from TechCorp Solutions has signed up for the Professional Plan.', type: 'success', status: 'unread', createdAt: new Date(Date.now() - 1000 * 60 * 30).toISOString() },
-  { id: 2, title: 'Payment Received', message: 'Payment of $799.99 received from DataStream Analytics for Professional Annual subscription.', type: 'success', status: 'unread', createdAt: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString() },
-  { id: 3, title: 'Service Upgrade Request', message: 'CloudVentures Inc has requested to upgrade from Professional to Enterprise Plan.', type: 'info', status: 'unread', createdAt: new Date(Date.now() - 1000 * 60 * 60 * 5).toISOString() },
-  { id: 4, title: 'Payment Failed', message: 'Payment attempt failed for Nexus Group. Please follow up with the customer.', type: 'error', status: 'read', createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString() },
-  { id: 5, title: 'Subscription Expiring Soon', message: 'Summit Enterprises subscription will expire in 7 days. Consider sending a renewal reminder.', type: 'warning', status: 'read', createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 2).toISOString() },
-  { id: 6, title: 'Customer Feedback Received', message: 'AlphaTech Systems left a 5-star review for your service.', type: 'success', status: 'read', createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 3).toISOString() },
-  { id: 7, title: 'Support Ticket Created', message: 'New support ticket #1234 created by Velocity Partners regarding API integration.', type: 'info', status: 'read', createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 4).toISOString() },
-  { id: 8, title: 'Monthly Report Available', message: 'Your monthly customer analytics report for April 2024 is now available.', type: 'info', status: 'read', createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 5).toISOString() },
-  { id: 9, title: 'System Maintenance Scheduled', message: 'Scheduled maintenance will occur on May 1st from 2:00 AM to 4:00 AM EST.', type: 'warning', status: 'read', createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 6).toISOString() },
-  { id: 10, title: 'New Feature Released', message: 'Advanced analytics dashboard is now available for all Professional and Enterprise customers.', type: 'success', status: 'read', createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 7).toISOString() },
 ]
 
 // Initial Events Data
@@ -124,7 +109,7 @@ export function initializeStorage() {
   if (currentVersion !== STORAGE_VERSION) {
     localStorage.removeItem(STORAGE_KEYS.CUSTOMERS)
     localStorage.removeItem(STORAGE_KEYS.SERVICES)
-    localStorage.removeItem(STORAGE_KEYS.NOTIFICATIONS)
+    localStorage.removeItem('crm_notifications')
     localStorage.removeItem(STORAGE_KEYS.EVENTS)
     localStorage.removeItem(STORAGE_KEYS.CUSTOMER_SERVICES)
     localStorage.removeItem(STORAGE_KEYS.CUSTOMER_NOTES)
@@ -137,9 +122,6 @@ export function initializeStorage() {
   }
   if (!localStorage.getItem(STORAGE_KEYS.SERVICES)) {
     localStorage.setItem(STORAGE_KEYS.SERVICES, JSON.stringify(initialServices))
-  }
-  if (!localStorage.getItem(STORAGE_KEYS.NOTIFICATIONS)) {
-    localStorage.setItem(STORAGE_KEYS.NOTIFICATIONS, JSON.stringify(initialNotifications))
   }
   if (!localStorage.getItem(STORAGE_KEYS.EVENTS)) {
     localStorage.setItem(STORAGE_KEYS.EVENTS, JSON.stringify(initialEvents))
@@ -233,35 +215,6 @@ export const servicesApi = {
     await delay(300)
     const services = await servicesApi.getAll()
     localStorage.setItem(STORAGE_KEYS.SERVICES, JSON.stringify(services.filter(s => s.id !== id)))
-  },
-}
-
-// Notifications API
-export const notificationsApi = {
-  getAll: async (): Promise<Notification[]> => {
-    await delay(300)
-    const data = localStorage.getItem(STORAGE_KEYS.NOTIFICATIONS)
-    return data ? JSON.parse(data) : []
-  },
-  markAsRead: async (id: number): Promise<Notification> => {
-    await delay(200)
-    const notifications = await notificationsApi.getAll()
-    const index = notifications.findIndex(n => n.id === id)
-    if (index === -1) throw new Error('Notification not found')
-    notifications[index].status = 'read'
-    localStorage.setItem(STORAGE_KEYS.NOTIFICATIONS, JSON.stringify(notifications))
-    return notifications[index]
-  },
-  markAllAsRead: async (): Promise<void> => {
-    await delay(300)
-    const notifications = await notificationsApi.getAll()
-    notifications.forEach(n => n.status = 'read')
-    localStorage.setItem(STORAGE_KEYS.NOTIFICATIONS, JSON.stringify(notifications))
-  },
-  delete: async (id: number): Promise<void> => {
-    await delay(300)
-    const notifications = await notificationsApi.getAll()
-    localStorage.setItem(STORAGE_KEYS.NOTIFICATIONS, JSON.stringify(notifications.filter(n => n.id !== id)))
   },
 }
 

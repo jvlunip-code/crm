@@ -10,19 +10,18 @@ import {
 } from '@/components/ui/card'
 import { useCustomers } from '@/hooks/use-customers'
 import { useServices } from '@/hooks/use-services'
-import { useNotifications } from '@/hooks/use-notifications'
+import { useUnreadCount } from '@/hooks/use-notifications'
 import { useEvents } from '@/hooks/use-events'
 
 export function SectionCards() {
   const { data: customers } = useCustomers()
   const { data: services } = useServices()
-  const { data: notifications } = useNotifications()
+  const { data: unreadNotifications = 0 } = useUnreadCount()
   const { data: events } = useEvents()
 
   const activeCustomers = customers?.filter(c => c.status === 'active').length || 0
   const totalCustomers = customers?.length || 0
   const activeServices = services?.filter(s => s.status === 'active').length || 0
-  const unreadNotifications = notifications?.filter(n => n.status === 'unread').length || 0
   const recentEvents = events?.slice(0, 30).length || 0
 
   return (

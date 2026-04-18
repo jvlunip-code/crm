@@ -23,14 +23,32 @@ export type Service = {
   createdAt: string
 }
 
-export type Notification = {
+export type NotificationFlag = 'red' | 'orange' | 'yellow' | 'green'
+
+export type ServiceEndingMetadata = {
+  schemaVersion: number
+  serviceId: number
+  serviceAcesso: string
+  customerId: number
+  customerName: string
+  serviceDataFim: string
+  flag: NotificationFlag
+  generatedAt: string
+}
+
+export type ServiceEndingNotification = {
   id: number
-  title: string
-  message: string
-  type: 'info' | 'warning' | 'error' | 'success'
-  status: 'unread' | 'read'
+  type: 'SERVICO'
+  subtype: 'SERVICO_A_TERMINAR'
+  metadata: ServiceEndingMetadata
+  dedupKey: string
+  isRead: boolean
+  readAt: string | null
+  dismissedAt: string | null
   createdAt: string
 }
+
+export type Notification = ServiceEndingNotification
 
 export type Event = {
   id: number

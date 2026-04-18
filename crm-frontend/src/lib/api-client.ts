@@ -1,4 +1,4 @@
-import type { Customer, CustomerService, CustomerDocument, CustomerAddress } from '@/types'
+import type { Customer, CustomerService, CustomerDocument, CustomerAddress, Notification } from '@/types'
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || '/api'
 
@@ -356,6 +356,120 @@ export const customerAddressApi = {
     await fetchWithAuth(`/customers/${customerId}/address/`, {
       method: 'DELETE',
     })
+  },
+}
+
+// Notifications API
+type BackendNotification = {
+  id: number
+  type: 'SERVICO'
+  subtype: 'SERVICO_A_TERMINAR'
+  metadata: Record<string, unknown>
+  dedup_key: string
+  is_read: boolean
+  read_at: string | null
+  dismissed_at: string | null
+  created_at: string
+}
+
+function transformNotification(n: BackendNotification): Notification {
+  return {
+    id: n.id,
+    type: n.type,
+    subtype: n.subtype,
+    metadata: toFrontend(n.metadata),
+    dedupKey: n.dedup_key,
+    isRead: n.is_read,
+    readAt: n.read_at,
+    dismissedAt: n.dismissed_at,
+    createdAt: n.created_at,
+  }
+}
+
+export type NotificationsListParams = {
+  isRead?: boolean
+  type?: string
+  subtype?: string
+  page?: number
+  pageSize?: number
+}
+
+export type NotificationsListResponse = {
+  count: number
+  next: string | null
+  previous: string | null
+  results: Notification[]
+}
+
+function buildNotificationsQuery(params: NotificationsListParams = {}): string {
+  const q = new URLSearchParams()
+  if (params.isRead !== undefined) q.set('is_read', String(params.isRead))
+  if (params.type) q.set('type', params.type)
+  if (params.subtype) q.set('subtype', params.subtype)
+  if (params.page !== undefined) q.set('page', String(params.page))
+  if (params.pageSize !== undefined) q.set('page_size', String(params.pageSize))
+  const s = q.toString()
+  return s ? `?${s}` : ''
+}
+
+export const notificationsApi = {
+  list: async (params: NotificationsListParams = {}): Promise<NotificationsListResponse> => {
+    const response = await fetchWithAuth(`/notifications/${buildNotificationsQuery(params)}`)
+    const data: PaginatedResponse<BackendNotification> = await response.json()
+    return {
+      count: data.count,
+      next: data.next,
+      previous: data.previous,
+      results: data.results.map(transformNotification),
+    }
+  },
+
+  listAll: async (params: Omit<NotificationsListParams, 'page' | 'pageSize'> = {}): Promise<Notification[]> => {
+    const all: Notification[] = []
+    let url: string | null = `/notifications/${buildNotificationsQuery(params)}`
+    while (url) {
+      const response = await fetchWithAuth(url)
+      const data: PaginatedResponse<BackendNotification> = await response.json()
+      all.push(...data.results.map(transformNotification))
+      if (data.next) {
+        const nextUrl = new URL(data.next)
+        url = (nextUrl.pathname + nextUrl.search).replace(/^\/api/, '')
+      } else {
+        url = null
+      }
+    }
+    return all
+  },
+
+  unreadCount: async (): Promise<number> => {
+    const response = await fetchWithAuth(`/notifications/?is_read=false&page_size=1`)
+    const data: PaginatedResponse<BackendNotification> = await response.json()
+    return data.count
+  },
+
+  markRead: async (id: number): Promise<Notification> => {
+    const response = await fetchWithAuth(`/notifications/${id}/mark_read/`, { method: 'POST' })
+    return transformNotification(await response.json())
+  },
+
+  markUnread: async (id: number): Promise<Notification> => {
+    const response = await fetchWithAuth(`/notifications/${id}/mark_unread/`, { method: 'POST' })
+    return transformNotification(await response.json())
+  },
+
+  markAllRead: async (): Promise<{ updated: number }> => {
+    const response = await fetchWithAuth(`/notifications/mark_all_read/`, { method: 'POST' })
+    return response.json()
+  },
+
+  dismiss: async (id: number): Promise<Notification> => {
+    const response = await fetchWithAuth(`/notifications/${id}/dismiss/`, { method: 'POST' })
+    return transformNotification(await response.json())
+  },
+
+  triggerServiceEnding: async (): Promise<{ created: number; skipped: number; auto_dismissed: number }> => {
+    const response = await fetchWithAuth(`/notifications/generate_service_ending/`, { method: 'POST' })
+    return response.json()
   },
 }
 
