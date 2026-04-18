@@ -23,7 +23,7 @@ import type { Notification } from '@/types'
 export function NotificationsBell() {
   const navigate = useNavigate()
   const { data: unreadCount = 0 } = useUnreadCount()
-  const { data: recent } = useNotifications({ pageSize: 8 })
+  const { data: recent } = useNotifications({ isRead: false, pageSize: 8 })
   const markAsRead = useMarkAsRead()
   const markAllRead = useMarkAllAsRead()
   const dismiss = useDismissNotification()
@@ -68,7 +68,7 @@ export function NotificationsBell() {
         <div className="max-h-[420px] overflow-y-auto">
           {rows.length === 0 ? (
             <div className="text-muted-foreground px-3 py-6 text-center text-sm">
-              Sem notificações.
+              Sem notificações por ler.
             </div>
           ) : (
             rows.map(n => {
