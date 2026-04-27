@@ -29,6 +29,7 @@ class CustomerService(models.Model):
     data_fim = models.DateField(null=True, blank=True)
     num_client = models.CharField(max_length=100, blank=True, default='')
     num_servico = models.CharField(max_length=100, blank=True, default='')
+    morada = models.TextField(blank=True, default='')
     observacoes = models.TextField(blank=True, default='')
     created_at = models.DateTimeField(auto_now_add=True)
 

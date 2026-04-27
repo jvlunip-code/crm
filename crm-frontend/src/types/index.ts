@@ -111,6 +111,8 @@ export type CustomerService = {
   numClient: string
   /** Número de serviço */
   numServico: string
+  /** Morada */
+  morada: string
   /** Observações */
   observacoes: string
   /** Data de criação */

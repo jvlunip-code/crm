@@ -10,7 +10,7 @@ class CustomerServiceSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'customer', 'parent', 'acesso', 'tarifario', 'operadora',
             'valor', 'moeda', 'conta', 'cvp', 'data_fim', 'num_client',
-            'num_servico', 'observacoes', 'created_at', 'children'
+            'num_servico', 'morada', 'observacoes', 'created_at', 'children'
         ]
         read_only_fields = ['id', 'created_at', 'children']
 
@@ -45,7 +45,7 @@ class CustomerServiceCreateSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'parent', 'acesso', 'tarifario', 'operadora',
             'valor', 'moeda', 'conta', 'cvp', 'data_fim', 'num_client',
-            'num_servico', 'observacoes', 'created_at'
+            'num_servico', 'morada', 'observacoes', 'created_at'
         ]
         read_only_fields = ['id', 'created_at']
 

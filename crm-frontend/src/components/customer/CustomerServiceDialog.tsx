@@ -53,6 +53,7 @@ export function CustomerServiceDialog({
     dataFim: '',
     numClient: '',
     numServico: '',
+    morada: '',
     observacoes: '',
   })
 
@@ -69,6 +70,7 @@ export function CustomerServiceDialog({
         dataFim: service.dataFim ?? '',
         numClient: service.numClient,
         numServico: service.numServico,
+        morada: service.morada,
         observacoes: service.observacoes,
       })
     } else {
@@ -83,6 +85,7 @@ export function CustomerServiceDialog({
         dataFim: '',
         numClient: '',
         numServico: '',
+        morada: '',
         observacoes: '',
       })
     }
@@ -114,6 +117,7 @@ export function CustomerServiceDialog({
       dataFim: formData.dataFim || null,
       numClient: formData.numClient,
       numServico: formData.numServico,
+      morada: formData.morada,
       observacoes: formData.observacoes,
     }
 
@@ -262,6 +266,17 @@ export function CustomerServiceDialog({
                 placeholder="Ex: NS-8001"
               />
             </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="morada">Morada</Label>
+            <Textarea
+              id="morada"
+              value={formData.morada}
+              onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => handleChange('morada', e.target.value)}
+              placeholder="Ex: Rua da Liberdade, 123, 1250-096 Lisboa"
+              rows={2}
+            />
           </div>
 
           <div className="space-y-2">

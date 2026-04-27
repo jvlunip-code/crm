@@ -106,6 +106,7 @@ type BackendCustomerService = {
   data_fim: string | null
   num_client: string
   num_servico: string
+  morada: string
   observacoes: string
   created_at: string
   children?: BackendCustomerService[]
@@ -127,6 +128,7 @@ function transformCustomerService(service: BackendCustomerService, customerId: n
     dataFim: service.data_fim,
     numClient: service.num_client,
     numServico: service.num_servico,
+    morada: service.morada ?? '',
     observacoes: service.observacoes,
     createdAt: service.created_at,
   }
@@ -245,6 +247,7 @@ export const customerServicesApi = {
       data_fim: service.dataFim || null,
       num_client: service.numClient,
       num_servico: service.numServico,
+      morada: service.morada,
       observacoes: service.observacoes,
     }
 
@@ -270,6 +273,7 @@ export const customerServicesApi = {
     if (updates.dataFim !== undefined) backendPayload.data_fim = updates.dataFim || null
     if (updates.numClient !== undefined) backendPayload.num_client = updates.numClient
     if (updates.numServico !== undefined) backendPayload.num_servico = updates.numServico
+    if (updates.morada !== undefined) backendPayload.morada = updates.morada
     if (updates.observacoes !== undefined) backendPayload.observacoes = updates.observacoes
 
     const response = await fetchWithAuth(`/customers/${customerId}/services/${id}/`, {
