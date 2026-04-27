@@ -139,6 +139,12 @@ export function CustomerServicesTab({ customerId, services, isLoading }: Custome
           <TableCell>{service.operadora}</TableCell>
           <TableCell>{formatCurrency(service.valor, service.moeda)}</TableCell>
           <TableCell>{service.conta}</TableCell>
+          <TableCell>{service.cvp || '—'}</TableCell>
+          <TableCell>{service.numClient || '—'}</TableCell>
+          <TableCell>{service.numServico || '—'}</TableCell>
+          <TableCell className="max-w-[240px] truncate" title={service.morada || undefined}>
+            {service.morada || '—'}
+          </TableCell>
           <TableCell>{formatServiceDate(service.dataFim)}</TableCell>
           <TableCell>
             <DropdownMenu>
@@ -213,6 +219,10 @@ export function CustomerServicesTab({ customerId, services, isLoading }: Custome
                     <TableHead>Operadora</TableHead>
                     <TableHead>Valor</TableHead>
                     <TableHead>Conta</TableHead>
+                    <TableHead>CVP</TableHead>
+                    <TableHead>Nº Cliente</TableHead>
+                    <TableHead>Nº Serviço</TableHead>
+                    <TableHead>Morada</TableHead>
                     <TableHead>Data Fim</TableHead>
                     <TableHead className="w-10"></TableHead>
                   </TableRow>
