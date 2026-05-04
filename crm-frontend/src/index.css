@@ -5,7 +5,25 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme {
-  --font-sans: 'Roboto', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-sans: 'Manrope', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-display: 'Fraunces', Georgia, serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --tracking-tightest: -0.04em;
+  --tracking-tighter2: -0.025em;
+
+  --color-bone: #F4EFE6;
+  --color-bone-light: #FAF7F1;
+  --color-bone-dark: #E8E0CE;
+  --color-ink: #14181F;
+  --color-ink-soft: #2A2F38;
+  --color-ink-mute: #5A6068;
+  --color-clay: #C2553D;
+  --color-clay-deep: #9E3E29;
+  --color-clay-light: #E8B5A6;
+  --color-sage: #6B7E6E;
+  --color-sage-light: #A8B5A9;
+  --color-mist: #E5DCC9;
 
   --color-background: hsl(var(--background));
   --color-foreground: hsl(var(--foreground));
@@ -52,71 +70,90 @@
   --sidebar-width: 16rem;
   --sidebar-width-icon: 3rem;
 
-  --background: 0 0% 100%;
-  --foreground: 222.2 84% 4.9%;
-  --card: 0 0% 100%;
-  --card-foreground: 222.2 84% 4.9%;
-  --popover: 0 0% 100%;
-  --popover-foreground: 222.2 84% 4.9%;
-  --primary: 222.2 47.4% 11.2%;
-  --primary-foreground: 210 40% 98%;
-  --secondary: 210 40% 96.1%;
-  --secondary-foreground: 222.2 47.4% 11.2%;
-  --muted: 210 40% 96.1%;
-  --muted-foreground: 215.4 16.3% 46.9%;
-  --accent: 210 40% 96.1%;
-  --accent-foreground: 222.2 47.4% 11.2%;
-  --destructive: 0 84.2% 60.2%;
-  --destructive-foreground: 210 40% 98%;
-  --border: 214.3 31.8% 91.4%;
-  --input: 214.3 31.8% 91.4%;
-  --ring: 222.2 84% 4.9%;
+  /* phm "bone" #F4EFE6 */
+  --background: 39 39% 93%;
+  /* phm "ink" #14181F */
+  --foreground: 218 22% 10%;
+  /* phm "bone-light" #FAF7F1 */
+  --card: 40 47% 96%;
+  --card-foreground: 218 22% 10%;
+  --popover: 40 47% 96%;
+  --popover-foreground: 218 22% 10%;
+  /* primary buttons: ink-on-bone */
+  --primary: 218 22% 10%;
+  --primary-foreground: 40 47% 96%;
+  /* phm "bone-dark" #E8E0CE */
+  --secondary: 41 36% 86%;
+  --secondary-foreground: 218 22% 10%;
+  /* phm "mist" #E5DCC9 */
+  --muted: 41 32% 84%;
+  /* phm "ink-mute" #5A6068 */
+  --muted-foreground: 214 7% 38%;
+  /* phm "clay-light" #E8B5A6 */
+  --accent: 14 60% 78%;
+  --accent-foreground: 218 22% 10%;
+  /* phm "clay" #C2553D */
+  --destructive: 11 52% 50%;
+  --destructive-foreground: 40 47% 96%;
+  /* derived from ink @ ~12% over bone */
+  --border: 41 20% 86%;
+  --input: 41 20% 86%;
+  --ring: 218 22% 10%;
   --radius: 0.5rem;
-  --chart-1: 12 76% 61%;
-  --chart-2: 173 58% 39%;
-  --chart-3: 197 37% 24%;
-  --chart-4: 43 74% 66%;
-  --chart-5: 27 87% 67%;
+  /* charts: clay, sage, ink-soft, clay-light, sage-light */
+  --chart-1: 11 52% 50%;
+  --chart-2: 130 8% 46%;
+  --chart-3: 219 14% 19%;
+  --chart-4: 14 60% 78%;
+  --chart-5: 128 9% 68%;
 
-  --sidebar: 210 40% 98%;
-  --sidebar-foreground: 222.2 47.4% 11.2%;
-  --sidebar-primary: 222.2 47.4% 11.2%;
-  --sidebar-primary-foreground: 210 40% 98%;
-  --sidebar-accent: 210 40% 96.1%;
-  --sidebar-accent-foreground: 222.2 47.4% 11.2%;
-  --sidebar-border: 214.3 31.8% 91.4%;
-  --sidebar-ring: 222.2 84% 4.9%;
+  --sidebar: 40 47% 96%;
+  --sidebar-foreground: 218 22% 10%;
+  --sidebar-primary: 218 22% 10%;
+  --sidebar-primary-foreground: 40 47% 96%;
+  --sidebar-accent: 41 36% 86%;
+  --sidebar-accent-foreground: 218 22% 10%;
+  --sidebar-border: 41 20% 86%;
+  --sidebar-ring: 218 22% 10%;
 }
 
 .dark {
-  --background: 222.2 84% 4.9%;
-  --foreground: 210 40% 98%;
-  --card: 222.2 84% 4.9%;
-  --card-foreground: 210 40% 98%;
-  --popover: 222.2 84% 4.9%;
-  --popover-foreground: 210 40% 98%;
-  --primary: 210 40% 98%;
-  --primary-foreground: 222.2 47.4% 11.2%;
-  --secondary: 217.2 32.6% 17.5%;
-  --secondary-foreground: 210 40% 98%;
-  --muted: 217.2 32.6% 17.5%;
-  --muted-foreground: 215 20.2% 65.1%;
-  --accent: 217.2 32.6% 17.5%;
-  --accent-foreground: 210 40% 98%;
-  --destructive: 0 62.8% 30.6%;
-  --destructive-foreground: 210 40% 98%;
-  --border: 217.2 32.6% 17.5%;
-  --input: 217.2 32.6% 17.5%;
-  --ring: 212.7 26.8% 83.9%;
+  --background: 218 22% 10%;
+  --foreground: 40 47% 96%;
+  /* one notch lighter than bg = ink-soft */
+  --card: 219 14% 19%;
+  --card-foreground: 40 47% 96%;
+  --popover: 219 14% 19%;
+  --popover-foreground: 40 47% 96%;
+  --primary: 40 47% 96%;
+  --primary-foreground: 218 22% 10%;
+  --secondary: 219 14% 19%;
+  --secondary-foreground: 40 47% 96%;
+  --muted: 219 14% 19%;
+  /* sage-light for desaturated mute */
+  --muted-foreground: 128 9% 68%;
+  /* clay-deep #9E3E29 */
+  --accent: 11 59% 39%;
+  --accent-foreground: 40 47% 96%;
+  --destructive: 11 52% 50%;
+  --destructive-foreground: 40 47% 96%;
+  --border: 218 14% 22%;
+  --input: 218 14% 22%;
+  --ring: 40 47% 96%;
+  --chart-1: 14 60% 78%;
+  --chart-2: 128 9% 68%;
+  --chart-3: 41 36% 86%;
+  --chart-4: 11 52% 50%;
+  --chart-5: 130 8% 46%;
 
-  --sidebar: 222.2 47.4% 11.2%;
-  --sidebar-foreground: 210 40% 98%;
-  --sidebar-primary: 210 40% 98%;
-  --sidebar-primary-foreground: 222.2 47.4% 11.2%;
-  --sidebar-accent: 217.2 32.6% 17.5%;
-  --sidebar-accent-foreground: 210 40% 98%;
-  --sidebar-border: 217.2 32.6% 17.5%;
-  --sidebar-ring: 212.7 26.8% 83.9%;
+  --sidebar: 218 22% 10%;
+  --sidebar-foreground: 40 47% 96%;
+  --sidebar-primary: 40 47% 96%;
+  --sidebar-primary-foreground: 218 22% 10%;
+  --sidebar-accent: 219 14% 19%;
+  --sidebar-accent-foreground: 40 47% 96%;
+  --sidebar-border: 218 14% 22%;
+  --sidebar-ring: 40 47% 96%;
 }
 
 @layer base {
@@ -127,5 +164,47 @@
     background-color: hsl(var(--background));
     color: hsl(var(--foreground));
     font-family: var(--font-sans);
+    font-feature-settings: "ss01", "ss02", "cv11";
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+}
+
+@layer components {
+  .display {
+    font-family: var(--font-display);
+    font-feature-settings: "ss01", "ss02";
+    font-variation-settings: "opsz" 144, "SOFT" 30;
+    letter-spacing: -0.035em;
+    line-height: 1;
+  }
+
+  .display-italic {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-feature-settings: "ss01", "ss02";
+    font-variation-settings: "opsz" 144, "SOFT" 60;
+    letter-spacing: -0.045em;
+    line-height: 1;
+  }
+
+  .label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  .num {
+    font-family: var(--font-mono);
+    font-feature-settings: "tnum";
+  }
+
+  .marginalia {
+    color: hsl(var(--muted-foreground));
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    line-height: 1.6;
   }
 }
