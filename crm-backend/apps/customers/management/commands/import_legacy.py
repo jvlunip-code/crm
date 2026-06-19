@@ -1,6 +1,6 @@
 """Backfill the legacy MySQL CRM dump into the new PostgreSQL schema.
 
-The source `jvl_db.csv` concatenates 9 legacy tables (separated by header rows).
+The source `jvl_db.csv` concatenates 10 legacy tables (separated by header rows).
 This command parses each section by its header signature and imports:
 
     clientes     -> Customer + CustomerAddress
@@ -85,6 +85,14 @@ def _clean(value):
     if value == '' or value.upper() == 'NULL':
         return None
     return value
+
+
+def _to_int(value):
+    """Parse an id/foreign-key cell; return None for NULL/blank/non-numeric."""
+    try:
+        return int(str(value).strip())
+    except (TypeError, ValueError):
+        return None
 
 
 def _norm_nif(value):
@@ -195,20 +203,35 @@ class Command(BaseCommand):
         self._created_nifs = set()             # NIFs claimed by customers created this run
         self._existing = self._load_existing_map()
 
+        # Phase 1 — relational data: strictly all-or-nothing.
         try:
             with transaction.atomic():
                 self._import_customers(sections.get('clientes', []))
                 self._import_contacts(sections.get('contactos', []))
                 self._import_services(sections.get('servicos', []))
                 self._import_subservices(sections.get('subservicos', []))
-                self._import_documents(sections.get('documentos', []))
                 if self.dry_run:
+                    # Validate documents read-only so the summary is complete,
+                    # then roll the whole phase back.
+                    self._import_documents(sections.get('documentos', []))
                     raise _DryRunRollback()
         except _DryRunRollback:
             pass
 
+        # Phase 2 — documents: committed per file so the ~2 GB copy is resumable
+        # (each file is idempotent via LegacyImportMap). Runs only after the
+        # relational data is safely committed.
         if not self.dry_run:
-            self._generate_notifications()
+            self._import_documents(sections.get('documentos', []))
+
+        # Phase 3 — notifications: post-commit; a failure here must not mask an
+        # otherwise-successful import.
+        if not self.dry_run:
+            try:
+                self._generate_notifications()
+            except Exception as exc:  # noqa: BLE001
+                self.stderr.write(self.style.ERROR(
+                    f'Import committed OK, but notification generation failed: {exc}'))
 
         self._print_summary()
 
@@ -250,8 +273,12 @@ class Command(BaseCommand):
 
     def _import_customers(self, rows):
         for row in rows:
-            legacy_id = int(row['id'])
             stat = self.stats['customer']
+            legacy_id = _to_int(row['id'])
+            if legacy_id is None:
+                stat['errors'] += 1
+                self.notes['customer_bad_id'].append(repr(row.get('id')))
+                continue
 
             # Already imported in a prior run.
             if legacy_id in self._existing['customer']:
@@ -350,17 +377,25 @@ class Command(BaseCommand):
     def _import_contacts(self, rows):
         stat = self.stats['contact']
         for row in rows:
-            legacy_id = int(row['id'])
+            legacy_id = _to_int(row['id'])
+            if legacy_id is None:
+                stat['errors'] += 1
+                self.notes['contact_bad_id'].append(repr(row.get('id')))
+                continue
             if legacy_id in self._existing['contact']:
                 stat['skipped'] += 1
                 continue
-            customer_id = self.cust_map.get(int(row['cliente_id']))
+            customer_id = self.cust_map.get(_to_int(row['cliente_id']))
             if customer_id is None:
                 stat['errors'] += 1
                 self.notes['contact_no_customer'].append(
                     f"#{legacy_id} cliente_id={row['cliente_id']}")
                 continue
-            email = _sanitize_email(row['email']) or ''
+            email = _sanitize_email(row['email'])
+            if email is None:
+                self.notes['contact_email_invalid'].append(
+                    f"#{legacy_id} {row['email']!r}")
+                email = ''
             contact = CustomerContact.objects.create(
                 customer_id=customer_id,
                 name=(_clean(row['nome']) or '')[:255],
@@ -400,7 +435,11 @@ class Command(BaseCommand):
         stat = self.stats['service']
         pending, legacy_ids = [], []
         for row in rows:
-            legacy_id = int(row['id'])
+            legacy_id = _to_int(row['id'])
+            if legacy_id is None:
+                stat['errors'] += 1
+                self.notes['service_bad_id'].append(repr(row.get('id')))
+                continue
             if legacy_id in self._existing['service']:
                 obj_id = self._existing['service'][legacy_id]
                 # Re-hydrate svc_map for subservice resolution on re-runs.
@@ -409,7 +448,7 @@ class Command(BaseCommand):
                     self.svc_map[legacy_id] = (svc['id'], svc['customer_id'])
                 stat['skipped'] += 1
                 continue
-            customer_id = self.cust_map.get(int(row['cliente_id']))
+            customer_id = self.cust_map.get(_to_int(row['cliente_id']))
             if customer_id is None:
                 stat['errors'] += 1
                 self.notes['service_no_customer'].append(
@@ -428,11 +467,15 @@ class Command(BaseCommand):
         stat = self.stats['subservice']
         pending, legacy_ids = [], []
         for row in rows:
-            legacy_id = int(row['id'])
+            legacy_id = _to_int(row['id'])
+            if legacy_id is None:
+                stat['errors'] += 1
+                self.notes['subservice_bad_id'].append(repr(row.get('id')))
+                continue
             if legacy_id in self._existing['subservice']:
                 stat['skipped'] += 1
                 continue
-            parent = self.svc_map.get(int(row['servico_id']))
+            parent = self.svc_map.get(_to_int(row['servico_id']))
             if parent is None:
                 stat['errors'] += 1
                 self.notes['subservice_no_parent'].append(
@@ -450,13 +493,24 @@ class Command(BaseCommand):
     # -- Documents -------------------------------------------------------------
 
     def _import_documents(self, rows):
+        """Copy each legacy file into MEDIA_ROOT and create its Document row.
+
+        Runs OUTSIDE the relational transaction (real runs only): each file is
+        committed in its own small transaction, so the ~2 GB copy is resumable
+        — a failure part-way leaves earlier documents committed, and a re-run
+        skips them via LegacyImportMap. A single bad file is logged, not fatal.
+        """
         stat = self.stats['document']
         for row in rows:
-            legacy_id = int(row['id'])
+            legacy_id = _to_int(row['id'])
+            if legacy_id is None:
+                stat['errors'] += 1
+                self.notes['document_bad_id'].append(repr(row.get('id')))
+                continue
             if legacy_id in self._existing['document']:
                 stat['skipped'] += 1
                 continue
-            customer_id = self.cust_map.get(int(row['cliente_id']))
+            customer_id = self.cust_map.get(_to_int(row['cliente_id']))
             if customer_id is None:
                 stat['errors'] += 1
                 self.notes['document_no_customer'].append(
@@ -476,16 +530,22 @@ class Command(BaseCommand):
 
             size = os.path.getsize(src)
             mime_type = mimetypes.guess_type(filename)[0] or 'application/octet-stream'
-            doc = Document(
-                customer_id=customer_id,
-                name=(_clean(row['nome']) or filename)[:255],
-                type=infer_document_type(mime_type),
-                size=size,
-                mime_type=mime_type[:100],
-            )
-            with open(src, 'rb') as fh:
-                doc.file.save(filename, File(fh), save=True)
-            self._record('document', legacy_id, doc.id)
+            try:
+                with transaction.atomic():
+                    doc = Document(
+                        customer_id=customer_id,
+                        name=(_clean(row['nome']) or filename)[:255],
+                        type=infer_document_type(mime_type),
+                        size=size,
+                        mime_type=mime_type[:100],
+                    )
+                    with open(src, 'rb') as fh:
+                        doc.file.save(filename, File(fh), save=True)
+                    self._record('document', legacy_id, doc.id)
+            except Exception as exc:  # noqa: BLE001 — one bad file must not abort the pass
+                stat['errors'] += 1
+                self.notes['document_error'].append(f"#{legacy_id} {filename!r}: {exc}")
+                continue
             stat['created'] += 1
 
     # -- Notifications ---------------------------------------------------------
