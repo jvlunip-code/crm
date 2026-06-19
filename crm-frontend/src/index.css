@@ -5,8 +5,8 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme {
-  --font-sans: 'Inter Variable', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --font-display: 'Inter Variable', system-ui, -apple-system, sans-serif;
+  --font-sans: 'IBM Plex Sans Variable', 'IBM Plex Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-display: 'IBM Plex Sans Variable', 'IBM Plex Sans', system-ui, -apple-system, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, 'Cascadia Mono', monospace;
 
   --tracking-tightest: -0.04em;
@@ -41,6 +41,10 @@
   --color-accent-foreground: hsl(var(--accent-foreground));
   --color-destructive: hsl(var(--destructive));
   --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --color-success: hsl(var(--success));
+  --color-success-foreground: hsl(var(--success-foreground));
+  --color-warning: hsl(var(--warning));
+  --color-warning-foreground: hsl(var(--warning-foreground));
   --color-border: hsl(var(--border));
   --color-input: hsl(var(--input));
   --color-ring: hsl(var(--ring));
@@ -70,36 +74,41 @@
   --sidebar-width: 16rem;
   --sidebar-width-icon: 3rem;
 
-  /* phm "bone" #F4EFE6 */
+  /* App background — warm cream (kept); white cards sit on top, PostHog-style */
   --background: 39 39% 93%;
-  /* phm "ink" #14181F */
-  --foreground: 218 22% 10%;
-  /* phm "bone-light" #FAF7F1 */
-  --card: 40 47% 96%;
-  --card-foreground: 218 22% 10%;
-  --popover: 40 47% 96%;
-  --popover-foreground: 218 22% 10%;
-  /* primary buttons: ink-on-bone */
-  --primary: 218 22% 10%;
-  --primary-foreground: 40 47% 96%;
-  /* phm "bone-dark" #E8E0CE */
-  --secondary: 41 36% 86%;
-  --secondary-foreground: 218 22% 10%;
-  /* phm "mist" #E5DCC9 */
-  --muted: 41 32% 84%;
-  /* phm "ink-mute" #5A6068 */
-  --muted-foreground: 214 7% 38%;
-  /* phm "clay-light" #E8B5A6 */
-  --accent: 14 60% 78%;
-  --accent-foreground: 218 22% 10%;
-  /* phm "clay" #C2553D */
-  --destructive: 11 52% 50%;
-  --destructive-foreground: 40 47% 96%;
-  /* derived from ink @ ~12% over bone */
-  --border: 41 20% 86%;
-  --input: 41 20% 86%;
-  --ring: 218 22% 10%;
-  --radius: 0.5rem;
+  /* near-black neutral ink (PostHog text-primary) */
+  --foreground: 0 0% 9%;
+  /* PostHog surface-primary: white cards on cream */
+  --card: 0 0% 100%;
+  --card-foreground: 0 0% 9%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 0 0% 9%;
+  /* PostHog primary brand orange #f54e00 */
+  --primary: 19 100% 48%;
+  --primary-foreground: 0 0% 100%;
+  /* light warm surface for secondary buttons/chips */
+  --secondary: 40 30% 90%;
+  --secondary-foreground: 0 0% 12%;
+  --muted: 40 24% 91%;
+  --muted-foreground: 0 0% 38%;
+  /* subtle hover surface */
+  --accent: 40 30% 88%;
+  --accent-foreground: 0 0% 12%;
+  /* red-600 */
+  --destructive: 0 72% 51%;
+  --destructive-foreground: 0 0% 100%;
+  /* green-700 — semantic success buttons */
+  --success: 142 72% 29%;
+  --success-foreground: 0 0% 100%;
+  /* amber-500 — semantic warning buttons (dark text) */
+  --warning: 38 92% 50%;
+  --warning-foreground: 0 0% 12%;
+  /* PostHog subtle warm-gray border */
+  --border: 40 16% 84%;
+  --input: 40 16% 84%;
+  /* orange focus ring to match primary */
+  --ring: 19 100% 48%;
+  --radius: 0.375rem;
   /* charts: clay, sage, ink-soft, clay-light, sage-light */
   --chart-1: 11 52% 50%;
   --chart-2: 130 8% 46%;
@@ -118,28 +127,31 @@
 }
 
 .dark {
-  --background: 218 22% 10%;
-  --foreground: 40 47% 96%;
-  /* one notch lighter than bg = ink-soft */
-  --card: 219 14% 19%;
-  --card-foreground: 40 47% 96%;
-  --popover: 219 14% 19%;
-  --popover-foreground: 40 47% 96%;
-  --primary: 40 47% 96%;
-  --primary-foreground: 218 22% 10%;
-  --secondary: 219 14% 19%;
-  --secondary-foreground: 40 47% 96%;
-  --muted: 219 14% 19%;
-  /* sage-light for desaturated mute */
-  --muted-foreground: 128 9% 68%;
-  /* clay-deep #9E3E29 */
-  --accent: 11 59% 39%;
-  --accent-foreground: 40 47% 96%;
-  --destructive: 11 52% 50%;
-  --destructive-foreground: 40 47% 96%;
-  --border: 218 14% 22%;
-  --input: 218 14% 22%;
-  --ring: 40 47% 96%;
+  /* PostHog dark: neutral-cool */
+  --background: 240 8% 8%;
+  --foreground: 0 0% 90%;
+  --card: 235 8% 15%;
+  --card-foreground: 0 0% 90%;
+  --popover: 235 8% 15%;
+  --popover-foreground: 0 0% 90%;
+  /* keep orange brand primary in dark */
+  --primary: 19 100% 50%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 240 8% 18%;
+  --secondary-foreground: 0 0% 90%;
+  --muted: 240 8% 18%;
+  --muted-foreground: 0 0% 62%;
+  --accent: 230 8% 20%;
+  --accent-foreground: 0 0% 90%;
+  --destructive: 0 72% 55%;
+  --destructive-foreground: 0 0% 100%;
+  --success: 142 64% 42%;
+  --success-foreground: 0 0% 100%;
+  --warning: 38 92% 55%;
+  --warning-foreground: 0 0% 12%;
+  --border: 230 8% 20%;
+  --input: 230 8% 22%;
+  --ring: 19 100% 52%;
   --chart-1: 14 60% 78%;
   --chart-2: 128 9% 68%;
   --chart-3: 41 36% 86%;
