@@ -1,0 +1,4 @@
+# Legacy MySQL migration data dump (CSV + ~2.1GB of documents) — never commit
+/migration/
+
+.DS_Store

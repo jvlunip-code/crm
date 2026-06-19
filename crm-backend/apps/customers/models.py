@@ -126,3 +126,49 @@ class CustomerAddress(models.Model):
 
     def __str__(self):
         return f"{self.street}, {self.municipality}"
+
+
+class CustomerContact(models.Model):
+    """Secondary contact people for a customer (legacy `contactos` table)."""
+
+    customer = models.ForeignKey(
+        Customer, on_delete=models.CASCADE, related_name='contacts'
+    )
+    name = models.CharField(max_length=255)
+    phone = models.CharField(max_length=50, blank=True, default='')
+    email = models.EmailField(blank=True, default='')
+    cc_cidadao = models.CharField(max_length=50, blank=True, default='')
+    nif = models.CharField(max_length=20, blank=True, default='')
+    role = models.CharField(max_length=100, blank=True, default='')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['name']
+
+    def __str__(self):
+        return f"{self.name} ({self.role})" if self.role else self.name
+
+
+class LegacyImportMap(models.Model):
+    """Maps legacy MySQL primary keys to the new PostgreSQL object ids.
+
+    Used by the `import_legacy` management command to resolve legacy foreign
+    keys (cliente_id, servico_id) and to make re-runs idempotent. Removable
+    once the migration is confirmed stable.
+    """
+
+    entity = models.CharField(max_length=32)
+    legacy_id = models.IntegerField()
+    object_id = models.BigIntegerField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['entity', 'legacy_id'], name='uniq_legacy_entity_id'
+            )
+        ]
+        indexes = [models.Index(fields=['entity', 'legacy_id'])]
+
+    def __str__(self):
+        return f"{self.entity}:{self.legacy_id} -> {self.object_id}"
