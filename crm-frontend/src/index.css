@@ -74,8 +74,8 @@
   --sidebar-width: 16rem;
   --sidebar-width-icon: 3rem;
 
-  /* App background — warm cream (kept); white cards sit on top, PostHog-style */
-  --background: 39 39% 93%;
+  /* Main content background — PostHog cream #EEEFE9; white cards sit on top */
+  --background: 70 16% 93%;
   /* near-black neutral ink (PostHog text-primary) */
   --foreground: 0 0% 9%;
   /* PostHog surface-primary: white cards on cream */
@@ -108,7 +108,7 @@
   --input: 40 16% 84%;
   /* orange focus ring to match primary */
   --ring: 19 100% 48%;
-  --radius: 0.375rem;
+  --radius: 0.5rem;
   /* charts: clay, sage, ink-soft, clay-light, sage-light */
   --chart-1: 11 52% 50%;
   --chart-2: 130 8% 46%;
