@@ -85,10 +85,7 @@
   --popover-foreground: 0 0% 9%;
   /* PostHog primary brand orange #f54e00 */
   --primary: 19 100% 48%;
-  /* black text on orange (PostHog) — also better contrast than white */
-  --primary-foreground: 0 0% 9%;
-  /* near-black edge for PostHog 3D bordered buttons */
-  --btn-edge: 0 0% 9%;
+  --primary-foreground: 0 0% 100%;
   /* light warm surface for secondary buttons/chips */
   --secondary: 40 30% 90%;
   --secondary-foreground: 0 0% 12%;
@@ -139,8 +136,7 @@
   --popover-foreground: 0 0% 90%;
   /* keep orange brand primary in dark */
   --primary: 19 100% 50%;
-  --primary-foreground: 0 0% 9%;
-  --btn-edge: 0 0% 0%;
+  --primary-foreground: 0 0% 100%;
   --secondary: 240 8% 18%;
   --secondary-foreground: 0 0% 90%;
   --muted: 240 8% 18%;
