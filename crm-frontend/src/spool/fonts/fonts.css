@@ -1,0 +1,56 @@
+/*
+ * Web Fonts from colophon-foundry.org — ported from @trialspark/spool.
+ * Suisse Intl (body/labels) and Relative Pro (headings) are registered as
+ * single families with weight variants so Tailwind font-weight utilities
+ * pick the real font files instead of synthesizing.
+ */
+
+@font-face {
+  font-family: 'Suisse Intl';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src:
+    url('./SuisseIntl-Regular-WebM.woff2') format('woff2'),
+    url('./SuisseIntl-Regular-WebM.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'Suisse Intl';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src:
+    url('./SuisseIntl-Medium-WebM.woff2') format('woff2'),
+    url('./SuisseIntl-Medium-WebM.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'Suisse Intl';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src:
+    url('./SuisseIntl-Bold-WebM.woff2') format('woff2'),
+    url('./SuisseIntl-Bold-WebM.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'Relative Pro';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src:
+    url('./relative-medium-pro.woff2') format('woff2'),
+    url('./relative-medium-pro.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'Relative Pro';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src:
+    url('./relative-bold-pro.woff2') format('woff2'),
+    url('./relative-bold-pro.woff') format('woff');
+}

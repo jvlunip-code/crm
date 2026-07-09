@@ -1,84 +1,84 @@
 export type Customer = {
-  id: number
-  name: string
-  email: string
-  phone: string
-  company: string
-  nif: string | null
-  iban: string | null
-  decisor: string | null
-  segment: string | null
-  status: 'active' | 'inactive'
-  createdAt: string
-}
+  id: number;
+  name: string;
+  email: string;
+  phone: string;
+  company: string;
+  nif: string | null;
+  iban: string | null;
+  decisor: string | null;
+  segment: string | null;
+  status: 'active' | 'inactive';
+  createdAt: string;
+};
 
 export type Service = {
-  id: number
-  name: string
-  description: string
-  price: number
-  billingCycle: 'monthly' | 'yearly'
-  status: 'active' | 'inactive'
-  features: string[]
-  createdAt: string
-}
+  id: number;
+  name: string;
+  description: string;
+  price: number;
+  billingCycle: 'monthly' | 'yearly';
+  status: 'active' | 'inactive';
+  features: string[];
+  createdAt: string;
+};
 
-export type NotificationFlag = 'red' | 'orange' | 'yellow' | 'green'
+export type NotificationFlag = 'red' | 'orange' | 'yellow' | 'green';
 
 export type ServiceEndingMetadata = {
-  schemaVersion: number
-  serviceId: number
-  serviceAcesso: string
-  customerId: number
-  customerName: string
-  serviceDataFim: string
-  flag: NotificationFlag
-  generatedAt: string
-}
+  schemaVersion: number;
+  serviceId: number;
+  serviceAcesso: string;
+  customerId: number;
+  customerName: string;
+  serviceDataFim: string;
+  flag: NotificationFlag;
+  generatedAt: string;
+};
 
 export type ServiceEndingNotification = {
-  id: number
-  type: 'SERVICO'
-  subtype: 'SERVICO_A_TERMINAR'
-  metadata: ServiceEndingMetadata
-  dedupKey: string
-  isRead: boolean
-  readAt: string | null
-  dismissedAt: string | null
-  createdAt: string
-}
+  id: number;
+  type: 'SERVICO';
+  subtype: 'SERVICO_A_TERMINAR';
+  metadata: ServiceEndingMetadata;
+  dedupKey: string;
+  isRead: boolean;
+  readAt: string | null;
+  dismissedAt: string | null;
+  createdAt: string;
+};
 
-export type Notification = ServiceEndingNotification
+export type Notification = ServiceEndingNotification;
 
 export type Event = {
-  id: number
-  action: string
-  entityType: 'customer' | 'service' | 'notification' | 'system'
-  entityId: number
-  description: string
-  performedBy: string
-  createdAt: string
-}
+  id: number;
+  action: string;
+  entityType: 'customer' | 'service' | 'notification' | 'system';
+  entityId: number;
+  description: string;
+  performedBy: string;
+  createdAt: string;
+};
 
 export type NavItem = {
-  title: string
-  url: string
-  icon: React.ComponentType<{ className?: string }>
-  badge?: number
-}
+  title: string;
+  url: string;
+  icon: React.ComponentType<{ className?: string }>;
+  badge?: number;
+};
 
 export type User = {
-  id: number
-  username: string
-  email: string
-  firstName: string
-  lastName: string
-}
+  id: number;
+  username: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+};
 
 /**
  * Moeda — Tipo de moeda utilizada nos serviços
  */
-export type Moeda = 'EUR'
+export type Moeda = 'EUR';
 
 /**
  * Serviço do Cliente — Representa um serviço contratado por um cliente.
@@ -86,65 +86,65 @@ export type Moeda = 'EUR'
  */
 export type CustomerService = {
   /** Identificador único do serviço (gerado automaticamente) */
-  id: number
+  id: number;
   /** Identificador do cliente associado */
-  customerId: number
+  customerId: number;
   /** Identificador do serviço pai (opcional — para sub-serviços) */
-  parentId?: number
+  parentId?: number;
   /** ID de acesso */
-  acesso: string
+  acesso: string;
   /** Tarifário */
-  tarifario: string
+  tarifario: string;
   /** Operadora */
-  operadora: string
+  operadora: string;
   /** Valor do serviço (ex: 20.32) */
-  valor: number
+  valor: number;
   /** Moeda (predefinido: EUR) */
-  moeda: Moeda
+  moeda: Moeda;
   /** Conta */
-  conta: string
+  conta: string;
   /** CVP */
-  cvp: string
+  cvp: string;
   /** Data de fim do serviço */
-  dataFim: string | null
+  dataFim: string | null;
   /** Número de cliente */
-  numClient: string
+  numClient: string;
   /** Número de serviço */
-  numServico: string
+  numServico: string;
   /** Morada */
-  morada: string
+  morada: string;
   /** Observações */
-  observacoes: string
+  observacoes: string;
   /** Data de criação */
-  createdAt: string
-}
+  createdAt: string;
+};
 
 export type CustomerNote = {
-  id: number
-  customerId: number
-  content: string
-  createdBy: string
-  createdAt: string
-  updatedAt?: string
-}
+  id: number;
+  customerId: number;
+  content: string;
+  createdBy: string;
+  createdAt: string;
+  updatedAt?: string;
+};
 
 export type CustomerDocument = {
-  id: number
-  customerId: number
-  name: string
-  type: string
-  size: number
-  url: string
-  uploadedAt: string
-}
+  id: number;
+  customerId: number;
+  name: string;
+  type: string;
+  size: number;
+  url: string;
+  uploadedAt: string;
+};
 
 export type CustomerAddress = {
-  id: number
-  customerId: number
-  street: string
-  postalCode: string
-  district: string
-  municipality: string
-  parish: string
-  country: string
-}
+  id: number;
+  customerId: number;
+  street: string;
+  postalCode: string;
+  district: string;
+  municipality: string;
+  parish: string;
+  country: string;
+};

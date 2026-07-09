@@ -1,40 +1,40 @@
-import { useState } from 'react'
-import { useNavigate, Navigate } from 'react-router-dom'
-import { toast } from 'sonner'
-import { useAuth, useLogin } from '@/hooks/use-auth'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { useState } from 'react';
+import { useNavigate, Navigate } from 'react-router-dom';
+import { toast } from 'sonner';
+import { useAuth, useLogin } from '@/hooks/use-auth';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 export function LoginPage() {
-  const navigate = useNavigate()
-  const { isAuthenticated, isLoading: authLoading } = useAuth()
-  const login = useLogin()
-  const [username, setUsername] = useState('')
-  const [password, setPassword] = useState('')
+  const navigate = useNavigate();
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
+  const login = useLogin();
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
 
   if (authLoading) {
     return (
       <div className="flex h-screen items-center justify-center">
         <p className="text-muted-foreground">A carregar...</p>
       </div>
-    )
+    );
   }
 
   if (isAuthenticated) {
-    return <Navigate to="/" />
+    return <Navigate to="/" />;
   }
 
   function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
+    e.preventDefault();
     login.mutate(
       { username, password },
       {
         onSuccess: () => navigate('/'),
         onError: (error) => toast.error(error.message || 'Credenciais inválidas'),
-      }
-    )
+      },
+    );
   }
 
   return (
@@ -72,5 +72,5 @@ export function LoginPage() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

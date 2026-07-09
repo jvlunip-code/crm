@@ -1,5 +1,5 @@
-import { TrendingDown, TrendingUp } from 'lucide-react'
-import { Badge } from '@/components/ui/badge'
+import { TrendingDown, TrendingUp } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 import {
   Card,
   CardAction,
@@ -7,22 +7,22 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card'
-import { useCustomers } from '@/hooks/use-customers'
-import { useServices } from '@/hooks/use-services'
-import { useUnreadCount } from '@/hooks/use-notifications'
-import { useEvents } from '@/hooks/use-events'
+} from '@/components/ui/card';
+import { useCustomers } from '@/hooks/use-customers';
+import { useServices } from '@/hooks/use-services';
+import { useUnreadCount } from '@/hooks/use-notifications';
+import { useEvents } from '@/hooks/use-events';
 
 export function SectionCards() {
-  const { data: customers } = useCustomers()
-  const { data: services } = useServices()
-  const { data: unreadNotifications = 0 } = useUnreadCount()
-  const { data: events } = useEvents()
+  const { data: customers } = useCustomers();
+  const { data: services } = useServices();
+  const { data: unreadNotifications = 0 } = useUnreadCount();
+  const { data: events } = useEvents();
 
-  const activeCustomers = customers?.filter(c => c.status === 'active').length || 0
-  const totalCustomers = customers?.length || 0
-  const activeServices = services?.filter(s => s.status === 'active').length || 0
-  const recentEvents = events?.slice(0, 30).length || 0
+  const activeCustomers = customers?.filter((c) => c.status === 'active').length || 0;
+  const totalCustomers = customers?.length || 0;
+  const activeServices = services?.filter((s) => s.status === 'active').length || 0;
+  const recentEvents = events?.slice(0, 30).length || 0;
 
   return (
     <div className="*:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card dark:*:data-[slot=card]:bg-card grid grid-cols-1 gap-4 px-4 *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:shadow-xs lg:px-6 @xl/main:grid-cols-2 @5xl/main:grid-cols-4">
@@ -43,9 +43,7 @@ export function SectionCards() {
           <div className="line-clamp-1 flex gap-2 font-medium">
             {activeCustomers} clientes ativos <TrendingUp className="size-4" />
           </div>
-          <div className="text-muted-foreground">
-            Base de clientes em crescimento este mês
-          </div>
+          <div className="text-muted-foreground">Base de clientes em crescimento este mês</div>
         </CardFooter>
       </Card>
       <Card className="@container/card">
@@ -65,9 +63,7 @@ export function SectionCards() {
           <div className="line-clamp-1 flex gap-2 font-medium">
             Adoção de serviços em tendência crescente <TrendingUp className="size-4" />
           </div>
-          <div className="text-muted-foreground">
-            Envolvimento supera as metas
-          </div>
+          <div className="text-muted-foreground">Envolvimento supera as metas</div>
         </CardFooter>
       </Card>
       <Card className="@container/card">
@@ -101,9 +97,7 @@ export function SectionCards() {
               <TrendingUp className="size-4" />
             )}
           </div>
-          <div className="text-muted-foreground">
-            Mantenha-se atualizado com as novidades
-          </div>
+          <div className="text-muted-foreground">Mantenha-se atualizado com as novidades</div>
         </CardFooter>
       </Card>
       <Card className="@container/card">
@@ -123,11 +117,9 @@ export function SectionCards() {
           <div className="line-clamp-1 flex gap-2 font-medium">
             Atividade do sistema saudável <TrendingUp className="size-4" />
           </div>
-          <div className="text-muted-foreground">
-            Últimos 30 dias de atividade
-          </div>
+          <div className="text-muted-foreground">Últimos 30 dias de atividade</div>
         </CardFooter>
       </Card>
     </div>
-  )
+  );
 }

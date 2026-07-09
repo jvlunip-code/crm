@@ -1,0 +1,33 @@
+import React from 'react';
+import { Svg, type SvgProps } from '../svg';
+interface SVGRProps {
+  title?: string;
+  titleId?: string;
+}
+export type GraphicProps = SvgProps & SVGRProps;
+export const IconPhone = React.memo(
+  React.forwardRef(({ title, titleId, ...props }: GraphicProps, ref: React.Ref<SVGSVGElement>) => (
+    <Svg
+      viewBox="0 0 24 24"
+      fill="none"
+      width="24"
+      height="24"
+      ref={ref}
+      aria-labelledby={titleId}
+      {...props}
+    >
+      {title ? <title id={titleId}>{title}</title> : null}
+      <g clipPath="url(#phone_svg__a)">
+        <path
+          d="M9.366 10.682a10.56 10.56 0 003.952 3.952l.884-1.238a1 1 0 011.294-.296 11.4 11.4 0 004.583 1.364 1 1 0 01.921.997v4.462a1 1 0 01-.898.995A16 16 0 0118.5 21C9.94 21 3 14.06 3 5.5q0-.807.082-1.602A1 1 0 014.077 3h4.462a1 1 0 01.997.921A11.4 11.4 0 0010.9 8.504a1 1 0 01-.296 1.294zm-2.522-.657 1.9-1.357A13.4 13.4 0 017.647 5H5.01q-.009.25-.009.5C5 12.956 11.044 19 18.5 19q.25 0 .5-.01v-2.637a13.4 13.4 0 01-3.668-1.097l-1.357 1.9a12.5 12.5 0 01-1.588-.75l-.058-.033a12.56 12.56 0 01-4.702-4.702l-.033-.058a12.4 12.4 0 01-.75-1.588"
+          fill="currentColor"
+        />
+      </g>
+      <defs>
+        <clipPath id="phone_svg__a">
+          <rect width={24} height={24} fill="white" />
+        </clipPath>
+      </defs>
+    </Svg>
+  )),
+);

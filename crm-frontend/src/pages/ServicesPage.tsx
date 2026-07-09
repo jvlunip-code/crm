@@ -1,4 +1,4 @@
-import * as React from 'react'
+import * as React from 'react';
 import {
   flexRender,
   getCoreRowModel,
@@ -9,7 +9,7 @@ import {
   type ColumnDef,
   type ColumnFiltersState,
   type SortingState,
-} from '@tanstack/react-table'
+} from '@tanstack/react-table';
 import {
   ChevronLeft,
   ChevronRight,
@@ -18,32 +18,26 @@ import {
   MoreVertical,
   Plus,
   Search,
-} from 'lucide-react'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
+} from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+} from '@/components/ui/dropdown-menu';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
+} from '@/components/ui/select';
 import {
   Table,
   TableBody,
@@ -51,25 +45,21 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
-import { useServices } from '@/hooks/use-services'
-import type { Service } from '@/types'
+} from '@/components/ui/table';
+import { useServices } from '@/hooks/use-services';
+import type { Service } from '@/types';
 
 const columns: ColumnDef<Service>[] = [
   {
     accessorKey: 'name',
     header: 'Nome do Serviço',
-    cell: ({ row }) => (
-      <div className="font-medium">{row.original.name}</div>
-    ),
+    cell: ({ row }) => <div className="font-medium">{row.original.name}</div>,
   },
   {
     accessorKey: 'description',
     header: 'Descrição',
     cell: ({ row }) => (
-      <div className="text-muted-foreground max-w-[300px] truncate">
-        {row.original.description}
-      </div>
+      <div className="text-muted-foreground max-w-[300px] truncate">{row.original.description}</div>
     ),
   },
   {
@@ -85,9 +75,7 @@ const columns: ColumnDef<Service>[] = [
     accessorKey: 'status',
     header: 'Estado',
     cell: ({ row }) => (
-      <Badge
-        variant={row.original.status === 'active' ? 'default' : 'secondary'}
-      >
+      <Badge variant={row.original.status === 'active' ? 'default' : 'secondary'}>
         {row.original.status === 'active' ? 'Ativo' : 'Inativo'}
       </Badge>
     ),
@@ -124,18 +112,16 @@ const columns: ColumnDef<Service>[] = [
       </DropdownMenu>
     ),
   },
-]
+];
 
 export function ServicesPage() {
-  const { data: services, isLoading } = useServices()
-  const [sorting, setSorting] = React.useState<SortingState>([])
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-    []
-  )
+  const { data: services, isLoading } = useServices();
+  const [sorting, setSorting] = React.useState<SortingState>([]);
+  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
   const [pagination, setPagination] = React.useState({
     pageIndex: 0,
     pageSize: 10,
-  })
+  });
 
   const table = useReactTable({
     data: services || [],
@@ -152,14 +138,14 @@ export function ServicesPage() {
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
-  })
+  });
 
   if (isLoading) {
     return (
       <div className="flex flex-1 items-center justify-center">
         <div className="text-muted-foreground">A carregar serviços...</div>
       </div>
-    )
+    );
   }
 
   return (
@@ -169,9 +155,7 @@ export function ServicesPage() {
           <div className="flex items-center justify-between">
             <div>
               <CardTitle>Serviços</CardTitle>
-              <CardDescription>
-                Gerir os seus serviços
-              </CardDescription>
+              <CardDescription>Gerir os seus serviços</CardDescription>
             </div>
             <Button size="sm">
               <Plus className="mr-2 h-4 w-4" />
@@ -185,12 +169,8 @@ export function ServicesPage() {
               <Search className="text-muted-foreground absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2" />
               <Input
                 placeholder="Pesquisar serviços..."
-                value={
-                  (table.getColumn('name')?.getFilterValue() as string) ?? ''
-                }
-                onChange={(event) =>
-                  table.getColumn('name')?.setFilterValue(event.target.value)
-                }
+                value={(table.getColumn('name')?.getFilterValue() as string) ?? ''}
+                onChange={(event) => table.getColumn('name')?.setFilterValue(event.target.value)}
                 className="pl-9"
               />
             </div>
@@ -205,10 +185,7 @@ export function ServicesPage() {
                       <TableHead key={header.id}>
                         {header.isPlaceholder
                           ? null
-                          : flexRender(
-                              header.column.columnDef.header,
-                              header.getContext()
-                            )}
+                          : flexRender(header.column.columnDef.header, header.getContext())}
                       </TableHead>
                     ))}
                   </TableRow>
@@ -220,20 +197,14 @@ export function ServicesPage() {
                     <TableRow key={row.id}>
                       {row.getVisibleCells().map((cell) => (
                         <TableCell key={cell.id}>
-                          {flexRender(
-                            cell.column.columnDef.cell,
-                            cell.getContext()
-                          )}
+                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
                         </TableCell>
                       ))}
                     </TableRow>
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell
-                      colSpan={columns.length}
-                      className="h-24 text-center"
-                    >
+                    <TableCell colSpan={columns.length} className="h-24 text-center">
                       Nenhum serviço encontrado.
                     </TableCell>
                   </TableRow>
@@ -254,13 +225,11 @@ export function ServicesPage() {
                 <Select
                   value={`${table.getState().pagination.pageSize}`}
                   onValueChange={(value) => {
-                    table.setPageSize(Number(value))
+                    table.setPageSize(Number(value));
                   }}
                 >
                   <SelectTrigger size="sm" className="w-20" id="rows-per-page">
-                    <SelectValue
-                      placeholder={table.getState().pagination.pageSize}
-                    />
+                    <SelectValue placeholder={table.getState().pagination.pageSize} />
                   </SelectTrigger>
                   <SelectContent side="top">
                     {[10, 20, 30, 40, 50].map((pageSize) => (
@@ -291,8 +260,7 @@ export function ServicesPage() {
                   <ChevronLeft className="h-4 w-4" />
                 </Button>
                 <span className="text-sm">
-                  Página {table.getState().pagination.pageIndex + 1} de{' '}
-                  {table.getPageCount()}
+                  Página {table.getState().pagination.pageIndex + 1} de {table.getPageCount()}
                 </span>
                 <Button
                   variant="outline"
@@ -318,5 +286,5 @@ export function ServicesPage() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

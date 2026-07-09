@@ -1,63 +1,57 @@
-import * as React from 'react'
-import { Plus, MoreVertical, User } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
+import * as React from 'react';
+import { Plus, MoreVertical, User } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import { Textarea } from '@/components/ui/textarea'
-import { Separator } from '@/components/ui/separator'
-import { useCreateNote, useDeleteNote } from '@/hooks/use-customer-notes'
-import type { CustomerNote } from '@/types'
+} from '@/components/ui/dropdown-menu';
+import { Textarea } from '@/components/ui/textarea';
+import { Separator } from '@/components/ui/separator';
+import { useCreateNote, useDeleteNote } from '@/hooks/use-customer-notes';
+import type { CustomerNote } from '@/types';
 
 interface CustomerNotesTabProps {
-  customerId: number
-  notes: CustomerNote[]
-  isLoading?: boolean
+  customerId: number;
+  notes: CustomerNote[];
+  isLoading?: boolean;
 }
 
 export function CustomerNotesTab({ customerId, notes, isLoading }: CustomerNotesTabProps) {
-  const [newNote, setNewNote] = React.useState('')
-  const [isAdding, setIsAdding] = React.useState(false)
-  const createNote = useCreateNote()
-  const deleteNote = useDeleteNote()
+  const [newNote, setNewNote] = React.useState('');
+  const [isAdding, setIsAdding] = React.useState(false);
+  const createNote = useCreateNote();
+  const deleteNote = useDeleteNote();
 
   const handleAddNote = async () => {
-    if (!newNote.trim()) return
+    if (!newNote.trim()) return;
 
     await createNote.mutateAsync({
       customerId,
       content: newNote.trim(),
       createdBy: 'Admin',
-    })
+    });
 
-    setNewNote('')
-    setIsAdding(false)
-  }
+    setNewNote('');
+    setIsAdding(false);
+  };
 
   const handleDeleteNote = async (noteId: number) => {
-    await deleteNote.mutateAsync(noteId)
-  }
+    await deleteNote.mutateAsync(noteId);
+  };
 
   const formatDate = (dateString: string) => {
-    const date = new Date(dateString)
+    const date = new Date(dateString);
     return date.toLocaleDateString('pt-PT', {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
       hour: '2-digit',
       minute: '2-digit',
-    })
-  }
+    });
+  };
 
   if (isLoading) {
     return (
@@ -66,7 +60,7 @@ export function CustomerNotesTab({ customerId, notes, isLoading }: CustomerNotes
           <p className="text-muted-foreground">A carregar notas...</p>
         </CardContent>
       </Card>
-    )
+    );
   }
 
   return (
@@ -75,9 +69,7 @@ export function CustomerNotesTab({ customerId, notes, isLoading }: CustomerNotes
         <div className="flex items-center justify-between">
           <div>
             <CardTitle>Notas</CardTitle>
-            <CardDescription>
-              Notas internas e comentários sobre este cliente
-            </CardDescription>
+            <CardDescription>Notas internas e comentários sobre este cliente</CardDescription>
           </div>
           {!isAdding && (
             <Button size="sm" onClick={() => setIsAdding(true)}>
@@ -102,8 +94,8 @@ export function CustomerNotesTab({ customerId, notes, isLoading }: CustomerNotes
                 variant="outline"
                 size="sm"
                 onClick={() => {
-                  setIsAdding(false)
-                  setNewNote('')
+                  setIsAdding(false);
+                  setNewNote('');
                 }}
               >
                 Cancelar
@@ -122,12 +114,7 @@ export function CustomerNotesTab({ customerId, notes, isLoading }: CustomerNotes
         {notes.length === 0 && !isAdding ? (
           <div className="flex h-32 flex-col items-center justify-center rounded-lg border border-dashed">
             <p className="text-muted-foreground text-sm">Sem notas</p>
-            <Button
-              variant="link"
-              size="sm"
-              className="mt-2"
-              onClick={() => setIsAdding(true)}
-            >
+            <Button variant="link" size="sm" className="mt-2" onClick={() => setIsAdding(true)}>
               Adicionar primeira nota
             </Button>
           </div>
@@ -178,5 +165,5 @@ export function CustomerNotesTab({ customerId, notes, isLoading }: CustomerNotes
         )}
       </CardContent>
     </Card>
-  )
+  );
 }

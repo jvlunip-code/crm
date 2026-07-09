@@ -1,0 +1,33 @@
+import React from 'react';
+import { Svg, type SvgProps } from '../svg';
+interface SVGRProps {
+  title?: string;
+  titleId?: string;
+}
+export type GraphicProps = SvgProps & SVGRProps;
+export const IconFileTransfer = React.memo(
+  React.forwardRef(({ title, titleId, ...props }: GraphicProps, ref: React.Ref<SVGSVGElement>) => (
+    <Svg
+      viewBox="0 0 24 24"
+      fill="none"
+      width="24"
+      height="24"
+      ref={ref}
+      aria-labelledby={titleId}
+      {...props}
+    >
+      {title ? <title id={titleId}>{title}</title> : null}
+      <g clipPath="url(#file-transfer_svg__a)">
+        <path
+          d="M15 4H5v16h14V8h-4zM3 2.992C3 2.444 3.447 2 3.999 2H16l5 5v13.993A1 1 0 0120.007 22H3.993A1 1 0 013 21.008zM12 11V8l4 4-4 4v-3H8v-2z"
+          fill="currentColor"
+        />
+      </g>
+      <defs>
+        <clipPath id="file-transfer_svg__a">
+          <rect width={24} height={24} fill="white" />
+        </clipPath>
+      </defs>
+    </Svg>
+  )),
+);

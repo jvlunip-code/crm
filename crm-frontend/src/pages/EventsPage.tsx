@@ -1,4 +1,4 @@
-import * as React from 'react'
+import * as React from 'react';
 import {
   flexRender,
   getCoreRowModel,
@@ -9,7 +9,7 @@ import {
   type ColumnDef,
   type ColumnFiltersState,
   type SortingState,
-} from '@tanstack/react-table'
+} from '@tanstack/react-table';
 import {
   ChevronLeft,
   ChevronRight,
@@ -23,25 +23,19 @@ import {
   Package,
   Settings,
   Activity,
-} from 'lucide-react'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+} from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
+} from '@/components/ui/select';
 import {
   Table,
   TableBody,
@@ -49,9 +43,9 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
-import { useEvents } from '@/hooks/use-events'
-import type { Event } from '@/types'
+} from '@/components/ui/table';
+import { useEvents } from '@/hooks/use-events';
+import type { Event } from '@/types';
 
 const actionIcons: Record<string, React.ElementType> = {
   create: UserPlus,
@@ -61,7 +55,7 @@ const actionIcons: Record<string, React.ElementType> = {
   deactivate: UserMinus,
   config: Settings,
   default: Activity,
-}
+};
 
 const actionColors: Record<string, string> = {
   create: 'text-green-500',
@@ -71,16 +65,16 @@ const actionColors: Record<string, string> = {
   deactivate: 'text-yellow-500',
   config: 'text-purple-500',
   default: 'text-muted-foreground',
-}
+};
 
 const columns: ColumnDef<Event>[] = [
   {
     accessorKey: 'action',
     header: 'Ação',
     cell: ({ row }) => {
-      const action = row.original.action
-      const Icon = actionIcons[action] || actionIcons.default
-      const color = actionColors[action] || actionColors.default
+      const action = row.original.action;
+      const Icon = actionIcons[action] || actionIcons.default;
+      const color = actionColors[action] || actionColors.default;
       return (
         <div className="flex items-center gap-2">
           <Icon className={`h-4 w-4 ${color}`} />
@@ -88,7 +82,7 @@ const columns: ColumnDef<Event>[] = [
             {action}
           </Badge>
         </div>
-      )
+      );
     },
   },
   {
@@ -104,24 +98,18 @@ const columns: ColumnDef<Event>[] = [
     accessorKey: 'entityId',
     header: 'ID da Entidade',
     cell: ({ row }) => (
-      <div className="text-muted-foreground font-mono text-sm">
-        #{row.original.entityId}
-      </div>
+      <div className="text-muted-foreground font-mono text-sm">#{row.original.entityId}</div>
     ),
   },
   {
     accessorKey: 'description',
     header: 'Descrição',
-    cell: ({ row }) => (
-      <div className="max-w-[400px] truncate">{row.original.description}</div>
-    ),
+    cell: ({ row }) => <div className="max-w-[400px] truncate">{row.original.description}</div>,
   },
   {
     accessorKey: 'performedBy',
     header: 'Executado Por',
-    cell: ({ row }) => (
-      <div className="font-medium">{row.original.performedBy}</div>
-    ),
+    cell: ({ row }) => <div className="font-medium">{row.original.performedBy}</div>,
   },
   {
     accessorKey: 'createdAt',
@@ -132,25 +120,23 @@ const columns: ColumnDef<Event>[] = [
       </div>
     ),
   },
-]
+];
 
 export function EventsPage() {
-  const { data: events, isLoading } = useEvents()
-  const [sorting, setSorting] = React.useState<SortingState>([])
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-    []
-  )
+  const { data: events, isLoading } = useEvents();
+  const [sorting, setSorting] = React.useState<SortingState>([]);
+  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
   const [pagination, setPagination] = React.useState({
     pageIndex: 0,
     pageSize: 10,
-  })
-  const [entityTypeFilter, setEntityTypeFilter] = React.useState<string>('all')
+  });
+  const [entityTypeFilter, setEntityTypeFilter] = React.useState<string>('all');
 
   const filteredEvents = React.useMemo(() => {
-    if (!events) return []
-    if (entityTypeFilter === 'all') return events
-    return events.filter((e) => e.entityType === entityTypeFilter)
-  }, [events, entityTypeFilter])
+    if (!events) return [];
+    if (entityTypeFilter === 'all') return events;
+    return events.filter((e) => e.entityType === entityTypeFilter);
+  }, [events, entityTypeFilter]);
 
   const table = useReactTable({
     data: filteredEvents,
@@ -167,14 +153,14 @@ export function EventsPage() {
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
-  })
+  });
 
   if (isLoading) {
     return (
       <div className="flex flex-1 items-center justify-center">
         <div className="text-muted-foreground">A carregar eventos...</div>
       </div>
-    )
+    );
   }
 
   return (
@@ -187,9 +173,7 @@ export function EventsPage() {
                 <Activity className="h-5 w-5" />
                 Eventos do Sistema
               </CardTitle>
-              <CardDescription>
-                Registar todas as ações realizadas no sistema
-              </CardDescription>
+              <CardDescription>Registar todas as ações realizadas no sistema</CardDescription>
             </div>
           </div>
         </CardHeader>
@@ -199,9 +183,7 @@ export function EventsPage() {
               <Search className="text-muted-foreground absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2" />
               <Input
                 placeholder="Pesquisar eventos..."
-                value={
-                  (table.getColumn('description')?.getFilterValue() as string) ?? ''
-                }
+                value={(table.getColumn('description')?.getFilterValue() as string) ?? ''}
                 onChange={(event) =>
                   table.getColumn('description')?.setFilterValue(event.target.value)
                 }
@@ -230,10 +212,7 @@ export function EventsPage() {
                       <TableHead key={header.id}>
                         {header.isPlaceholder
                           ? null
-                          : flexRender(
-                              header.column.columnDef.header,
-                              header.getContext()
-                            )}
+                          : flexRender(header.column.columnDef.header, header.getContext())}
                       </TableHead>
                     ))}
                   </TableRow>
@@ -245,20 +224,14 @@ export function EventsPage() {
                     <TableRow key={row.id}>
                       {row.getVisibleCells().map((cell) => (
                         <TableCell key={cell.id}>
-                          {flexRender(
-                            cell.column.columnDef.cell,
-                            cell.getContext()
-                          )}
+                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
                         </TableCell>
                       ))}
                     </TableRow>
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell
-                      colSpan={columns.length}
-                      className="h-24 text-center"
-                    >
+                    <TableCell colSpan={columns.length} className="h-24 text-center">
                       Nenhum evento encontrado.
                     </TableCell>
                   </TableRow>
@@ -279,13 +252,11 @@ export function EventsPage() {
                 <Select
                   value={`${table.getState().pagination.pageSize}`}
                   onValueChange={(value) => {
-                    table.setPageSize(Number(value))
+                    table.setPageSize(Number(value));
                   }}
                 >
                   <SelectTrigger size="sm" className="w-20" id="rows-per-page">
-                    <SelectValue
-                      placeholder={table.getState().pagination.pageSize}
-                    />
+                    <SelectValue placeholder={table.getState().pagination.pageSize} />
                   </SelectTrigger>
                   <SelectContent side="top">
                     {[10, 20, 30, 40, 50].map((pageSize) => (
@@ -316,8 +287,7 @@ export function EventsPage() {
                   <ChevronLeft className="h-4 w-4" />
                 </Button>
                 <span className="text-sm">
-                  Página {table.getState().pagination.pageIndex + 1} de{' '}
-                  {table.getPageCount()}
+                  Página {table.getState().pagination.pageIndex + 1} de {table.getPageCount()}
                 </span>
                 <Button
                   variant="outline"
@@ -343,5 +313,5 @@ export function EventsPage() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

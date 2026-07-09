@@ -1,5 +1,5 @@
-import * as React from 'react'
-import { useNavigate } from 'react-router-dom'
+import * as React from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   flexRender,
   getCoreRowModel,
@@ -8,7 +8,7 @@ import {
   useReactTable,
   type ColumnDef,
   type SortingState,
-} from '@tanstack/react-table'
+} from '@tanstack/react-table';
 import {
   ChevronLeft,
   ChevronRight,
@@ -17,32 +17,26 @@ import {
   MoreVertical,
   Plus,
   Search,
-} from 'lucide-react'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
+} from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+} from '@/components/ui/dropdown-menu';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
+} from '@/components/ui/select';
 import {
   Table,
   TableBody,
@@ -50,20 +44,20 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
-import { useCustomers, useDeleteCustomer } from '@/hooks/use-customers'
-import { CustomerDialog } from '@/components/customer/CustomerDialog'
-import type { Customer } from '@/types'
-import { toast } from 'sonner'
+} from '@/components/ui/table';
+import { useCustomers, useDeleteCustomer } from '@/hooks/use-customers';
+import { CustomerDialog } from '@/components/customer/CustomerDialog';
+import type { Customer } from '@/types';
+import { toast } from 'sonner';
 
-const coreRowModel = getCoreRowModel()
-const paginationRowModel = getPaginationRowModel()
-const sortedRowModel = getSortedRowModel()
+const coreRowModel = getCoreRowModel();
+const paginationRowModel = getPaginationRowModel();
+const sortedRowModel = getSortedRowModel();
 
 function createColumns(
   navigate: ReturnType<typeof useNavigate>,
   onEdit: (customer: Customer) => void,
-  onDelete: (id: number) => void
+  onDelete: (id: number) => void,
 ): ColumnDef<Customer>[] {
   return [
     {
@@ -81,24 +75,18 @@ function createColumns(
     {
       accessorKey: 'email',
       header: 'Email',
-      cell: ({ row }) => (
-        <div className="text-muted-foreground">{row.original.email}</div>
-      ),
+      cell: ({ row }) => <div className="text-muted-foreground">{row.original.email}</div>,
     },
     {
       accessorKey: 'phone',
       header: 'Telefone',
-      cell: ({ row }) => (
-        <div className="text-muted-foreground">{row.original.phone}</div>
-      ),
+      cell: ({ row }) => <div className="text-muted-foreground">{row.original.phone}</div>,
     },
     {
       accessorKey: 'status',
       header: 'Estado',
       cell: ({ row }) => (
-        <Badge
-          variant={row.original.status === 'active' ? 'default' : 'secondary'}
-        >
+        <Badge variant={row.original.status === 'active' ? 'default' : 'secondary'}>
           {row.original.status === 'active' ? 'Ativo' : 'Inativo'}
         </Badge>
       ),
@@ -132,56 +120,61 @@ function createColumns(
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => onEdit(row.original)}>Editar</DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem variant="destructive" onClick={() => onDelete(row.original.id)}>Eliminar</DropdownMenuItem>
+            <DropdownMenuItem variant="destructive" onClick={() => onDelete(row.original.id)}>
+              Eliminar
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       ),
     },
-  ]
+  ];
 }
 
 export function CustomersPage() {
-  const navigate = useNavigate()
-  const [searchInput, setSearchInput] = React.useState('')
-  const [submittedSearch, setSubmittedSearch] = React.useState('')
-  const { data: customers, isLoading } = useCustomers(submittedSearch)
-  const deleteCustomer = useDeleteCustomer()
-  const [sorting, setSorting] = React.useState<SortingState>([])
+  const navigate = useNavigate();
+  const [searchInput, setSearchInput] = React.useState('');
+  const [submittedSearch, setSubmittedSearch] = React.useState('');
+  const { data: customers, isLoading } = useCustomers(submittedSearch);
+  const deleteCustomer = useDeleteCustomer();
+  const [sorting, setSorting] = React.useState<SortingState>([]);
   const [pagination, setPagination] = React.useState({
     pageIndex: 0,
     pageSize: 10,
-  })
-  const [dialogOpen, setDialogOpen] = React.useState(false)
-  const [editingCustomer, setEditingCustomer] = React.useState<Customer | undefined>()
+  });
+  const [dialogOpen, setDialogOpen] = React.useState(false);
+  const [editingCustomer, setEditingCustomer] = React.useState<Customer | undefined>();
 
-  const handleSubmitSearch = () => setSubmittedSearch(searchInput.trim())
+  const handleSubmitSearch = () => setSubmittedSearch(searchInput.trim());
   const handleClearSearch = () => {
-    setSearchInput('')
-    setSubmittedSearch('')
-  }
+    setSearchInput('');
+    setSubmittedSearch('');
+  };
 
   const handleCreate = () => {
-    setEditingCustomer(undefined)
-    setDialogOpen(true)
-  }
+    setEditingCustomer(undefined);
+    setDialogOpen(true);
+  };
 
   const handleEdit = (customer: Customer) => {
-    setEditingCustomer(customer)
-    setDialogOpen(true)
-  }
+    setEditingCustomer(customer);
+    setDialogOpen(true);
+  };
 
   const handleDelete = async (id: number) => {
     try {
-      await deleteCustomer.mutateAsync(id)
-      toast.success('Cliente eliminado com sucesso')
+      await deleteCustomer.mutateAsync(id);
+      toast.success('Cliente eliminado com sucesso');
     } catch {
-      toast.error('Erro ao eliminar cliente')
+      toast.error('Erro ao eliminar cliente');
     }
-  }
+  };
 
-  const columns = React.useMemo(() => createColumns(navigate, handleEdit, handleDelete), [navigate])
+  const columns = React.useMemo(
+    () => createColumns(navigate, handleEdit, handleDelete),
+    [navigate],
+  );
 
-  const data = React.useMemo(() => customers ?? [], [customers])
+  const data = React.useMemo(() => customers ?? [], [customers]);
 
   const table = useReactTable({
     data,
@@ -195,14 +188,14 @@ export function CustomersPage() {
     getCoreRowModel: coreRowModel,
     getPaginationRowModel: paginationRowModel,
     getSortedRowModel: sortedRowModel,
-  })
+  });
 
   if (isLoading) {
     return (
       <div className="flex flex-1 items-center justify-center">
         <div className="text-muted-foreground">A carregar clientes...</div>
       </div>
-    )
+    );
   }
 
   return (
@@ -212,9 +205,7 @@ export function CustomersPage() {
           <div className="flex items-center justify-between">
             <div>
               <CardTitle>Clientes</CardTitle>
-              <CardDescription>
-                Gerir a base de dados de clientes
-              </CardDescription>
+              <CardDescription>Gerir a base de dados de clientes</CardDescription>
             </div>
             <Button size="sm" onClick={handleCreate}>
               <Plus className="mr-2 h-4 w-4" />
@@ -225,8 +216,8 @@ export function CustomersPage() {
         <CardContent>
           <form
             onSubmit={(event) => {
-              event.preventDefault()
-              handleSubmitSearch()
+              event.preventDefault();
+              handleSubmitSearch();
             }}
             className="mb-4 flex items-center gap-2"
           >
@@ -243,12 +234,7 @@ export function CustomersPage() {
               Pesquisar
             </Button>
             {submittedSearch && (
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={handleClearSearch}
-              >
+              <Button type="button" variant="outline" size="sm" onClick={handleClearSearch}>
                 Limpar
               </Button>
             )}
@@ -263,10 +249,7 @@ export function CustomersPage() {
                       <TableHead key={header.id}>
                         {header.isPlaceholder
                           ? null
-                          : flexRender(
-                              header.column.columnDef.header,
-                              header.getContext()
-                            )}
+                          : flexRender(header.column.columnDef.header, header.getContext())}
                       </TableHead>
                     ))}
                   </TableRow>
@@ -278,20 +261,14 @@ export function CustomersPage() {
                     <TableRow key={row.id}>
                       {row.getVisibleCells().map((cell) => (
                         <TableCell key={cell.id}>
-                          {flexRender(
-                            cell.column.columnDef.cell,
-                            cell.getContext()
-                          )}
+                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
                         </TableCell>
                       ))}
                     </TableRow>
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell
-                      colSpan={columns.length}
-                      className="h-24 text-center"
-                    >
+                    <TableCell colSpan={columns.length} className="h-24 text-center">
                       Nenhum cliente encontrado.
                     </TableCell>
                   </TableRow>
@@ -312,13 +289,11 @@ export function CustomersPage() {
                 <Select
                   value={`${table.getState().pagination.pageSize}`}
                   onValueChange={(value) => {
-                    table.setPageSize(Number(value))
+                    table.setPageSize(Number(value));
                   }}
                 >
                   <SelectTrigger size="sm" className="w-20" id="rows-per-page">
-                    <SelectValue
-                      placeholder={table.getState().pagination.pageSize}
-                    />
+                    <SelectValue placeholder={table.getState().pagination.pageSize} />
                   </SelectTrigger>
                   <SelectContent side="top">
                     {[10, 20, 30, 40, 50].map((pageSize) => (
@@ -349,8 +324,7 @@ export function CustomersPage() {
                   <ChevronLeft className="h-4 w-4" />
                 </Button>
                 <span className="text-sm">
-                  Página {table.getState().pagination.pageIndex + 1} de{' '}
-                  {table.getPageCount()}
+                  Página {table.getState().pagination.pageIndex + 1} de {table.getPageCount()}
                 </span>
                 <Button
                   variant="outline"
@@ -376,11 +350,7 @@ export function CustomersPage() {
         </CardContent>
       </Card>
 
-      <CustomerDialog
-        customer={editingCustomer}
-        open={dialogOpen}
-        onOpenChange={setDialogOpen}
-      />
+      <CustomerDialog customer={editingCustomer} open={dialogOpen} onOpenChange={setDialogOpen} />
     </div>
-  )
+  );
 }

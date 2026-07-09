@@ -1,39 +1,35 @@
-import { Link, useNavigate } from 'react-router-dom'
-import { Bell, X } from 'lucide-react'
+import { Link, useNavigate } from 'react-router-dom';
+import { Bell, X } from 'lucide-react';
 
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover'
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import {
   useDismissNotification,
   useMarkAllAsRead,
   useMarkAsRead,
   useNotifications,
   useUnreadCount,
-} from '@/hooks/use-notifications'
-import { flagDotClass } from '@/lib/notifications/flag-style'
-import { renderNotification } from '@/lib/notifications/renderers'
-import { formatRelativeTime } from '@/lib/utils'
-import type { Notification } from '@/types'
+} from '@/hooks/use-notifications';
+import { flagDotClass } from '@/lib/notifications/flag-style';
+import { renderNotification } from '@/lib/notifications/renderers';
+import { formatRelativeTime } from '@/lib/utils';
+import type { Notification } from '@/types';
 
 export function NotificationsBell() {
-  const navigate = useNavigate()
-  const { data: unreadCount = 0 } = useUnreadCount()
-  const { data: recent } = useNotifications({ isRead: false, pageSize: 8 })
-  const markAsRead = useMarkAsRead()
-  const markAllRead = useMarkAllAsRead()
-  const dismiss = useDismissNotification()
+  const navigate = useNavigate();
+  const { data: unreadCount = 0 } = useUnreadCount();
+  const { data: recent } = useNotifications({ isRead: false, pageSize: 8 });
+  const markAsRead = useMarkAsRead();
+  const markAllRead = useMarkAllAsRead();
+  const dismiss = useDismissNotification();
 
-  const rows = recent?.results ?? []
+  const rows = recent?.results ?? [];
 
   const handleRowClick = (n: Notification) => {
-    if (!n.isRead) markAsRead.mutate(n.id)
-    navigate(renderNotification(n).href)
-  }
+    if (!n.isRead) markAsRead.mutate(n.id);
+    navigate(renderNotification(n).href);
+  };
 
   return (
     <Popover>
@@ -71,25 +67,27 @@ export function NotificationsBell() {
               Sem notificações por ler.
             </div>
           ) : (
-            rows.map(n => {
-              const r = renderNotification(n)
+            rows.map((n) => {
+              const r = renderNotification(n);
               return (
                 <div
                   key={n.id}
                   role="button"
                   tabIndex={0}
                   onClick={() => handleRowClick(n)}
-                  onKeyDown={e => {
+                  onKeyDown={(e) => {
                     if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault()
-                      handleRowClick(n)
+                      e.preventDefault();
+                      handleRowClick(n);
                     }
                   }}
                   className={`group flex cursor-pointer items-start gap-2 border-b px-3 py-2 text-sm last:border-b-0 hover:bg-muted/50 ${
                     n.isRead ? '' : 'bg-muted/20'
                   }`}
                 >
-                  <span className={`mt-1.5 inline-block h-2 w-2 shrink-0 rounded-full ${flagDotClass[r.flag]}`} />
+                  <span
+                    className={`mt-1.5 inline-block h-2 w-2 shrink-0 rounded-full ${flagDotClass[r.flag]}`}
+                  />
                   <div className="min-w-0 flex-1">
                     <div className={`truncate ${n.isRead ? 'font-normal' : 'font-medium'}`}>
                       {r.title}
@@ -103,29 +101,26 @@ export function NotificationsBell() {
                     variant="ghost"
                     size="icon"
                     className="h-6 w-6 opacity-0 group-hover:opacity-100"
-                    onClick={e => {
-                      e.stopPropagation()
-                      dismiss.mutate(n.id)
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      dismiss.mutate(n.id);
                     }}
                   >
                     <X className="h-3.5 w-3.5" />
                     <span className="sr-only">Ignorar</span>
                   </Button>
                 </div>
-              )
+              );
             })
           )}
         </div>
 
         <div className="border-t px-3 py-2">
-          <Link
-            to="/notifications"
-            className="text-sm text-primary hover:underline"
-          >
+          <Link to="/notifications" className="text-sm text-primary hover:underline">
             Ver todas
           </Link>
         </div>
       </PopoverContent>
     </Popover>
-  )
+  );
 }
