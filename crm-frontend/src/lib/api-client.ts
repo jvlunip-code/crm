@@ -161,8 +161,39 @@ function flattenServices(
   return result;
 }
 
+export type CustomersPage = {
+  items: Customer[];
+  count: number;
+  hasNext: boolean;
+  hasPrevious: boolean;
+};
+
+export type CustomersPageParams = {
+  search?: string;
+  ordering?: string;
+  page?: number;
+};
+
 // Customers API
 export const customersApi = {
+  // Single server-side page (10 by default) — use for list screens.
+  getPage: async (params: CustomersPageParams = {}): Promise<CustomersPage> => {
+    const qs = new URLSearchParams();
+    const trimmed = params.search?.trim();
+    if (trimmed) qs.set('search', trimmed);
+    if (params.ordering) qs.set('ordering', params.ordering);
+    if (params.page && params.page > 1) qs.set('page', String(params.page));
+    const suffix = qs.size > 0 ? `?${qs.toString()}` : '';
+    const response = await fetchWithAuth(`/customers/${suffix}`);
+    const data: PaginatedResponse<BackendCustomer> = await response.json();
+    return {
+      items: data.results.map((c) => toFrontend<Customer>(c)),
+      count: data.count,
+      hasNext: data.next !== null,
+      hasPrevious: data.previous !== null,
+    };
+  },
+
   getAll: async (search?: string): Promise<Customer[]> => {
     // Fetch all pages
     let allCustomers: Customer[] = [];

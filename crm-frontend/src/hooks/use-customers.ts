@@ -1,11 +1,19 @@
 import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query';
-import { customersApi } from '@/lib/api-client';
+import { customersApi, type CustomersPageParams } from '@/lib/api-client';
 import type { Customer } from '@/types';
 
 export function useCustomers(search?: string) {
   return useQuery({
     queryKey: ['customers', { search: search ?? '' }],
     queryFn: () => customersApi.getAll(search),
+    placeholderData: keepPreviousData,
+  });
+}
+
+export function useCustomersPage(params: CustomersPageParams) {
+  return useQuery({
+    queryKey: ['customers', 'page', params],
+    queryFn: () => customersApi.getPage(params),
     placeholderData: keepPreviousData,
   });
 }

@@ -1,15 +1,27 @@
-from rest_framework import viewsets, status
+from rest_framework import filters, viewsets, status
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from .models import Customer, CustomerAddress
 from .serializers import CustomerSerializer, CustomerAddressSerializer
 
 
+class CustomerPagination(PageNumberPagination):
+    page_size = 10
+    page_size_query_param = 'page_size'
+    max_page_size = 100
+
+
 class CustomerViewSet(viewsets.ModelViewSet):
     queryset = Customer.objects.all()
     serializer_class = CustomerSerializer
+    pagination_class = CustomerPagination
+    filter_backends = [filters.OrderingFilter]
+    ordering_fields = ['name', 'company', 'status', 'created_at']
 
     def get_queryset(self):
+        # Without an explicit ?ordering=, search results keep their rank order
+        # (OrderingFilter only reorders when the param is present).
         return Customer.objects.search(self.request.query_params.get('search', ''))
 
 
