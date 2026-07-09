@@ -1,4 +1,4 @@
-import { useLocation, Link, useNavigate } from 'react-router-dom'
+import { useLocation, Link, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard,
   Users,
@@ -11,8 +11,8 @@ import {
   CreditCard,
   User,
   CircleDot,
-} from 'lucide-react'
-import { useAuth, useLogout } from '@/hooks/use-auth'
+} from 'lucide-react';
+import { useAuth, useLogout } from '@/hooks/use-auth';
 import {
   Sidebar,
   SidebarContent,
@@ -24,7 +24,7 @@ import {
   SidebarMenuBadge,
   SidebarMenuButton,
   SidebarMenuItem,
-} from '@/components/ui/sidebar'
+} from '@/components/ui/sidebar';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -33,9 +33,9 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { useUnreadCount } from '@/hooks/use-notifications'
+} from '@/components/ui/dropdown-menu';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { useUnreadCount } from '@/hooks/use-notifications';
 
 const navMain = [
   { title: 'Painel', url: '/', icon: LayoutDashboard },
@@ -43,34 +43,36 @@ const navMain = [
   { title: 'Serviços', url: '/services', icon: Package },
   { title: 'Notificações', url: '/notifications', icon: Bell, hasBadge: true },
   { title: 'Eventos', url: '/events', icon: Activity },
-]
+];
 
 const navSecondary = [
   { title: 'Definições', url: '#', icon: Settings },
   { title: 'Ajuda', url: '#', icon: HelpCircle },
-]
+];
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const location = useLocation()
-  const navigate = useNavigate()
-  const { data: unreadCount = 0 } = useUnreadCount()
-  const { user } = useAuth()
-  const logout = useLogout()
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { data: unreadCount = 0 } = useUnreadCount();
+  const { user } = useAuth();
+  const logout = useLogout();
 
   const displayName = user
-    ? (user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : user.username)
-    : ''
-  const displayEmail = user?.email ?? ''
+    ? user.firstName && user.lastName
+      ? `${user.firstName} ${user.lastName}`
+      : user.username
+    : '';
+  const displayEmail = user?.email ?? '';
   const initials = user
-    ? (user.firstName && user.lastName
-        ? `${user.firstName[0]}${user.lastName[0]}`
-        : user.username.slice(0, 2).toUpperCase())
-    : ''
+    ? user.firstName && user.lastName
+      ? `${user.firstName[0]}${user.lastName[0]}`
+      : user.username.slice(0, 2).toUpperCase()
+    : '';
 
   function handleLogout() {
     logout.mutate(undefined, {
       onSuccess: () => navigate('/login'),
-    })
+    });
   }
 
   return (
@@ -145,9 +147,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   </Avatar>
                   <div className="grid flex-1 text-left text-sm leading-tight">
                     <span className="truncate font-medium">{displayName}</span>
-                    <span className="truncate text-xs text-muted-foreground">
-                      {displayEmail}
-                    </span>
+                    <span className="truncate text-xs text-muted-foreground">{displayEmail}</span>
                   </div>
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
@@ -164,9 +164,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     </Avatar>
                     <div className="grid flex-1 text-left text-sm leading-tight">
                       <span className="truncate font-medium">{displayName}</span>
-                      <span className="truncate text-xs text-muted-foreground">
-                        {displayEmail}
-                      </span>
+                      <span className="truncate text-xs text-muted-foreground">{displayEmail}</span>
                     </div>
                   </div>
                 </DropdownMenuLabel>
@@ -196,5 +194,5 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarMenu>
       </SidebarFooter>
     </Sidebar>
-  )
+  );
 }

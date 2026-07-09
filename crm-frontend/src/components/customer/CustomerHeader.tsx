@@ -1,36 +1,29 @@
-import { useNavigate } from 'react-router-dom'
-import {
-  ArrowLeft,
-  MoreVertical,
-  Mail,
-  Phone,
-  Pencil,
-  Trash2,
-} from 'lucide-react'
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
+import { useNavigate } from 'react-router-dom';
+import { ArrowLeft, MoreVertical, Mail, Phone, Pencil, Trash2 } from 'lucide-react';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import type { Customer } from '@/types'
+} from '@/components/ui/dropdown-menu';
+import type { Customer } from '@/types';
 
 interface CustomerHeaderProps {
-  customer: Customer
+  customer: Customer;
 }
 
 export function CustomerHeader({ customer }: CustomerHeaderProps) {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   const initials = customer.name
     .split(' ')
-    .map(n => n[0])
+    .map((n) => n[0])
     .join('')
-    .toUpperCase()
+    .toUpperCase();
 
   return (
     <div className="flex items-center justify-between px-4 py-4 lg:px-6">
@@ -104,5 +97,5 @@ export function CustomerHeader({ customer }: CustomerHeaderProps) {
         </DropdownMenu>
       </div>
     </div>
-  )
+  );
 }

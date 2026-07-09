@@ -1,22 +1,22 @@
-import { CheckCircle, AlertCircle, Loader2, FileText } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import type { UploadItem } from '@/hooks/use-file-upload'
+import { CheckCircle, AlertCircle, Loader2, FileText } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import type { UploadItem } from '@/hooks/use-file-upload';
 
 interface UploadProgressListProps {
-  uploads: UploadItem[]
-  onClearCompleted: () => void
+  uploads: UploadItem[];
+  onClearCompleted: () => void;
 }
 
 function formatFileSize(bytes: number) {
-  if (bytes === 0) return '0 Bytes'
-  const k = 1024
-  const sizes = ['Bytes', 'KB', 'MB', 'GB']
-  const i = Math.floor(Math.log(bytes) / Math.log(k))
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i]
+  if (bytes === 0) return '0 Bytes';
+  const k = 1024;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
 }
 
 export function UploadProgressList({ uploads, onClearCompleted }: UploadProgressListProps) {
-  const hasCompleted = uploads.some((u) => u.status === 'success' || u.status === 'error')
+  const hasCompleted = uploads.some((u) => u.status === 'success' || u.status === 'error');
 
   return (
     <div className="mb-4 space-y-2">
@@ -25,7 +25,12 @@ export function UploadProgressList({ uploads, onClearCompleted }: UploadProgress
           Uploads ({uploads.filter((u) => u.status === 'success').length}/{uploads.length})
         </p>
         {hasCompleted && (
-          <Button variant="ghost" size="sm" className="h-auto px-2 py-1 text-xs" onClick={onClearCompleted}>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-auto px-2 py-1 text-xs"
+            onClick={onClearCompleted}
+          >
             Clear
           </Button>
         )}
@@ -59,15 +64,11 @@ export function UploadProgressList({ uploads, onClearCompleted }: UploadProgress
             {item.status === 'pending' && (
               <Loader2 className="text-muted-foreground h-4 w-4 animate-spin" />
             )}
-            {item.status === 'success' && (
-              <CheckCircle className="h-4 w-4 text-green-500" />
-            )}
-            {item.status === 'error' && (
-              <AlertCircle className="text-destructive h-4 w-4" />
-            )}
+            {item.status === 'success' && <CheckCircle className="h-4 w-4 text-green-500" />}
+            {item.status === 'error' && <AlertCircle className="text-destructive h-4 w-4" />}
           </div>
         </div>
       ))}
     </div>
-  )
+  );
 }

@@ -1,14 +1,14 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
-import { Toaster } from 'sonner'
-import { Layout } from './components/layout/Layout'
-import { ProtectedRoute } from './components/layout/ProtectedRoute'
-import { LoginPage } from './pages/LoginPage'
-import { DashboardPage } from './pages/DashboardPage'
-import { CustomersPage } from './pages/CustomersPage'
-import { CustomerDetailPage } from './pages/CustomerDetailPage'
-import { ServicesPage } from './pages/ServicesPage'
-import { NotificationsPage } from './pages/NotificationsPage'
-import { EventsPage } from './pages/EventsPage'
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { Toaster } from 'sonner';
+import { Layout } from './components/layout/Layout';
+import { ProtectedRoute } from './components/layout/ProtectedRoute';
+import { LoginPage } from './pages/LoginPage';
+import { DashboardPage } from './pages/DashboardPage';
+import { CustomersPage } from './pages/CustomersPage';
+import { CustomerDetailPage } from './pages/CustomerDetailPage';
+import { ServicesPage } from './pages/ServicesPage';
+import { NotificationsPage } from './pages/NotificationsPage';
+import { EventsPage } from './pages/EventsPage';
 
 export default function App() {
   return (
@@ -28,5 +28,5 @@ export default function App() {
       </Routes>
       <Toaster position="bottom-right" />
     </BrowserRouter>
-  )
+  );
 }

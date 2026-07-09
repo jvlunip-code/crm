@@ -1,5 +1,5 @@
-import * as React from 'react'
-import { Button } from '@/components/ui/button'
+import * as React from 'react';
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
@@ -7,35 +7,31 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { PhoneInput } from '@/components/ui/phone-input'
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { PhoneInput } from '@/components/ui/phone-input';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
-import { useCreateCustomer, useUpdateCustomer } from '@/hooks/use-customers'
-import type { Customer } from '@/types'
-import { toast } from 'sonner'
+} from '@/components/ui/select';
+import { useCreateCustomer, useUpdateCustomer } from '@/hooks/use-customers';
+import type { Customer } from '@/types';
+import { toast } from 'sonner';
 
 interface CustomerDialogProps {
-  customer?: Customer
-  open: boolean
-  onOpenChange: (open: boolean) => void
+  customer?: Customer;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }
 
-export function CustomerDialog({
-  customer,
-  open,
-  onOpenChange,
-}: CustomerDialogProps) {
-  const isEdit = !!customer
-  const createCustomer = useCreateCustomer()
-  const updateCustomer = useUpdateCustomer()
+export function CustomerDialog({ customer, open, onOpenChange }: CustomerDialogProps) {
+  const isEdit = !!customer;
+  const createCustomer = useCreateCustomer();
+  const updateCustomer = useUpdateCustomer();
 
   const [formData, setFormData] = React.useState({
     name: '',
@@ -47,7 +43,7 @@ export function CustomerDialog({
     decisor: null as string | null,
     segment: null as string | null,
     status: 'active' as 'active' | 'inactive',
-  })
+  });
 
   React.useEffect(() => {
     if (customer) {
@@ -61,7 +57,7 @@ export function CustomerDialog({
         decisor: customer.decisor,
         segment: customer.segment,
         status: customer.status,
-      })
+      });
     } else {
       setFormData({
         name: '',
@@ -73,44 +69,40 @@ export function CustomerDialog({
         decisor: null,
         segment: null,
         status: 'active',
-      })
+      });
     }
-  }, [customer, open])
+  }, [customer, open]);
 
   const handleChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }))
-  }
+    setFormData((prev) => ({ ...prev, [field]: value }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
     try {
       if (isEdit) {
-        await updateCustomer.mutateAsync({ id: customer.id, updates: formData })
-        toast.success('Cliente atualizado com sucesso')
+        await updateCustomer.mutateAsync({ id: customer.id, updates: formData });
+        toast.success('Cliente atualizado com sucesso');
       } else {
-        await createCustomer.mutateAsync(formData)
-        toast.success('Cliente criado com sucesso')
+        await createCustomer.mutateAsync(formData);
+        toast.success('Cliente criado com sucesso');
       }
-      onOpenChange(false)
+      onOpenChange(false);
     } catch {
-      toast.error(isEdit ? 'Erro ao atualizar cliente' : 'Erro ao criar cliente')
+      toast.error(isEdit ? 'Erro ao atualizar cliente' : 'Erro ao criar cliente');
     }
-  }
+  };
 
-  const isPending = createCustomer.isPending || updateCustomer.isPending
+  const isPending = createCustomer.isPending || updateCustomer.isPending;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>
-            {isEdit ? 'Editar Cliente' : 'Adicionar Cliente'}
-          </DialogTitle>
+          <DialogTitle>{isEdit ? 'Editar Cliente' : 'Adicionar Cliente'}</DialogTitle>
           <DialogDescription>
-            {isEdit
-              ? 'Altere os dados do cliente abaixo.'
-              : 'Preencha os dados do novo cliente.'}
+            {isEdit ? 'Altere os dados do cliente abaixo.' : 'Preencha os dados do novo cliente.'}
           </DialogDescription>
         </DialogHeader>
 
@@ -120,7 +112,7 @@ export function CustomerDialog({
             <Input
               id="name"
               value={formData.name}
-              onChange={e => handleChange('name', e.target.value)}
+              onChange={(e) => handleChange('name', e.target.value)}
               placeholder="Nome completo"
               required
             />
@@ -132,7 +124,7 @@ export function CustomerDialog({
               id="email"
               type="email"
               value={formData.email}
-              onChange={e => handleChange('email', e.target.value)}
+              onChange={(e) => handleChange('email', e.target.value)}
               placeholder="email@exemplo.com"
               required
             />
@@ -142,7 +134,7 @@ export function CustomerDialog({
             <Label htmlFor="phone">Telefone</Label>
             <PhoneInput
               value={formData.phone}
-              onChange={v => handleChange('phone', v)}
+              onChange={(v) => handleChange('phone', v)}
               required
             />
           </div>
@@ -152,7 +144,7 @@ export function CustomerDialog({
             <Input
               id="company"
               value={formData.company}
-              onChange={e => handleChange('company', e.target.value)}
+              onChange={(e) => handleChange('company', e.target.value)}
               placeholder="Nome da empresa"
               required
             />
@@ -162,7 +154,7 @@ export function CustomerDialog({
             <Label htmlFor="status">Estado</Label>
             <Select
               value={formData.status}
-              onValueChange={value => handleChange('status', value)}
+              onValueChange={(value) => handleChange('status', value)}
             >
               <SelectTrigger id="status">
                 <SelectValue placeholder="Selecionar estado" />
@@ -190,5 +182,5 @@ export function CustomerDialog({
         </form>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

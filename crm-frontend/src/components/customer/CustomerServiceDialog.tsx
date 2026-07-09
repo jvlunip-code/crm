@@ -1,5 +1,5 @@
-import * as React from 'react'
-import { Button } from '@/components/ui/button'
+import * as React from 'react';
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
@@ -7,28 +7,28 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog'
-import { DatePicker } from '@/components/ui/date-picker'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+} from '@/components/ui/dialog';
+import { DatePicker } from '@/components/ui/date-picker';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
-import { Textarea } from '@/components/ui/textarea'
-import { useCreateCustomerService, useUpdateCustomerService } from '@/hooks/use-customer-services'
-import type { CustomerService, Moeda } from '@/types'
-import { toast } from 'sonner'
+} from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import { useCreateCustomerService, useUpdateCustomerService } from '@/hooks/use-customer-services';
+import type { CustomerService, Moeda } from '@/types';
+import { toast } from 'sonner';
 
 interface CustomerServiceDialogProps {
-  customerId: number
-  parentId?: number
-  service?: CustomerService
-  open: boolean
-  onOpenChange: (open: boolean) => void
+  customerId: number;
+  parentId?: number;
+  service?: CustomerService;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }
 
 export function CustomerServiceDialog({
@@ -38,9 +38,9 @@ export function CustomerServiceDialog({
   open,
   onOpenChange,
 }: CustomerServiceDialogProps) {
-  const isEdit = !!service
-  const createService = useCreateCustomerService()
-  const updateService = useUpdateCustomerService()
+  const isEdit = !!service;
+  const createService = useCreateCustomerService();
+  const updateService = useUpdateCustomerService();
 
   const [formData, setFormData] = React.useState({
     acesso: '',
@@ -55,7 +55,7 @@ export function CustomerServiceDialog({
     numServico: '',
     morada: '',
     observacoes: '',
-  })
+  });
 
   React.useEffect(() => {
     if (service) {
@@ -72,7 +72,7 @@ export function CustomerServiceDialog({
         numServico: service.numServico,
         morada: service.morada,
         observacoes: service.observacoes,
-      })
+      });
     } else {
       setFormData({
         acesso: '',
@@ -87,21 +87,21 @@ export function CustomerServiceDialog({
         numServico: '',
         morada: '',
         observacoes: '',
-      })
+      });
     }
-  }, [service, open])
+  }, [service, open]);
 
   const handleChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }))
-  }
+    setFormData((prev) => ({ ...prev, [field]: value }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
-    const valor = parseFloat(formData.valor)
+    const valor = parseFloat(formData.valor);
     if (isNaN(valor)) {
-      toast.error('O valor deve ser um número válido')
-      return
+      toast.error('O valor deve ser um número válido');
+      return;
     }
 
     const payload = {
@@ -119,23 +119,23 @@ export function CustomerServiceDialog({
       numServico: formData.numServico,
       morada: formData.morada,
       observacoes: formData.observacoes,
-    }
+    };
 
     try {
       if (isEdit) {
-        await updateService.mutateAsync({ id: service.id, updates: payload, customerId })
-        toast.success('Serviço atualizado com sucesso')
+        await updateService.mutateAsync({ id: service.id, updates: payload, customerId });
+        toast.success('Serviço atualizado com sucesso');
       } else {
-        await createService.mutateAsync(payload)
-        toast.success('Serviço criado com sucesso')
+        await createService.mutateAsync(payload);
+        toast.success('Serviço criado com sucesso');
       }
-      onOpenChange(false)
+      onOpenChange(false);
     } catch {
-      toast.error(isEdit ? 'Erro ao atualizar serviço' : 'Erro ao criar serviço')
+      toast.error(isEdit ? 'Erro ao atualizar serviço' : 'Erro ao criar serviço');
     }
-  }
+  };
 
-  const isPending = createService.isPending || updateService.isPending
+  const isPending = createService.isPending || updateService.isPending;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -160,7 +160,7 @@ export function CustomerServiceDialog({
               <Input
                 id="acesso"
                 value={formData.acesso}
-                onChange={e => handleChange('acesso', e.target.value)}
+                onChange={(e) => handleChange('acesso', e.target.value)}
                 placeholder="Ex: ACC-001"
                 required
               />
@@ -171,7 +171,7 @@ export function CustomerServiceDialog({
               <Input
                 id="tarifario"
                 value={formData.tarifario}
-                onChange={e => handleChange('tarifario', e.target.value)}
+                onChange={(e) => handleChange('tarifario', e.target.value)}
                 placeholder="Ex: Empresarial Plus"
               />
             </div>
@@ -181,7 +181,7 @@ export function CustomerServiceDialog({
               <Input
                 id="operadora"
                 value={formData.operadora}
-                onChange={e => handleChange('operadora', e.target.value)}
+                onChange={(e) => handleChange('operadora', e.target.value)}
                 placeholder="Ex: MEO"
                 required
               />
@@ -195,7 +195,7 @@ export function CustomerServiceDialog({
                 step="0.01"
                 min="0"
                 value={formData.valor}
-                onChange={e => handleChange('valor', e.target.value)}
+                onChange={(e) => handleChange('valor', e.target.value)}
                 placeholder="Ex: 20.32"
                 required
               />
@@ -205,7 +205,7 @@ export function CustomerServiceDialog({
               <Label htmlFor="moeda">Moeda</Label>
               <Select
                 value={formData.moeda}
-                onValueChange={value => handleChange('moeda', value)}
+                onValueChange={(value) => handleChange('moeda', value)}
               >
                 <SelectTrigger id="moeda">
                   <SelectValue placeholder="Selecionar moeda" />
@@ -221,7 +221,7 @@ export function CustomerServiceDialog({
               <Input
                 id="conta"
                 value={formData.conta}
-                onChange={e => handleChange('conta', e.target.value)}
+                onChange={(e) => handleChange('conta', e.target.value)}
                 placeholder="Ex: CT-10001"
                 required
               />
@@ -232,7 +232,7 @@ export function CustomerServiceDialog({
               <Input
                 id="cvp"
                 value={formData.cvp}
-                onChange={e => handleChange('cvp', e.target.value)}
+                onChange={(e) => handleChange('cvp', e.target.value)}
                 placeholder="Ex: CVP-2001"
                 required
               />
@@ -243,7 +243,7 @@ export function CustomerServiceDialog({
               <DatePicker
                 id="dataFim"
                 value={formData.dataFim}
-                onChange={v => handleChange('dataFim', v)}
+                onChange={(v) => handleChange('dataFim', v)}
               />
             </div>
 
@@ -252,7 +252,7 @@ export function CustomerServiceDialog({
               <Input
                 id="numClient"
                 value={formData.numClient}
-                onChange={e => handleChange('numClient', e.target.value)}
+                onChange={(e) => handleChange('numClient', e.target.value)}
                 placeholder="Ex: NC-5001"
               />
             </div>
@@ -262,7 +262,7 @@ export function CustomerServiceDialog({
               <Input
                 id="numServico"
                 value={formData.numServico}
-                onChange={e => handleChange('numServico', e.target.value)}
+                onChange={(e) => handleChange('numServico', e.target.value)}
                 placeholder="Ex: NS-8001"
               />
             </div>
@@ -273,7 +273,9 @@ export function CustomerServiceDialog({
             <Textarea
               id="morada"
               value={formData.morada}
-              onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => handleChange('morada', e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+                handleChange('morada', e.target.value)
+              }
               placeholder="Ex: Rua da Liberdade, 123, 1250-096 Lisboa"
               rows={2}
             />
@@ -284,7 +286,9 @@ export function CustomerServiceDialog({
             <Textarea
               id="observacoes"
               value={formData.observacoes}
-              onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => handleChange('observacoes', e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+                handleChange('observacoes', e.target.value)
+              }
               placeholder="Notas adicionais sobre o serviço..."
               rows={3}
             />
@@ -306,5 +310,5 @@ export function CustomerServiceDialog({
         </form>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

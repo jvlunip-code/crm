@@ -1,5 +1,5 @@
-import * as React from 'react'
-import { useNavigate } from 'react-router-dom'
+import * as React from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   flexRender,
   getCoreRowModel,
@@ -10,7 +10,7 @@ import {
   type ColumnDef,
   type ColumnFiltersState,
   type SortingState,
-} from '@tanstack/react-table'
+} from '@tanstack/react-table';
 import {
   ChevronLeft,
   ChevronRight,
@@ -20,32 +20,26 @@ import {
   Search,
   CheckCircle2,
   Circle,
-} from 'lucide-react'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
+} from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+} from '@/components/ui/dropdown-menu';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
+} from '@/components/ui/select';
 import {
   Table,
   TableBody,
@@ -53,7 +47,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
+} from '@/components/ui/table';
 import {
   useAllNotifications,
   useDismissNotification,
@@ -61,139 +55,142 @@ import {
   useMarkAsRead,
   useMarkAsUnread,
   useUnreadCount,
-} from '@/hooks/use-notifications'
-import { renderNotification } from '@/lib/notifications/renderers'
-import { flagBadgeClass, flagLabel } from '@/lib/notifications/flag-style'
-import { formatRelativeTime } from '@/lib/utils'
-import type { Notification } from '@/types'
-import { toast } from 'sonner'
+} from '@/hooks/use-notifications';
+import { renderNotification } from '@/lib/notifications/renderers';
+import { flagBadgeClass, flagLabel } from '@/lib/notifications/flag-style';
+import { formatRelativeTime } from '@/lib/utils';
+import type { Notification } from '@/types';
+import { toast } from 'sonner';
 
 export function NotificationsPage() {
-  const navigate = useNavigate()
-  const { data: notifications, isLoading } = useAllNotifications()
-  const { data: unreadCount = 0 } = useUnreadCount()
-  const markAsRead = useMarkAsRead()
-  const markAsUnread = useMarkAsUnread()
-  const markAllRead = useMarkAllAsRead()
-  const dismiss = useDismissNotification()
+  const navigate = useNavigate();
+  const { data: notifications, isLoading } = useAllNotifications();
+  const { data: unreadCount = 0 } = useUnreadCount();
+  const markAsRead = useMarkAsRead();
+  const markAsUnread = useMarkAsUnread();
+  const markAllRead = useMarkAllAsRead();
+  const dismiss = useDismissNotification();
 
-  const [sorting, setSorting] = React.useState<SortingState>([])
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
-  const [pagination, setPagination] = React.useState({ pageIndex: 0, pageSize: 10 })
-  const [statusFilter, setStatusFilter] = React.useState<'all' | 'unread' | 'read'>('all')
+  const [sorting, setSorting] = React.useState<SortingState>([]);
+  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
+  const [pagination, setPagination] = React.useState({ pageIndex: 0, pageSize: 10 });
+  const [statusFilter, setStatusFilter] = React.useState<'all' | 'unread' | 'read'>('all');
 
   const filtered = React.useMemo(() => {
-    if (!notifications) return []
-    if (statusFilter === 'unread') return notifications.filter(n => !n.isRead)
-    if (statusFilter === 'read') return notifications.filter(n => n.isRead)
-    return notifications
-  }, [notifications, statusFilter])
+    if (!notifications) return [];
+    if (statusFilter === 'unread') return notifications.filter((n) => !n.isRead);
+    if (statusFilter === 'read') return notifications.filter((n) => n.isRead);
+    return notifications;
+  }, [notifications, statusFilter]);
 
-  const columns = React.useMemo<ColumnDef<Notification>[]>(() => [
-    {
-      id: 'flag',
-      header: 'Estado',
-      cell: ({ row }) => {
-        const r = renderNotification(row.original)
-        return (
-          <Badge variant="outline" className={flagBadgeClass[r.flag]}>
-            {flagLabel[r.flag]}
+  const columns = React.useMemo<ColumnDef<Notification>[]>(
+    () => [
+      {
+        id: 'flag',
+        header: 'Estado',
+        cell: ({ row }) => {
+          const r = renderNotification(row.original);
+          return (
+            <Badge variant="outline" className={flagBadgeClass[r.flag]}>
+              {flagLabel[r.flag]}
+            </Badge>
+          );
+        },
+      },
+      {
+        id: 'title',
+        accessorFn: (row) => renderNotification(row).title,
+        header: 'Título',
+        cell: ({ row }) => (
+          <div className="font-medium">{renderNotification(row.original).title}</div>
+        ),
+      },
+      {
+        id: 'message',
+        accessorFn: (row) => renderNotification(row).message,
+        header: 'Mensagem',
+        cell: ({ row }) => (
+          <div className="text-muted-foreground max-w-[400px] truncate">
+            {renderNotification(row.original).message}
+          </div>
+        ),
+      },
+      {
+        accessorKey: 'isRead',
+        header: 'Lida',
+        cell: ({ row }) => (
+          <Badge variant="outline" className="text-muted-foreground px-1.5">
+            {row.original.isRead ? (
+              <CheckCircle2 className="fill-green-500 dark:fill-green-400 size-4" />
+            ) : (
+              <Circle className="size-4" />
+            )}
+            {row.original.isRead ? 'Lida' : 'Não lida'}
           </Badge>
-        )
+        ),
       },
-    },
-    {
-      id: 'title',
-      accessorFn: row => renderNotification(row).title,
-      header: 'Título',
-      cell: ({ row }) => <div className="font-medium">{renderNotification(row.original).title}</div>,
-    },
-    {
-      id: 'message',
-      accessorFn: row => renderNotification(row).message,
-      header: 'Mensagem',
-      cell: ({ row }) => (
-        <div className="text-muted-foreground max-w-[400px] truncate">
-          {renderNotification(row.original).message}
-        </div>
-      ),
-    },
-    {
-      accessorKey: 'isRead',
-      header: 'Lida',
-      cell: ({ row }) => (
-        <Badge variant="outline" className="text-muted-foreground px-1.5">
-          {row.original.isRead ? (
-            <CheckCircle2 className="fill-green-500 dark:fill-green-400 size-4" />
-          ) : (
-            <Circle className="size-4" />
-          )}
-          {row.original.isRead ? 'Lida' : 'Não lida'}
-        </Badge>
-      ),
-    },
-    {
-      accessorKey: 'createdAt',
-      header: 'Data',
-      cell: ({ row }) => (
-        <div className="text-muted-foreground">
-          {formatRelativeTime(row.original.createdAt)}
-        </div>
-      ),
-    },
-    {
-      id: 'actions',
-      cell: ({ row }) => {
-        const n = row.original
-        return (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                className="data-[state=open]:bg-muted text-muted-foreground flex size-8"
-                size="icon"
-                onClick={e => e.stopPropagation()}
-              >
-                <MoreVertical />
-                <span className="sr-only">Abrir menu</span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48">
-              <DropdownMenuItem
-                onSelect={() =>
-                  (n.isRead ? markAsUnread : markAsRead)
-                    .mutateAsync(n.id)
-                    .catch(() => toast.error('Erro ao atualizar notificação'))
-                }
-              >
-                {n.isRead ? 'Marcar como não lida' : 'Marcar como lida'}
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onSelect={() => {
-                  const href = renderNotification(n).href
-                  if (!n.isRead) markAsRead.mutate(n.id)
-                  navigate(href)
-                }}
-              >
-                Ver cliente
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                variant="destructive"
-                onSelect={() =>
-                  dismiss
-                    .mutateAsync(n.id)
-                    .catch(() => toast.error('Erro ao ignorar notificação'))
-                }
-              >
-                Ignorar
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        )
+      {
+        accessorKey: 'createdAt',
+        header: 'Data',
+        cell: ({ row }) => (
+          <div className="text-muted-foreground">{formatRelativeTime(row.original.createdAt)}</div>
+        ),
       },
-    },
-  ], [markAsRead, markAsUnread, dismiss, navigate])
+      {
+        id: 'actions',
+        cell: ({ row }) => {
+          const n = row.original;
+          return (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  className="data-[state=open]:bg-muted text-muted-foreground flex size-8"
+                  size="icon"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <MoreVertical />
+                  <span className="sr-only">Abrir menu</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuItem
+                  onSelect={() =>
+                    (n.isRead ? markAsUnread : markAsRead)
+                      .mutateAsync(n.id)
+                      .catch(() => toast.error('Erro ao atualizar notificação'))
+                  }
+                >
+                  {n.isRead ? 'Marcar como não lida' : 'Marcar como lida'}
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onSelect={() => {
+                    const href = renderNotification(n).href;
+                    if (!n.isRead) markAsRead.mutate(n.id);
+                    navigate(href);
+                  }}
+                >
+                  Ver cliente
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  variant="destructive"
+                  onSelect={() =>
+                    dismiss
+                      .mutateAsync(n.id)
+                      .catch(() => toast.error('Erro ao ignorar notificação'))
+                  }
+                >
+                  Ignorar
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          );
+        },
+      },
+    ],
+    [markAsRead, markAsUnread, dismiss, navigate],
+  );
 
   const table = useReactTable({
     data: filtered,
@@ -206,19 +203,19 @@ export function NotificationsPage() {
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
-  })
+  });
 
   const handleRowClick = (n: Notification) => {
-    if (!n.isRead) markAsRead.mutate(n.id)
-    navigate(renderNotification(n).href)
-  }
+    if (!n.isRead) markAsRead.mutate(n.id);
+    navigate(renderNotification(n).href);
+  };
 
   if (isLoading) {
     return (
       <div className="flex flex-1 items-center justify-center">
         <div className="text-muted-foreground">A carregar notificações...</div>
       </div>
-    )
+    );
   }
 
   return (
@@ -229,9 +226,7 @@ export function NotificationsPage() {
             <div>
               <CardTitle className="flex items-center gap-2">
                 Notificações
-                {unreadCount > 0 && (
-                  <Badge variant="destructive">{unreadCount} por ler</Badge>
-                )}
+                {unreadCount > 0 && <Badge variant="destructive">{unreadCount} por ler</Badge>}
               </CardTitle>
               <CardDescription>Ver e gerir as suas notificações</CardDescription>
             </div>
@@ -259,13 +254,14 @@ export function NotificationsPage() {
               <Input
                 placeholder="Pesquisar notificações..."
                 value={(table.getColumn('title')?.getFilterValue() as string) ?? ''}
-                onChange={event =>
-                  table.getColumn('title')?.setFilterValue(event.target.value)
-                }
+                onChange={(event) => table.getColumn('title')?.setFilterValue(event.target.value)}
                 className="pl-9"
               />
             </div>
-            <Select value={statusFilter} onValueChange={v => setStatusFilter(v as 'all' | 'unread' | 'read')}>
+            <Select
+              value={statusFilter}
+              onValueChange={(v) => setStatusFilter(v as 'all' | 'unread' | 'read')}
+            >
               <SelectTrigger className="w-40">
                 <SelectValue placeholder="Filtrar por estado" />
               </SelectTrigger>
@@ -280,9 +276,9 @@ export function NotificationsPage() {
           <div className="overflow-hidden rounded-lg border">
             <Table>
               <TableHeader className="bg-muted">
-                {table.getHeaderGroups().map(headerGroup => (
+                {table.getHeaderGroups().map((headerGroup) => (
                   <TableRow key={headerGroup.id}>
-                    {headerGroup.headers.map(header => (
+                    {headerGroup.headers.map((header) => (
                       <TableHead key={header.id}>
                         {header.isPlaceholder
                           ? null
@@ -294,13 +290,13 @@ export function NotificationsPage() {
               </TableHeader>
               <TableBody>
                 {table.getRowModel().rows?.length ? (
-                  table.getRowModel().rows.map(row => (
+                  table.getRowModel().rows.map((row) => (
                     <TableRow
                       key={row.id}
                       className={`cursor-pointer ${row.original.isRead ? '' : 'bg-muted/30'}`}
                       onClick={() => handleRowClick(row.original)}
                     >
-                      {row.getVisibleCells().map(cell => (
+                      {row.getVisibleCells().map((cell) => (
                         <TableCell key={cell.id}>
                           {flexRender(cell.column.columnDef.cell, cell.getContext())}
                         </TableCell>
@@ -329,13 +325,13 @@ export function NotificationsPage() {
                 </Label>
                 <Select
                   value={`${table.getState().pagination.pageSize}`}
-                  onValueChange={value => table.setPageSize(Number(value))}
+                  onValueChange={(value) => table.setPageSize(Number(value))}
                 >
                   <SelectTrigger size="sm" className="w-20" id="rows-per-page">
                     <SelectValue placeholder={table.getState().pagination.pageSize} />
                   </SelectTrigger>
                   <SelectContent side="top">
-                    {[10, 20, 30, 40, 50].map(pageSize => (
+                    {[10, 20, 30, 40, 50].map((pageSize) => (
                       <SelectItem key={pageSize} value={`${pageSize}`}>
                         {pageSize}
                       </SelectItem>
@@ -389,5 +385,5 @@ export function NotificationsPage() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

@@ -1,31 +1,22 @@
-import { Coins, Package, FileText, Calendar } from 'lucide-react'
-import {
-  Card,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
-import type { Customer, CustomerService, CustomerNote } from '@/types'
+import { Coins, Package, FileText, Calendar } from 'lucide-react';
+import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import type { Customer, CustomerService, CustomerNote } from '@/types';
 
 interface CustomerSummaryCardsProps {
-  customer: Customer
-  services: CustomerService[]
-  notes: CustomerNote[]
+  customer: Customer;
+  services: CustomerService[];
+  notes: CustomerNote[];
 }
 
-export function CustomerSummaryCards({
-  customer,
-  services,
-  notes,
-}: CustomerSummaryCardsProps) {
-  const parentServices = services.filter(s => !s.parentId)
+export function CustomerSummaryCards({ customer, services, notes }: CustomerSummaryCardsProps) {
+  const parentServices = services.filter((s) => !s.parentId);
 
-  const totalValor = services.reduce((total, s) => total + s.valor, 0)
+  const totalValor = services.reduce((total, s) => total + s.valor, 0);
 
   const memberSince = new Date(customer.createdAt).toLocaleDateString('pt-PT', {
     month: 'short',
     year: 'numeric',
-  })
+  });
 
   return (
     <div className="grid gap-4 px-4 md:grid-cols-2 lg:grid-cols-4 lg:px-6">
@@ -35,7 +26,9 @@ export function CustomerSummaryCards({
             <Coins className="h-4 w-4" />
             Gasto Mensal
           </CardDescription>
-          <CardTitle className="text-2xl">{totalValor.toLocaleString('pt-PT', { style: 'currency', currency: 'EUR' })}</CardTitle>
+          <CardTitle className="text-2xl">
+            {totalValor.toLocaleString('pt-PT', { style: 'currency', currency: 'EUR' })}
+          </CardTitle>
         </CardHeader>
       </Card>
       <Card>
@@ -66,5 +59,5 @@ export function CustomerSummaryCards({
         </CardHeader>
       </Card>
     </div>
-  )
+  );
 }

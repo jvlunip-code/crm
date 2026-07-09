@@ -1,20 +1,14 @@
-import { useRef } from 'react'
-import { Upload, MoreVertical, FileText, Image, File, Download } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
+import { useRef } from 'react';
+import { Upload, MoreVertical, FileText, Image, File, Download } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
+} from '@/components/ui/dropdown-menu';
 import {
   Table,
   TableBody,
@@ -22,58 +16,62 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
-import { FileDropZone } from '@/components/ui/file-drop-zone'
-import { UploadProgressList } from './UploadProgressList'
-import { useDeleteDocument } from '@/hooks/use-customer-documents'
-import { useFileUpload } from '@/hooks/use-file-upload'
-import { customerDocumentsApi } from '@/lib/api-client'
-import type { CustomerDocument } from '@/types'
+} from '@/components/ui/table';
+import { FileDropZone } from '@/components/ui/file-drop-zone';
+import { UploadProgressList } from './UploadProgressList';
+import { useDeleteDocument } from '@/hooks/use-customer-documents';
+import { useFileUpload } from '@/hooks/use-file-upload';
+import { customerDocumentsApi } from '@/lib/api-client';
+import type { CustomerDocument } from '@/types';
 
 interface CustomerDocumentsTabProps {
-  customerId: number
-  documents: CustomerDocument[]
-  isLoading?: boolean
+  customerId: number;
+  documents: CustomerDocument[];
+  isLoading?: boolean;
 }
 
-export function CustomerDocumentsTab({ customerId, documents, isLoading }: CustomerDocumentsTabProps) {
-  const deleteDocument = useDeleteDocument(customerId)
-  const { uploads, uploadFiles, clearCompleted, isUploading } = useFileUpload(customerId)
-  const fileInputRef = useRef<HTMLInputElement>(null)
+export function CustomerDocumentsTab({
+  customerId,
+  documents,
+  isLoading,
+}: CustomerDocumentsTabProps) {
+  const deleteDocument = useDeleteDocument(customerId);
+  const { uploads, uploadFiles, clearCompleted, isUploading } = useFileUpload(customerId);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const getFileIcon = (type: string) => {
     switch (type) {
       case 'pdf':
-        return <FileText className="h-4 w-4 text-red-500" />
+        return <FileText className="h-4 w-4 text-red-500" />;
       case 'image':
-        return <Image className="h-4 w-4 text-blue-500" />
+        return <Image className="h-4 w-4 text-blue-500" />;
       default:
-        return <File className="h-4 w-4 text-gray-500" />
+        return <File className="h-4 w-4 text-gray-500" />;
     }
-  }
+  };
 
   const formatFileSize = (bytes: number) => {
-    if (bytes === 0) return '0 Bytes'
-    const k = 1024
-    const sizes = ['Bytes', 'KB', 'MB', 'GB']
-    const i = Math.floor(Math.log(bytes) / Math.log(k))
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i]
-  }
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+  };
 
   const handleDelete = async (documentId: number) => {
-    await deleteDocument.mutateAsync(documentId)
-  }
+    await deleteDocument.mutateAsync(documentId);
+  };
 
   const handleDownload = (document: CustomerDocument) => {
-    const downloadUrl = customerDocumentsApi.getDownloadUrl(customerId, document.id)
-    window.open(downloadUrl, '_blank')
-  }
+    const downloadUrl = customerDocumentsApi.getDownloadUrl(customerId, document.id);
+    window.open(downloadUrl, '_blank');
+  };
 
   const handleView = (document: CustomerDocument) => {
     if (document.url) {
-      window.open(document.url, '_blank')
+      window.open(document.url, '_blank');
     }
-  }
+  };
 
   if (isLoading) {
     return (
@@ -82,7 +80,7 @@ export function CustomerDocumentsTab({ customerId, documents, isLoading }: Custo
           <p className="text-muted-foreground">A carregar documentos...</p>
         </CardContent>
       </Card>
-    )
+    );
   }
 
   return (
@@ -91,15 +89,9 @@ export function CustomerDocumentsTab({ customerId, documents, isLoading }: Custo
         <div className="flex items-center justify-between">
           <div>
             <CardTitle>Documentos</CardTitle>
-            <CardDescription>
-              Contratos, acordos e outros ficheiros deste cliente
-            </CardDescription>
+            <CardDescription>Contratos, acordos e outros ficheiros deste cliente</CardDescription>
           </div>
-          <Button
-            size="sm"
-            disabled={isUploading}
-            onClick={() => fileInputRef.current?.click()}
-          >
+          <Button size="sm" disabled={isUploading} onClick={() => fileInputRef.current?.click()}>
             <Upload className="mr-2 h-4 w-4" />
             {isUploading ? 'A carregar...' : 'Carregar'}
           </Button>
@@ -115,10 +107,7 @@ export function CustomerDocumentsTab({ customerId, documents, isLoading }: Custo
         />
 
         {uploads.length > 0 && (
-          <UploadProgressList
-            uploads={uploads}
-            onClearCompleted={clearCompleted}
-          />
+          <UploadProgressList uploads={uploads} onClearCompleted={clearCompleted} />
         )}
 
         {documents.length === 0 ? (
@@ -146,9 +135,7 @@ export function CustomerDocumentsTab({ customerId, documents, isLoading }: Custo
                         <span className="font-medium">{document.name}</span>
                       </div>
                     </TableCell>
-                    <TableCell className="uppercase text-xs">
-                      {document.type}
-                    </TableCell>
+                    <TableCell className="uppercase text-xs">{document.type}</TableCell>
                     <TableCell>{formatFileSize(document.size)}</TableCell>
                     <TableCell>
                       {new Date(document.uploadedAt).toLocaleDateString('pt-PT')}
@@ -187,5 +174,5 @@ export function CustomerDocumentsTab({ customerId, documents, isLoading }: Custo
         )}
       </CardContent>
     </Card>
-  )
+  );
 }

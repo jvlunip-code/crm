@@ -1,66 +1,78 @@
-import { useState } from 'react'
-import { Mail, Phone, Building2, Calendar, User, MapPin, Pencil, Plus, Check, X, CreditCard, FileText, UserCheck, Tag } from 'lucide-react'
+import { useState } from 'react';
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { PhoneInput } from '@/components/ui/phone-input'
-import { Separator } from '@/components/ui/separator'
-import { Switch } from '@/components/ui/switch'
-import { CustomerAddressDialog } from './CustomerAddressDialog'
-import { useUpdateCustomer } from '@/hooks/use-customers'
-import type { Customer, CustomerAddress } from '@/types'
-import { formatNif } from '@/lib/utils'
-import { toast } from 'sonner'
+  Mail,
+  Phone,
+  Building2,
+  Calendar,
+  User,
+  MapPin,
+  Pencil,
+  Plus,
+  Check,
+  X,
+  CreditCard,
+  FileText,
+  UserCheck,
+  Tag,
+} from 'lucide-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { PhoneInput } from '@/components/ui/phone-input';
+import { Separator } from '@/components/ui/separator';
+import { Switch } from '@/components/ui/switch';
+import { CustomerAddressDialog } from './CustomerAddressDialog';
+import { useUpdateCustomer } from '@/hooks/use-customers';
+import type { Customer, CustomerAddress } from '@/types';
+import { formatNif } from '@/lib/utils';
+import { toast } from 'sonner';
 
-type EditableField = 'email' | 'phone' | 'company' | 'nif' | 'iban' | 'decisor' | 'segment'
+type EditableField = 'email' | 'phone' | 'company' | 'nif' | 'iban' | 'decisor' | 'segment';
 
 interface CustomerOverviewTabProps {
-  customer: Customer
-  customerId: number
-  address?: CustomerAddress | null
+  customer: Customer;
+  customerId: number;
+  address?: CustomerAddress | null;
 }
 
 export function CustomerOverviewTab({ customer, customerId, address }: CustomerOverviewTabProps) {
-  const [addressDialogOpen, setAddressDialogOpen] = useState(false)
-  const [editingField, setEditingField] = useState<EditableField | null>(null)
-  const [editValue, setEditValue] = useState('')
-  const updateCustomer = useUpdateCustomer()
+  const [addressDialogOpen, setAddressDialogOpen] = useState(false);
+  const [editingField, setEditingField] = useState<EditableField | null>(null);
+  const [editValue, setEditValue] = useState('');
+  const updateCustomer = useUpdateCustomer();
 
   const startEditing = (field: EditableField) => {
-    setEditingField(field)
-    setEditValue(customer[field] ?? '')
-  }
+    setEditingField(field);
+    setEditValue(customer[field] ?? '');
+  };
 
   const cancelEditing = () => {
-    setEditingField(null)
-    setEditValue('')
-  }
+    setEditingField(null);
+    setEditValue('');
+  };
 
   const saveEdit = async () => {
-    if (!editingField) return
+    if (!editingField) return;
     try {
-      await updateCustomer.mutateAsync({ id: customer.id, updates: { [editingField]: editValue || null } })
-      toast.success('Dados atualizados com sucesso')
-      setEditingField(null)
-      setEditValue('')
+      await updateCustomer.mutateAsync({
+        id: customer.id,
+        updates: { [editingField]: editValue || null },
+      });
+      toast.success('Dados atualizados com sucesso');
+      setEditingField(null);
+      setEditValue('');
     } catch {
-      toast.error('Erro ao atualizar dados')
+      toast.error('Erro ao atualizar dados');
     }
-  }
+  };
 
   const initials = customer.name
     .split(' ')
-    .map(n => n[0])
+    .map((n) => n[0])
     .join('')
-    .toUpperCase()
+    .toUpperCase();
 
   const renderEditableField = (
     field: EditableField,
@@ -68,7 +80,7 @@ export function CustomerOverviewTab({ customer, customerId, address }: CustomerO
     icon: React.ReactNode,
     displayValue: React.ReactNode,
   ) => {
-    const isEditing = editingField === field
+    const isEditing = editingField === field;
 
     return (
       <div className="flex items-center gap-3">
@@ -80,33 +92,29 @@ export function CustomerOverviewTab({ customer, customerId, address }: CustomerO
           {isEditing ? (
             <div className="flex items-center gap-1">
               {field === 'phone' ? (
-                <PhoneInput
-                  value={editValue}
-                  onChange={setEditValue}
-                  className="flex-1"
-                />
+                <PhoneInput value={editValue} onChange={setEditValue} className="flex-1" />
               ) : field === 'nif' ? (
                 <Input
                   value={editValue}
-                  onChange={e => setEditValue(e.target.value.replace(/\D/g, '').slice(0, 9))}
+                  onChange={(e) => setEditValue(e.target.value.replace(/\D/g, '').slice(0, 9))}
                   className="h-7 text-sm"
                   maxLength={9}
                   placeholder="123456789"
                   autoFocus
-                  onKeyDown={e => {
-                    if (e.key === 'Enter') saveEdit()
-                    if (e.key === 'Escape') cancelEditing()
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') saveEdit();
+                    if (e.key === 'Escape') cancelEditing();
                   }}
                 />
               ) : (
                 <Input
                   value={editValue}
-                  onChange={e => setEditValue(e.target.value)}
+                  onChange={(e) => setEditValue(e.target.value)}
                   className="h-7 text-sm"
                   autoFocus
-                  onKeyDown={e => {
-                    if (e.key === 'Enter') saveEdit()
-                    if (e.key === 'Escape') cancelEditing()
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') saveEdit();
+                    if (e.key === 'Escape') cancelEditing();
                   }}
                 />
               )}
@@ -144,8 +152,8 @@ export function CustomerOverviewTab({ customer, customerId, address }: CustomerO
           )}
         </div>
       </div>
-    )
-  }
+    );
+  };
 
   return (
     <div className="grid gap-4 lg:grid-cols-2">
@@ -294,15 +302,17 @@ export function CustomerOverviewTab({ customer, customerId, address }: CustomerO
                         await updateCustomer.mutateAsync({
                           id: customer.id,
                           updates: { status: checked ? 'active' : 'inactive' },
-                        })
-                        toast.success(checked ? 'Cliente ativado' : 'Cliente desativado')
+                        });
+                        toast.success(checked ? 'Cliente ativado' : 'Cliente desativado');
                       } catch {
-                        toast.error('Erro ao atualizar estado')
+                        toast.error('Erro ao atualizar estado');
                       }
                     }}
                     disabled={updateCustomer.isPending}
                   />
-                  <span className="text-sm font-medium">{customer.status === 'active' ? 'Ativo' : 'Inativo'}</span>
+                  <span className="text-sm font-medium">
+                    {customer.status === 'active' ? 'Ativo' : 'Inativo'}
+                  </span>
                 </div>
               </div>
             </div>
@@ -317,11 +327,7 @@ export function CustomerOverviewTab({ customer, customerId, address }: CustomerO
               <CardTitle>Morada</CardTitle>
               <CardDescription>Endereço do cliente</CardDescription>
             </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setAddressDialogOpen(true)}
-            >
+            <Button variant="outline" size="sm" onClick={() => setAddressDialogOpen(true)}>
               {address ? (
                 <>
                   <Pencil className="mr-2 h-4 w-4" />
@@ -407,5 +413,5 @@ export function CustomerOverviewTab({ customer, customerId, address }: CustomerO
         onOpenChange={setAddressDialogOpen}
       />
     </div>
-  )
+  );
 }

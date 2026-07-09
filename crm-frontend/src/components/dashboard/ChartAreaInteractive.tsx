@@ -1,6 +1,6 @@
-import * as React from 'react'
-import { Area, AreaChart, CartesianGrid, XAxis } from 'recharts'
-import { useIsMobile } from '@/hooks/use-mobile'
+import * as React from 'react';
+import { Area, AreaChart, CartesianGrid, XAxis } from 'recharts';
+import { useIsMobile } from '@/hooks/use-mobile';
 import {
   Card,
   CardAction,
@@ -8,49 +8,46 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card'
+} from '@/components/ui/card';
 import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
   type ChartConfig,
-} from '@/components/ui/chart'
+} from '@/components/ui/chart';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
-import {
-  ToggleGroup,
-  ToggleGroupItem,
-} from '@/components/ui/toggle-group'
+} from '@/components/ui/select';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 
 // Generate chart data for the last 90 days
 function generateChartData() {
-  const data = []
-  const now = new Date()
+  const data = [];
+  const now = new Date();
 
   for (let i = 90; i >= 0; i--) {
-    const date = new Date(now)
-    date.setDate(date.getDate() - i)
+    const date = new Date(now);
+    date.setDate(date.getDate() - i);
 
     // Simulate growing customer base with some variation
-    const baseActive = 150 + Math.floor((90 - i) * 1.5)
-    const baseNew = 10 + Math.floor(Math.random() * 15)
+    const baseActive = 150 + Math.floor((90 - i) * 1.5);
+    const baseNew = 10 + Math.floor(Math.random() * 15);
 
     data.push({
       date: date.toISOString().split('T')[0],
       active: baseActive + Math.floor(Math.random() * 20),
       new: baseNew,
-    })
+    });
   }
 
-  return data
+  return data;
 }
 
-const chartData = generateChartData()
+const chartData = generateChartData();
 
 const chartConfig = {
   customers: {
@@ -64,31 +61,31 @@ const chartConfig = {
     label: 'Novos Clientes',
     color: 'var(--primary)',
   },
-} satisfies ChartConfig
+} satisfies ChartConfig;
 
 export function ChartAreaInteractive() {
-  const isMobile = useIsMobile()
-  const [timeRange, setTimeRange] = React.useState('90d')
+  const isMobile = useIsMobile();
+  const [timeRange, setTimeRange] = React.useState('90d');
 
   React.useEffect(() => {
     if (isMobile) {
-      setTimeRange('7d')
+      setTimeRange('7d');
     }
-  }, [isMobile])
+  }, [isMobile]);
 
   const filteredData = chartData.filter((item) => {
-    const date = new Date(item.date)
-    const referenceDate = new Date()
-    let daysToSubtract = 90
+    const date = new Date(item.date);
+    const referenceDate = new Date();
+    let daysToSubtract = 90;
     if (timeRange === '30d') {
-      daysToSubtract = 30
+      daysToSubtract = 30;
     } else if (timeRange === '7d') {
-      daysToSubtract = 7
+      daysToSubtract = 7;
     }
-    const startDate = new Date(referenceDate)
-    startDate.setDate(startDate.getDate() - daysToSubtract)
-    return date >= startDate
-  })
+    const startDate = new Date(referenceDate);
+    startDate.setDate(startDate.getDate() - daysToSubtract);
+    return date >= startDate;
+  });
 
   return (
     <Card className="@container/card">
@@ -135,35 +132,16 @@ export function ChartAreaInteractive() {
         </CardAction>
       </CardHeader>
       <CardContent className="px-2 pt-4 sm:px-6 sm:pt-6">
-        <ChartContainer
-          config={chartConfig}
-          className="aspect-auto h-[250px] w-full"
-        >
+        <ChartContainer config={chartConfig} className="aspect-auto h-[250px] w-full">
           <AreaChart data={filteredData}>
             <defs>
               <linearGradient id="fillActive" x1="0" y1="0" x2="0" y2="1">
-                <stop
-                  offset="5%"
-                  stopColor="var(--color-active)"
-                  stopOpacity={1.0}
-                />
-                <stop
-                  offset="95%"
-                  stopColor="var(--color-active)"
-                  stopOpacity={0.1}
-                />
+                <stop offset="5%" stopColor="var(--color-active)" stopOpacity={1.0} />
+                <stop offset="95%" stopColor="var(--color-active)" stopOpacity={0.1} />
               </linearGradient>
               <linearGradient id="fillNew" x1="0" y1="0" x2="0" y2="1">
-                <stop
-                  offset="5%"
-                  stopColor="var(--color-new)"
-                  stopOpacity={0.8}
-                />
-                <stop
-                  offset="95%"
-                  stopColor="var(--color-new)"
-                  stopOpacity={0.1}
-                />
+                <stop offset="5%" stopColor="var(--color-new)" stopOpacity={0.8} />
+                <stop offset="95%" stopColor="var(--color-new)" stopOpacity={0.1} />
               </linearGradient>
             </defs>
             <CartesianGrid vertical={false} />
@@ -174,11 +152,11 @@ export function ChartAreaInteractive() {
               tickMargin={8}
               minTickGap={32}
               tickFormatter={(value) => {
-                const date = new Date(value)
+                const date = new Date(value);
                 return date.toLocaleDateString('pt-PT', {
                   month: 'short',
                   day: 'numeric',
-                })
+                });
               }}
             />
             <ChartTooltip
@@ -190,7 +168,7 @@ export function ChartAreaInteractive() {
                     return new Date(value).toLocaleDateString('pt-PT', {
                       month: 'short',
                       day: 'numeric',
-                    })
+                    });
                   }}
                   indicator="dot"
                 />
@@ -214,5 +192,5 @@ export function ChartAreaInteractive() {
         </ChartContainer>
       </CardContent>
     </Card>
-  )
+  );
 }

@@ -1,78 +1,69 @@
-import * as React from 'react'
-import { format, isValid, parse } from 'date-fns'
-import { pt } from 'date-fns/locale/pt'
-import { CalendarIcon } from 'lucide-react'
+import * as React from 'react';
+import { format, isValid, parse } from 'date-fns';
+import { pt } from 'date-fns/locale/pt';
+import { CalendarIcon } from 'lucide-react';
 
-import { cn } from '@/lib/utils'
-import { Button } from '@/components/ui/button'
-import { Calendar } from '@/components/ui/calendar'
-import { Input } from '@/components/ui/input'
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover'
+import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+import { Calendar } from '@/components/ui/calendar';
+import { Input } from '@/components/ui/input';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
 interface DatePickerProps {
-  value: string | null
-  onChange: (value: string) => void
-  placeholder?: string
-  id?: string
+  value: string | null;
+  onChange: (value: string) => void;
+  placeholder?: string;
+  id?: string;
 }
 
-const DISPLAY_FORMAT = 'dd/MM/yyyy'
-const STORAGE_FORMAT = 'yyyy-MM-dd'
+const DISPLAY_FORMAT = 'dd/MM/yyyy';
+const STORAGE_FORMAT = 'yyyy-MM-dd';
 
 function parseStored(value: string | null): Date | undefined {
-  if (!value) return undefined
-  const d = parse(value, STORAGE_FORMAT, new Date())
-  return isValid(d) ? d : undefined
+  if (!value) return undefined;
+  const d = parse(value, STORAGE_FORMAT, new Date());
+  return isValid(d) ? d : undefined;
 }
 
 function parseTyped(input: string): Date | undefined {
-  const normalized = input.trim().replace(/-/g, '/').replace(/\./g, '/')
-  const d = parse(normalized, DISPLAY_FORMAT, new Date())
-  return isValid(d) ? d : undefined
+  const normalized = input.trim().replace(/-/g, '/').replace(/\./g, '/');
+  const d = parse(normalized, DISPLAY_FORMAT, new Date());
+  return isValid(d) ? d : undefined;
 }
 
 function toDisplay(value: string | null): string {
-  const d = parseStored(value)
-  return d ? format(d, DISPLAY_FORMAT) : ''
+  const d = parseStored(value);
+  return d ? format(d, DISPLAY_FORMAT) : '';
 }
 
-export function DatePicker({
-  value,
-  onChange,
-  placeholder = 'dd/mm/aaaa',
-  id,
-}: DatePickerProps) {
-  const [open, setOpen] = React.useState(false)
-  const [text, setText] = React.useState(() => toDisplay(value))
+export function DatePicker({ value, onChange, placeholder = 'dd/mm/aaaa', id }: DatePickerProps) {
+  const [open, setOpen] = React.useState(false);
+  const [text, setText] = React.useState(() => toDisplay(value));
 
   React.useEffect(() => {
-    setText(toDisplay(value))
-  }, [value])
+    setText(toDisplay(value));
+  }, [value]);
 
-  const selected = parseStored(value)
-  const invalid = text.trim() !== '' && !parseTyped(text)
+  const selected = parseStored(value);
+  const invalid = text.trim() !== '' && !parseTyped(text);
 
   const commitText = () => {
-    const trimmed = text.trim()
+    const trimmed = text.trim();
     if (!trimmed) {
-      if (value) onChange('')
-      return
+      if (value) onChange('');
+      return;
     }
-    const d = parseTyped(trimmed)
+    const d = parseTyped(trimmed);
     if (d) {
-      const next = format(d, STORAGE_FORMAT)
-      setText(format(d, DISPLAY_FORMAT))
-      if (next !== value) onChange(next)
+      const next = format(d, STORAGE_FORMAT);
+      setText(format(d, DISPLAY_FORMAT));
+      if (next !== value) onChange(next);
     } else {
-      setText(toDisplay(value))
+      setText(toDisplay(value));
     }
-  }
+  };
 
-  const currentYear = new Date().getFullYear()
+  const currentYear = new Date().getFullYear();
 
   return (
     <div className="relative">
@@ -83,8 +74,8 @@ export function DatePicker({
         onBlur={commitText}
         onKeyDown={(e) => {
           if (e.key === 'Enter') {
-            e.preventDefault()
-            commitText()
+            e.preventDefault();
+            commitText();
           }
         }}
         placeholder={placeholder}
@@ -112,9 +103,9 @@ export function DatePicker({
             defaultMonth={selected ?? new Date()}
             onSelect={(day) => {
               if (day) {
-                onChange(format(day, STORAGE_FORMAT))
-                setText(format(day, DISPLAY_FORMAT))
-                setOpen(false)
+                onChange(format(day, STORAGE_FORMAT));
+                setText(format(day, DISPLAY_FORMAT));
+                setOpen(false);
               }
             }}
             locale={pt}
@@ -125,5 +116,5 @@ export function DatePicker({
         </PopoverContent>
       </Popover>
     </div>
-  )
+  );
 }
