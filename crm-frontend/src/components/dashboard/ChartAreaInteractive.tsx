@@ -23,6 +23,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import { StatusBadge } from '@/components/shared/StatusBadge';
 
 // Generate chart data for the last 90 days
 function generateChartData() {
@@ -54,12 +55,12 @@ const chartConfig = {
     label: 'Clientes',
   },
   active: {
-    label: 'Clientes Ativos',
-    color: 'var(--primary)',
+    label: 'Clientes ativos',
+    color: 'var(--chart-1)',
   },
   new: {
-    label: 'Novos Clientes',
-    color: 'var(--primary)',
+    label: 'Novos clientes',
+    color: 'var(--chart-2)',
   },
 } satisfies ChartConfig;
 
@@ -90,20 +91,20 @@ export function ChartAreaInteractive() {
   return (
     <Card className="@container/card">
       <CardHeader>
-        <CardTitle>Crescimento de Clientes</CardTitle>
-        <CardDescription>
-          <span className="hidden @[540px]/card:block">
-            Clientes ativos e novos nos últimos 3 meses
-          </span>
-          <span className="@[540px]/card:hidden">Últimos 3 meses</span>
-        </CardDescription>
+        <CardTitle className="flex flex-wrap items-center gap-2">
+          Crescimento de clientes
+          <StatusBadge tone="warning" dot={false}>
+            Dados de demonstração
+          </StatusBadge>
+        </CardTitle>
+        <CardDescription>Clientes ativos e novos por dia</CardDescription>
         <CardAction>
           <ToggleGroup
             type="single"
             value={timeRange}
             onValueChange={setTimeRange}
             variant="outline"
-            className="hidden *:data-[slot=toggle-group-item]:!px-4 @[767px]/card:flex"
+            className="hidden @[767px]/card:flex"
           >
             <ToggleGroupItem value="90d">Últimos 3 meses</ToggleGroupItem>
             <ToggleGroupItem value="30d">Últimos 30 dias</ToggleGroupItem>
@@ -113,37 +114,21 @@ export function ChartAreaInteractive() {
             <SelectTrigger
               className="flex w-40 **:data-[slot=select-value]:block **:data-[slot=select-value]:truncate @[767px]/card:hidden"
               size="sm"
-              aria-label="Selecionar um valor"
+              aria-label="Período"
             >
               <SelectValue placeholder="Últimos 3 meses" />
             </SelectTrigger>
-            <SelectContent className="rounded-xl">
-              <SelectItem value="90d" className="rounded-lg">
-                Últimos 3 meses
-              </SelectItem>
-              <SelectItem value="30d" className="rounded-lg">
-                Últimos 30 dias
-              </SelectItem>
-              <SelectItem value="7d" className="rounded-lg">
-                Últimos 7 dias
-              </SelectItem>
+            <SelectContent>
+              <SelectItem value="90d">Últimos 3 meses</SelectItem>
+              <SelectItem value="30d">Últimos 30 dias</SelectItem>
+              <SelectItem value="7d">Últimos 7 dias</SelectItem>
             </SelectContent>
           </Select>
         </CardAction>
       </CardHeader>
-      <CardContent className="px-2 pt-4 sm:px-6 sm:pt-6">
-        <ChartContainer config={chartConfig} className="aspect-auto h-[250px] w-full">
-          <AreaChart data={filteredData}>
-            <defs>
-              <linearGradient id="fillActive" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="var(--color-active)" stopOpacity={1.0} />
-                <stop offset="95%" stopColor="var(--color-active)" stopOpacity={0.1} />
-              </linearGradient>
-              <linearGradient id="fillNew" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="var(--color-new)" stopOpacity={0.8} />
-                <stop offset="95%" stopColor="var(--color-new)" stopOpacity={0.1} />
-              </linearGradient>
-            </defs>
+      <CardContent>
+        <ChartContainer config={chartConfig} className="aspect-auto h-[240px] w-full">
+          <AreaChart data={filteredData} margin={{ left: 4, right: 4, top: 8 }}>
             <CartesianGrid vertical={false} />
             <XAxis
               dataKey="date"
@@ -160,8 +145,7 @@ export function ChartAreaInteractive() {
               }}
             />
             <ChartTooltip
-              cursor={false}
-              defaultIndex={isMobile ? -1 : 10}
+              cursor={{ stroke: 'var(--border)' }}
               content={
                 <ChartTooltipContent
                   labelFormatter={(value) => {
@@ -176,16 +160,20 @@ export function ChartAreaInteractive() {
             />
             <Area
               dataKey="new"
-              type="natural"
-              fill="url(#fillNew)"
+              type="monotone"
+              fill="var(--color-new)"
+              fillOpacity={0.12}
               stroke="var(--color-new)"
+              strokeWidth={1.5}
               stackId="a"
             />
             <Area
               dataKey="active"
-              type="natural"
-              fill="url(#fillActive)"
+              type="monotone"
+              fill="var(--color-active)"
+              fillOpacity={0.12}
               stroke="var(--color-active)"
+              strokeWidth={1.5}
               stackId="a"
             />
           </AreaChart>
