@@ -1,7 +1,6 @@
 import * as React from 'react';
-import { Plus, MoreVertical, ChevronRight, ChevronDown } from 'lucide-react';
+import { ChevronRight, MoreVertical, Package, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,6 +16,10 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { Skeleton } from '@/components/ui/skeleton';
+import { EmptyState } from '@/components/shared/EmptyState';
+import { DetailPanel } from './DetailPanel';
+import { cn } from '@/lib/utils';
 import { useDeleteCustomerService } from '@/hooks/use-customer-services';
 import { CustomerServiceDialog } from '@/components/customer/CustomerServiceDialog';
 import type { CustomerService } from '@/types';
@@ -92,11 +95,13 @@ export function CustomerServicesTab({ customerId, services, isLoading }: Custome
 
   if (isLoading) {
     return (
-      <Card>
-        <CardContent className="flex h-48 items-center justify-center">
-          <p className="text-muted-foreground">A carregar serviços...</p>
-        </CardContent>
-      </Card>
+      <DetailPanel title="Serviços">
+        <div className="flex flex-col gap-3 p-4" aria-busy>
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Skeleton key={i} className="h-6 w-full" />
+          ))}
+        </div>
+      </DetailPanel>
     );
   }
 
@@ -107,52 +112,66 @@ export function CustomerServicesTab({ customerId, services, isLoading }: Custome
 
     return (
       <React.Fragment key={service.id}>
-        <TableRow className={isChild ? 'bg-muted/30' : undefined}>
+        <TableRow className={cn(isChild && 'bg-background/60')}>
           <TableCell className="font-medium">
-            <div className={`flex items-center gap-2 ${isChild ? 'pl-6' : ''}`}>
+            <div className={cn('flex items-center gap-1.5', isChild && 'pl-7')}>
               {!isChild && hasChildren ? (
                 <Button
                   variant="ghost"
-                  size="icon"
-                  className="h-6 w-6"
+                  size="icon-xs"
                   onClick={() => toggleExpand(service.id)}
+                  aria-expanded={isExpanded}
+                  aria-label={`${isExpanded ? 'Ocultar' : 'Mostrar'} sub-serviços de ${service.acesso}`}
                 >
-                  {isExpanded ? (
-                    <ChevronDown className="h-4 w-4" />
-                  ) : (
-                    <ChevronRight className="h-4 w-4" />
-                  )}
+                  <ChevronRight className={cn('transition-transform', isExpanded && 'rotate-90')} />
                 </Button>
               ) : !isChild ? (
                 <span className="inline-block w-6" />
               ) : null}
-              {service.acesso}
+              <span className="type-mono">{service.acesso}</span>
+              {!isChild && hasChildren && (
+                <span className="type-caption text-muted-foreground tabular-nums">
+                  +{children.length}
+                </span>
+              )}
             </div>
           </TableCell>
           <TableCell>{service.tarifario}</TableCell>
-          <TableCell>{service.operadora}</TableCell>
-          <TableCell>{formatCurrency(service.valor, service.moeda)}</TableCell>
-          <TableCell>{service.conta}</TableCell>
-          <TableCell>{service.cvp || '—'}</TableCell>
-          <TableCell>{service.numClient || '—'}</TableCell>
-          <TableCell>{service.numServico || '—'}</TableCell>
-          <TableCell className="max-w-[240px] truncate" title={service.morada || undefined}>
+          <TableCell className="text-foreground-secondary">{service.operadora}</TableCell>
+          <TableCell className="text-right type-mono">
+            {formatCurrency(service.valor, service.moeda)}
+          </TableCell>
+          <TableCell className="type-mono text-xs text-foreground-secondary">
+            {service.conta || '—'}
+          </TableCell>
+          <TableCell className="type-mono text-xs text-foreground-secondary">
+            {service.cvp || '—'}
+          </TableCell>
+          <TableCell className="type-mono text-xs text-foreground-secondary">
+            {service.numClient || '—'}
+          </TableCell>
+          <TableCell className="type-mono text-xs text-foreground-secondary">
+            {service.numServico || '—'}
+          </TableCell>
+          <TableCell
+            className="hidden max-w-[240px] truncate text-foreground-secondary 2xl:table-cell"
+            title={service.morada || undefined}
+          >
             {service.morada || '—'}
           </TableCell>
-          <TableCell>{formatServiceDate(service.dataFim)}</TableCell>
-          <TableCell>
+          <TableCell className="type-mono text-xs">{formatServiceDate(service.dataFim)}</TableCell>
+          <TableCell className="text-right">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8">
-                  <MoreVertical className="h-4 w-4" />
-                  <span className="sr-only">Ações</span>
+                <Button variant="ghost" size="icon-xs" aria-label={`Ações para ${service.acesso}`}>
+                  <MoreVertical />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
                 <DropdownMenuItem onClick={() => handleEdit(service)}>Editar</DropdownMenuItem>
                 {!isChild && (
                   <DropdownMenuItem onClick={() => handleCreateSubService(service.id)}>
-                    Adicionar Sub-serviço
+                    Adicionar sub-serviço
                   </DropdownMenuItem>
                 )}
                 <DropdownMenuSeparator />
@@ -170,51 +189,49 @@ export function CustomerServicesTab({ customerId, services, isLoading }: Custome
 
   return (
     <>
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle>Serviços</CardTitle>
-              <CardDescription>Serviços contratados para este cliente</CardDescription>
-            </div>
-            <Button size="sm" onClick={handleCreate}>
-              <Plus className="mr-2 h-4 w-4" />
-              Criar Serviço
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent>
-          {parentServices.length === 0 ? (
-            <div className="flex h-32 flex-col items-center justify-center rounded-lg border border-dashed">
-              <p className="text-muted-foreground text-sm">Sem serviços</p>
-              <Button variant="link" size="sm" className="mt-2" onClick={handleCreate}>
+      <DetailPanel
+        title="Serviços"
+        description="Serviços contratados para este cliente"
+        action={
+          <Button size="sm" onClick={handleCreate}>
+            <Plus />
+            Criar serviço
+          </Button>
+        }
+      >
+        {parentServices.length === 0 ? (
+          <EmptyState
+            icon={<Package />}
+            title="Sem serviços"
+            action={
+              <Button variant="outline" size="sm" onClick={handleCreate}>
                 Criar primeiro serviço
               </Button>
-            </div>
-          ) : (
-            <div className="overflow-hidden rounded-lg border">
-              <Table>
-                <TableHeader className="bg-muted">
-                  <TableRow>
-                    <TableHead>Acesso (ID)</TableHead>
-                    <TableHead>Tarifário</TableHead>
-                    <TableHead>Operadora</TableHead>
-                    <TableHead>Valor</TableHead>
-                    <TableHead>Conta</TableHead>
-                    <TableHead>CVP</TableHead>
-                    <TableHead>Nº Cliente</TableHead>
-                    <TableHead>Nº Serviço</TableHead>
-                    <TableHead>Morada</TableHead>
-                    <TableHead>Data Fim</TableHead>
-                    <TableHead className="w-10"></TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>{parentServices.map((service) => renderServiceRow(service))}</TableBody>
-              </Table>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+            }
+          />
+        ) : (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Acesso (ID)</TableHead>
+                <TableHead>Tarifário</TableHead>
+                <TableHead>Operadora</TableHead>
+                <TableHead className="text-right">Valor</TableHead>
+                <TableHead>Conta</TableHead>
+                <TableHead>CVP</TableHead>
+                <TableHead>Nº cliente</TableHead>
+                <TableHead>Nº serviço</TableHead>
+                <TableHead className="hidden 2xl:table-cell">Morada</TableHead>
+                <TableHead>Data fim</TableHead>
+                <TableHead className="w-10">
+                  <span className="sr-only">Ações</span>
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>{parentServices.map((service) => renderServiceRow(service))}</TableBody>
+          </Table>
+        )}
+      </DetailPanel>
 
       <CustomerServiceDialog
         customerId={customerId}
