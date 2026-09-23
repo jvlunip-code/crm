@@ -57,7 +57,7 @@ import {
   useUnreadCount,
 } from '@/hooks/use-notifications';
 import { renderNotification } from '@/lib/notifications/renderers';
-import { flagBadgeClass, flagLabel } from '@/lib/notifications/flag-style';
+import { FLAG } from '@/lib/notifications/flag-style';
 import { formatRelativeTime } from '@/lib/utils';
 import type { Notification } from '@/types';
 import { toast } from 'sonner';
@@ -90,11 +90,7 @@ export function NotificationsPage() {
         header: 'Estado',
         cell: ({ row }) => {
           const r = renderNotification(row.original);
-          return (
-            <Badge variant="outline" className={flagBadgeClass[r.flag]}>
-              {flagLabel[r.flag]}
-            </Badge>
-          );
+          return <Badge tone={FLAG[r.flag].tone}>{FLAG[r.flag].label}</Badge>;
         },
       },
       {
