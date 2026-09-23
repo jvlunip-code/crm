@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/dialog';
 import { DatePicker } from '@/components/ui/date-picker';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { Field, FieldLabel } from '@/components/ui/field';
 import {
   Select,
   SelectContent,
@@ -153,10 +153,12 @@ export function CustomerServiceDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="acesso">Acesso (ID)</Label>
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field>
+              <FieldLabel required htmlFor="acesso">
+                Acesso (ID)
+              </FieldLabel>
               <Input
                 id="acesso"
                 value={formData.acesso}
@@ -164,20 +166,22 @@ export function CustomerServiceDialog({
                 placeholder="Ex: ACC-001"
                 required
               />
-            </div>
+            </Field>
 
-            <div className="space-y-2">
-              <Label htmlFor="tarifario">Tarifário</Label>
+            <Field>
+              <FieldLabel htmlFor="tarifario">Tarifário</FieldLabel>
               <Input
                 id="tarifario"
                 value={formData.tarifario}
                 onChange={(e) => handleChange('tarifario', e.target.value)}
                 placeholder="Ex: Empresarial Plus"
               />
-            </div>
+            </Field>
 
-            <div className="space-y-2">
-              <Label htmlFor="operadora">Operadora</Label>
+            <Field>
+              <FieldLabel required htmlFor="operadora">
+                Operadora
+              </FieldLabel>
               <Input
                 id="operadora"
                 value={formData.operadora}
@@ -185,10 +189,12 @@ export function CustomerServiceDialog({
                 placeholder="Ex: MEO"
                 required
               />
-            </div>
+            </Field>
 
-            <div className="space-y-2">
-              <Label htmlFor="valor">Valor</Label>
+            <Field>
+              <FieldLabel required htmlFor="valor">
+                Valor
+              </FieldLabel>
               <Input
                 id="valor"
                 type="number"
@@ -199,10 +205,10 @@ export function CustomerServiceDialog({
                 placeholder="Ex: 20.32"
                 required
               />
-            </div>
+            </Field>
 
-            <div className="space-y-2">
-              <Label htmlFor="moeda">Moeda</Label>
+            <Field>
+              <FieldLabel htmlFor="moeda">Moeda</FieldLabel>
               <Select
                 value={formData.moeda}
                 onValueChange={(value) => handleChange('moeda', value)}
@@ -214,10 +220,12 @@ export function CustomerServiceDialog({
                   <SelectItem value="EUR">EUR</SelectItem>
                 </SelectContent>
               </Select>
-            </div>
+            </Field>
 
-            <div className="space-y-2">
-              <Label htmlFor="conta">Conta</Label>
+            <Field>
+              <FieldLabel required htmlFor="conta">
+                Conta
+              </FieldLabel>
               <Input
                 id="conta"
                 value={formData.conta}
@@ -225,10 +233,12 @@ export function CustomerServiceDialog({
                 placeholder="Ex: CT-10001"
                 required
               />
-            </div>
+            </Field>
 
-            <div className="space-y-2">
-              <Label htmlFor="cvp">CVP</Label>
+            <Field>
+              <FieldLabel required htmlFor="cvp">
+                CVP
+              </FieldLabel>
               <Input
                 id="cvp"
                 value={formData.cvp}
@@ -236,40 +246,40 @@ export function CustomerServiceDialog({
                 placeholder="Ex: CVP-2001"
                 required
               />
-            </div>
+            </Field>
 
-            <div className="space-y-2">
-              <Label htmlFor="dataFim">Data de Fim</Label>
+            <Field>
+              <FieldLabel htmlFor="dataFim">Data de Fim</FieldLabel>
               <DatePicker
                 id="dataFim"
                 value={formData.dataFim}
                 onChange={(v) => handleChange('dataFim', v)}
               />
-            </div>
+            </Field>
 
-            <div className="space-y-2">
-              <Label htmlFor="numClient">Número de Cliente</Label>
+            <Field>
+              <FieldLabel htmlFor="numClient">Número de Cliente</FieldLabel>
               <Input
                 id="numClient"
                 value={formData.numClient}
                 onChange={(e) => handleChange('numClient', e.target.value)}
                 placeholder="Ex: NC-5001"
               />
-            </div>
+            </Field>
 
-            <div className="space-y-2">
-              <Label htmlFor="numServico">Número de Serviço</Label>
+            <Field>
+              <FieldLabel htmlFor="numServico">Número de Serviço</FieldLabel>
               <Input
                 id="numServico"
                 value={formData.numServico}
                 onChange={(e) => handleChange('numServico', e.target.value)}
                 placeholder="Ex: NS-8001"
               />
-            </div>
+            </Field>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="morada">Morada</Label>
+          <Field>
+            <FieldLabel htmlFor="morada">Morada</FieldLabel>
             <Textarea
               id="morada"
               value={formData.morada}
@@ -279,10 +289,10 @@ export function CustomerServiceDialog({
               placeholder="Ex: Rua da Liberdade, 123, 1250-096 Lisboa"
               rows={2}
             />
-          </div>
+          </Field>
 
-          <div className="space-y-2">
-            <Label htmlFor="observacoes">Observações</Label>
+          <Field>
+            <FieldLabel htmlFor="observacoes">Observações</FieldLabel>
             <Textarea
               id="observacoes"
               value={formData.observacoes}
@@ -292,7 +302,7 @@ export function CustomerServiceDialog({
               placeholder="Notas adicionais sobre o serviço..."
               rows={3}
             />
-          </div>
+          </Field>
 
           <DialogFooter>
             <Button

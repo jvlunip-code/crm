@@ -1,5 +1,9 @@
-import { useParams, useNavigate } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
+import { UserX } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { EmptyState } from '@/components/shared/EmptyState';
 import { useCustomer } from '@/hooks/use-customers';
 import { useCustomerServices } from '@/hooks/use-customer-services';
 import { useCustomerNotes } from '@/hooks/use-customer-notes';
@@ -14,7 +18,6 @@ import { CustomerDocumentsTab } from '@/components/customer/CustomerDocumentsTab
 
 export function CustomerDetailPage() {
   const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
   const customerId = Number(id);
 
   const { data: customer, isLoading: customerLoading } = useCustomer(customerId);
@@ -25,68 +28,60 @@ export function CustomerDetailPage() {
 
   if (customerLoading) {
     return (
-      <div className="flex flex-1 items-center justify-center">
-        <p className="text-muted-foreground">A carregar cliente...</p>
+      <div className="flex flex-col gap-3 px-4 py-4 lg:px-6" aria-busy>
+        <Skeleton className="h-7 w-64" />
+        <Skeleton className="h-4 w-40" />
+        <Skeleton className="mt-4 h-40 w-full" />
       </div>
     );
   }
 
   if (!customer) {
     return (
-      <div className="flex flex-1 flex-col items-center justify-center gap-4">
-        <p className="text-muted-foreground">Cliente não encontrado</p>
-        <button onClick={() => navigate('/customers')} className="text-primary hover:underline">
-          Voltar aos clientes
-        </button>
+      <div className="px-4 py-4 lg:px-6">
+        <EmptyState
+          framed
+          icon={<UserX />}
+          title="Cliente não encontrado"
+          description="O cliente pode ter sido eliminado ou o endereço está incorreto."
+          action={
+            <Button variant="outline" size="sm" asChild>
+              <Link to="/customers">Voltar aos clientes</Link>
+            </Button>
+          }
+        />
       </div>
     );
   }
 
+  const parentCount = customerServices?.filter((s) => !s.parentId).length ?? 0;
+  const count = (n: number) =>
+    n > 0 && <span className="type-caption text-muted-foreground tabular-nums">{n}</span>;
+
   return (
-    <div className="flex flex-1 flex-col gap-4 pb-4">
-      <CustomerHeader customer={customer} />
+    <>
+      <CustomerHeader customer={customer}>
+        <CustomerSummaryCards
+          customer={customer}
+          services={customerServices || []}
+          notes={notes || []}
+        />
+      </CustomerHeader>
 
-      <CustomerSummaryCards
-        customer={customer}
-        services={customerServices || []}
-        notes={notes || []}
-      />
-
-      <div className="px-4 lg:px-6">
-        <Tabs defaultValue="overview" className="w-full">
-          <TabsList className="mb-4">
-            <TabsTrigger value="overview">Visão Geral</TabsTrigger>
-            <TabsTrigger value="services">
-              Serviços
-              {customerServices && customerServices.length > 0 && (
-                <span className="bg-muted-foreground/20 ml-2 rounded-full px-2 py-0.5 text-xs">
-                  {customerServices.filter((s) => !s.parentId).length}
-                </span>
-              )}
-            </TabsTrigger>
-            <TabsTrigger value="notes">
-              Notas
-              {notes && notes.length > 0 && (
-                <span className="bg-muted-foreground/20 ml-2 rounded-full px-2 py-0.5 text-xs">
-                  {notes.length}
-                </span>
-              )}
-            </TabsTrigger>
-            <TabsTrigger value="documents">
-              Documentos
-              {documents && documents.length > 0 && (
-                <span className="bg-muted-foreground/20 ml-2 rounded-full px-2 py-0.5 text-xs">
-                  {documents.length}
-                </span>
-              )}
-            </TabsTrigger>
+      <div className="w-full px-4 py-4 lg:px-6">
+        <Tabs defaultValue="overview">
+          <TabsList variant="line">
+            <TabsTrigger value="overview">Visão geral</TabsTrigger>
+            <TabsTrigger value="services">Serviços {count(parentCount)}</TabsTrigger>
+            <TabsTrigger value="notes">Notas {count(notes?.length ?? 0)}</TabsTrigger>
+            <TabsTrigger value="documents">Documentos {count(documents?.length ?? 0)}</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="overview">
+          <TabsContent value="overview" className="mt-4">
             <CustomerOverviewTab customer={customer} customerId={customerId} address={address} />
           </TabsContent>
 
-          <TabsContent value="services">
+          <TabsContent value="services" className="mt-4">
             <CustomerServicesTab
               customerId={customerId}
               services={customerServices || []}
@@ -94,7 +89,7 @@ export function CustomerDetailPage() {
             />
           </TabsContent>
 
-          <TabsContent value="notes">
+          <TabsContent value="notes" className="mt-4">
             <CustomerNotesTab
               customerId={customerId}
               notes={notes || []}
@@ -102,7 +97,7 @@ export function CustomerDetailPage() {
             />
           </TabsContent>
 
-          <TabsContent value="documents">
+          <TabsContent value="documents" className="mt-4">
             <CustomerDocumentsTab
               customerId={customerId}
               documents={documents || []}
@@ -111,6 +106,6 @@ export function CustomerDetailPage() {
           </TabsContent>
         </Tabs>
       </div>
-    </div>
+    </>
   );
 }
