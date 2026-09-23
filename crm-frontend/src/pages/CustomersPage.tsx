@@ -34,8 +34,10 @@ import { Pagination } from '@/components/shared/Pagination';
 import { StatusBadge } from '@/components/shared/StatusBadge';
 import { TableToolbar } from '@/components/shared/TableToolbar';
 import { CustomerDialog } from '@/components/customer/CustomerDialog';
+import { ConfirmDeleteDialog } from '@/components/shared/ConfirmDeleteDialog';
 import { CustomerSearchCombobox } from '@/components/customer/CustomerSearchCombobox';
 import { useCustomersPage, useDeleteCustomer } from '@/hooks/use-customers';
+import { useDeleteTarget } from '@/hooks/use-delete-target';
 import { getStatusTone } from '@/lib/status';
 import { cn, formatNif, getStatusLabel } from '@/lib/utils';
 import type { Customer } from '@/types';
@@ -95,13 +97,11 @@ export function CustomersPage() {
     setDialogOpen(true);
   };
 
-  const handleDelete = async (id: number) => {
-    try {
-      await deleteCustomer.mutateAsync(id);
-      toast.success('Cliente eliminado com sucesso');
-    } catch {
-      toast.error('Erro ao eliminar cliente');
-    }
+  const pendingDelete = useDeleteTarget<Customer>();
+  const confirmDelete = async () => {
+    if (!pendingDelete.target) return;
+    await deleteCustomer.mutateAsync(pendingDelete.target.id);
+    toast.success('Cliente eliminado');
   };
 
   return (
@@ -245,7 +245,7 @@ export function CustomersPage() {
                             <DropdownMenuSeparator />
                             <DropdownMenuItem
                               variant="destructive"
-                              onClick={() => handleDelete(customer.id)}
+                              onSelect={() => pendingDelete.request(customer)}
                             >
                               Eliminar
                             </DropdownMenuItem>
@@ -282,6 +282,14 @@ export function CustomersPage() {
       </div>
 
       <CustomerDialog customer={editingCustomer} open={dialogOpen} onOpenChange={setDialogOpen} />
+      <ConfirmDeleteDialog
+        open={pendingDelete.open}
+        onOpenChange={pendingDelete.setOpen}
+        title={`Eliminar ${pendingDelete.target?.name ?? 'cliente'}?`}
+        description="O cliente e todos os seus serviços, documentos, contactos e morada serão eliminados permanentemente. Esta ação não pode ser anulada."
+        confirmLabel="Eliminar cliente"
+        onConfirm={confirmDelete}
+      />
     </>
   );
 }
