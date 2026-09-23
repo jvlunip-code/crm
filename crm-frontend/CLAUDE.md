@@ -72,18 +72,21 @@ Hooks in `hooks/` abstract this — some call the real API, others call mock dat
 
 ### UI Framework
 
-- **shadcn/ui** components in `components/ui/` — do not edit these directly, use `npx shadcn@latest add` to add new ones
-- **Custom components**: `components/customer/` (customer detail tabs, dialogs), `components/dashboard/` (charts, data table)
+- **UI primitives** in `components/ui/` — the phmcare web-app's radix-nova shadcn components (`radix-ui` monopackage), restyled on the design tokens. Port changes from the web-app instead of editing ad hoc; see `DESIGN.md`
+- **Page molecules** in `components/shared/` — `PageHeader`, `TableToolbar`, `SearchField`, `Pagination`, `ClientTable`, `MetricCard`, `StatStrip`, `EmptyState`, `StatusBadge`, `SectionEyebrow`
+- **Custom components**: `components/customer/` (customer detail tabs, dialogs, `DetailPanel`), `components/dashboard/` (charts, data table), `components/layout/` (sidebar, header, user menu, notifications bell)
 - **Icons**: Lucide React (`lucide-react`)
 - **Charts**: Recharts (`recharts`)
-- **Toast notifications**: Sonner (`sonner`) — `<Toaster>` mounted in `main.tsx`
+- **Toast notifications**: Sonner via `components/ui/sonner` — `<Toaster>` mounted in `App.tsx`; `<TooltipProvider>` is mounted in `main.tsx`
 - **Tables**: TanStack Table for sortable/filterable data grids
-- **Drag & drop**: dnd-kit for file upload zone
+- **Drag & drop**: dnd-kit for the dashboard table row reordering
 
 ### Styling
 
-- Tailwind CSS 4 with CSS variables (HSL) defined in `src/index.css`
-- Light and dark mode via class strategy
+- **Design system: `DESIGN.md`** — a clone of the phmcare web-app system. Tokens in `src/index.css` (hex values, three layers), Inter Variable + Geist Mono Variable, `type-*` text utilities, 2px/4px radii
+- Tailwind CSS 4 via `@tailwindcss/vite` (no `tailwind.config.js`); `tw-animate-css` + `shadcn/tailwind.css`
+- Light only: dark mode is not supported, don't add `dark:` utilities
+- Status colour comes from a tone (`StatusBadge` + `lib/status.ts`), never raw Tailwind palette classes
 - `cn()` utility from `lib/utils.ts` (clsx + tailwind-merge) for conditional classes
 
 ### Locale

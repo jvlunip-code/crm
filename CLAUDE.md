@@ -62,7 +62,8 @@ No test framework is configured for either frontend or backend.
 - `lib/api-client.ts` — Central API client. Handles CSRF tokens, session auth credentials, and automatic snake_case↔camelCase key transformation between Django and React.
 - `lib/mock-data.ts` — localStorage-based mock data layer for features without backend endpoints yet (services catalog, notifications, events, customer notes, customer addresses).
 - `hooks/` — TanStack Query hooks wrapping API client calls (useQuery/useMutation). Check each hook to determine if it uses real API or mock data.
-- `components/ui/` — shadcn/ui library components (do not edit directly).
+- `components/ui/` — radix-nova shadcn primitives ported from the phmcare web-app and restyled on its design tokens (see `crm-frontend/DESIGN.md`).
+- `components/shared/` — page molecules (PageHeader, TableToolbar, ClientTable, StatusBadge, EmptyState…).
 - `components/customer/` — Customer detail view components (tabs, dialogs, forms).
 - `components/layout/` — Header, Sidebar, Layout, ProtectedRoute wrappers.
 - `pages/` — Route-level page components (Dashboard, Customers, CustomerDetail, Services, Notifications, Events, Login).
