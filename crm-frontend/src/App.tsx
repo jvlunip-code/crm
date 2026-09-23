@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { Toaster } from 'sonner';
+import { Toaster } from '@/components/ui/sonner';
 import { Layout } from './components/layout/Layout';
 import { ProtectedRoute } from './components/layout/ProtectedRoute';
 import { LoginPage } from './pages/LoginPage';
@@ -26,7 +26,7 @@ export default function App() {
           </Route>
         </Route>
       </Routes>
-      <Toaster position="bottom-right" />
+      <Toaster />
     </BrowserRouter>
   );
 }

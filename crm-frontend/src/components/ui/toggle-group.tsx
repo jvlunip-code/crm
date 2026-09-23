@@ -1,64 +1,74 @@
 import * as React from 'react';
-import * as ToggleGroupPrimitive from '@radix-ui/react-toggle-group';
-import { cva, type VariantProps } from 'class-variance-authority';
+import { type VariantProps } from 'class-variance-authority';
+import { ToggleGroup as ToggleGroupPrimitive } from 'radix-ui';
+
 import { cn } from '@/lib/utils';
+import { toggleVariants } from '@/components/ui/toggle';
 
-const toggleVariants = cva(
-  'inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-muted hover:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 data-[state=on]:bg-accent data-[state=on]:text-accent-foreground',
-  {
-    variants: {
-      variant: {
-        default: 'bg-transparent',
-        outline:
-          'border border-input bg-transparent shadow-sm hover:bg-accent hover:text-accent-foreground',
-      },
-      size: {
-        default: 'h-9 px-3',
-        sm: 'h-8 px-2',
-        lg: 'h-10 px-3',
-      },
-    },
-    defaultVariants: {
-      variant: 'default',
-      size: 'default',
-    },
-  },
-);
-
-const ToggleGroupContext = React.createContext<VariantProps<typeof toggleVariants>>({
+const ToggleGroupContext = React.createContext<
+  VariantProps<typeof toggleVariants> & {
+    spacing?: number;
+    orientation?: 'horizontal' | 'vertical';
+  }
+>({
   size: 'default',
   variant: 'default',
+  spacing: 0,
+  orientation: 'horizontal',
 });
 
-const ToggleGroup = React.forwardRef<
-  React.ElementRef<typeof ToggleGroupPrimitive.Root>,
-  React.ComponentPropsWithoutRef<typeof ToggleGroupPrimitive.Root> &
-    VariantProps<typeof toggleVariants>
->(({ className, variant, size, children, ...props }, ref) => (
-  <ToggleGroupPrimitive.Root
-    ref={ref}
-    data-slot="toggle-group"
-    className={cn('flex items-center justify-center gap-1', className)}
-    {...props}
-  >
-    <ToggleGroupContext.Provider value={{ variant, size }}>{children}</ToggleGroupContext.Provider>
-  </ToggleGroupPrimitive.Root>
-));
+/** Segmented control: items share one border and sit flush by default. */
+function ToggleGroup({
+  className,
+  variant,
+  size,
+  spacing = 0,
+  orientation = 'horizontal',
+  children,
+  ...props
+}: React.ComponentProps<typeof ToggleGroupPrimitive.Root> &
+  VariantProps<typeof toggleVariants> & {
+    spacing?: number;
+    orientation?: 'horizontal' | 'vertical';
+  }) {
+  return (
+    <ToggleGroupPrimitive.Root
+      data-slot="toggle-group"
+      data-variant={variant}
+      data-size={size}
+      data-spacing={spacing}
+      data-orientation={orientation}
+      style={{ '--gap': spacing } as React.CSSProperties}
+      className={cn(
+        'group/toggle-group flex w-fit flex-row items-center gap-[--spacing(var(--gap))] rounded-sm data-vertical:flex-col data-vertical:items-stretch',
+        className,
+      )}
+      {...props}
+    >
+      <ToggleGroupContext.Provider value={{ variant, size, spacing, orientation }}>
+        {children}
+      </ToggleGroupContext.Provider>
+    </ToggleGroupPrimitive.Root>
+  );
+}
 
-ToggleGroup.displayName = ToggleGroupPrimitive.Root.displayName;
-
-const ToggleGroupItem = React.forwardRef<
-  React.ElementRef<typeof ToggleGroupPrimitive.Item>,
-  React.ComponentPropsWithoutRef<typeof ToggleGroupPrimitive.Item> &
-    VariantProps<typeof toggleVariants>
->(({ className, children, variant, size, ...props }, ref) => {
+function ToggleGroupItem({
+  className,
+  children,
+  variant = 'default',
+  size = 'default',
+  ...props
+}: React.ComponentProps<typeof ToggleGroupPrimitive.Item> & VariantProps<typeof toggleVariants>) {
   const context = React.useContext(ToggleGroupContext);
 
   return (
     <ToggleGroupPrimitive.Item
-      ref={ref}
       data-slot="toggle-group-item"
+      data-variant={context.variant || variant}
+      data-size={context.size || size}
+      data-spacing={context.spacing}
       className={cn(
+        'shrink-0 group-data-[spacing=0]/toggle-group:rounded-none focus:z-10 focus-visible:z-10 group-data-horizontal/toggle-group:data-[spacing=0]:first:rounded-l-sm group-data-vertical/toggle-group:data-[spacing=0]:first:rounded-t-sm group-data-horizontal/toggle-group:data-[spacing=0]:last:rounded-r-sm group-data-vertical/toggle-group:data-[spacing=0]:last:rounded-b-sm group-data-horizontal/toggle-group:data-[spacing=0]:data-[variant=outline]:not-first:-ml-px group-data-vertical/toggle-group:data-[spacing=0]:data-[variant=outline]:not-first:-mt-px',
         toggleVariants({
           variant: context.variant || variant,
           size: context.size || size,
@@ -70,8 +80,6 @@ const ToggleGroupItem = React.forwardRef<
       {children}
     </ToggleGroupPrimitive.Item>
   );
-});
-
-ToggleGroupItem.displayName = ToggleGroupPrimitive.Item.displayName;
+}
 
 export { ToggleGroup, ToggleGroupItem };

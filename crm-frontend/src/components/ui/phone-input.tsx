@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { cn } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
 import {
   Select,
@@ -66,9 +67,9 @@ export function PhoneInput({ value, onChange, required, className }: PhoneInputP
   };
 
   return (
-    <div className={`flex gap-2 ${className ?? ''}`}>
+    <div className={cn('flex gap-2', className)}>
       <Select value={country.code} disabled>
-        <SelectTrigger className="w-[100px] shrink-0">
+        <SelectTrigger className="w-24 shrink-0">
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
@@ -84,7 +85,7 @@ export function PhoneInput({ value, onChange, required, className }: PhoneInputP
         onChange={handleDigitChange}
         placeholder={country.mask.replace(/0/g, '0')}
         required={required}
-        className="flex-1"
+        className="flex-1 type-mono"
       />
     </div>
   );
