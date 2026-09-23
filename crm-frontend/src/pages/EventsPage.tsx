@@ -1,6 +1,5 @@
 import * as React from 'react';
 import {
-  flexRender,
   getCoreRowModel,
   getFilteredRowModel,
   getPaginationRowModel,
@@ -10,25 +9,8 @@ import {
   type ColumnFiltersState,
   type SortingState,
 } from '@tanstack/react-table';
-import {
-  ChevronLeft,
-  ChevronRight,
-  ChevronsLeft,
-  ChevronsRight,
-  Search,
-  UserPlus,
-  UserMinus,
-  Edit,
-  Trash2,
-  Package,
-  Settings,
-  Activity,
-} from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { Activity } from 'lucide-react';
+import type { BadgeTone } from '@/components/ui/badge';
 import {
   Select,
   SelectContent,
@@ -36,35 +18,31 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
+import { Skeleton } from '@/components/ui/skeleton';
+import { ClientTable } from '@/components/shared/ClientTable';
+import { EmptyState } from '@/components/shared/EmptyState';
+import { PageHeader } from '@/components/shared/PageHeader';
+import { SearchField } from '@/components/shared/SearchField';
+import { StatusBadge } from '@/components/shared/StatusBadge';
+import { TableToolbar } from '@/components/shared/TableToolbar';
 import { useEvents } from '@/hooks/use-events';
 import type { Event } from '@/types';
 
-const actionIcons: Record<string, React.ElementType> = {
-  create: UserPlus,
-  update: Edit,
-  delete: Trash2,
-  activate: Package,
-  deactivate: UserMinus,
-  config: Settings,
-  default: Activity,
+/** Event action → label and tone (the label carries the meaning). */
+const ACTIONS: Record<string, { label: string; tone: BadgeTone }> = {
+  create: { label: 'Criação', tone: 'success' },
+  update: { label: 'Atualização', tone: 'info' },
+  delete: { label: 'Eliminação', tone: 'error' },
+  activate: { label: 'Ativação', tone: 'success' },
+  deactivate: { label: 'Desativação', tone: 'warning' },
+  config: { label: 'Configuração', tone: 'note' },
 };
 
-const actionColors: Record<string, string> = {
-  create: 'text-green-500',
-  update: 'text-blue-500',
-  delete: 'text-destructive',
-  activate: 'text-green-500',
-  deactivate: 'text-yellow-500',
-  config: 'text-purple-500',
-  default: 'text-muted-foreground',
+const ENTITY_LABELS: Record<Event['entityType'], string> = {
+  customer: 'Cliente',
+  service: 'Serviço',
+  notification: 'Notificação',
+  system: 'Sistema',
 };
 
 const columns: ColumnDef<Event>[] = [
@@ -72,52 +50,45 @@ const columns: ColumnDef<Event>[] = [
     accessorKey: 'action',
     header: 'Ação',
     cell: ({ row }) => {
-      const action = row.original.action;
-      const Icon = actionIcons[action] || actionIcons.default;
-      const color = actionColors[action] || actionColors.default;
+      const action = ACTIONS[row.original.action];
       return (
-        <div className="flex items-center gap-2">
-          <Icon className={`h-4 w-4 ${color}`} />
-          <Badge variant="outline" className="capitalize">
-            {action}
-          </Badge>
-        </div>
+        <StatusBadge tone={action?.tone ?? 'neutral'}>
+          {action?.label ?? row.original.action}
+        </StatusBadge>
       );
     },
   },
   {
     accessorKey: 'entityType',
-    header: 'Tipo de Entidade',
+    header: 'Entidade',
     cell: ({ row }) => (
-      <Badge variant="secondary" className="capitalize">
-        {row.original.entityType}
-      </Badge>
-    ),
-  },
-  {
-    accessorKey: 'entityId',
-    header: 'ID da Entidade',
-    cell: ({ row }) => (
-      <div className="text-muted-foreground font-mono text-sm">#{row.original.entityId}</div>
+      <span className="text-foreground-secondary">
+        {ENTITY_LABELS[row.original.entityType] ?? row.original.entityType}{' '}
+        <span className="type-mono text-xs text-muted-foreground">#{row.original.entityId}</span>
+      </span>
     ),
   },
   {
     accessorKey: 'description',
     header: 'Descrição',
-    cell: ({ row }) => <div className="max-w-[400px] truncate">{row.original.description}</div>,
+    cell: ({ row }) => (
+      <div className="max-w-[56ch] truncate text-foreground">{row.original.description}</div>
+    ),
   },
   {
     accessorKey: 'performedBy',
-    header: 'Executado Por',
-    cell: ({ row }) => <div className="font-medium">{row.original.performedBy}</div>,
+    header: 'Executado por',
+    cell: ({ row }) => (
+      <span className="text-foreground-secondary">{row.original.performedBy}</span>
+    ),
   },
   {
     accessorKey: 'createdAt',
-    header: 'Data/Hora',
+    header: 'Data/hora',
     cell: ({ row }) => (
-      <div className="text-muted-foreground text-sm">
+      <span className="type-mono text-xs whitespace-nowrap text-foreground-secondary">
         {new Date(row.original.createdAt).toLocaleString('pt-PT')}
-      </div>
+      </span>
     ),
   },
 ];
@@ -155,163 +126,61 @@ export function EventsPage() {
     getSortedRowModel: getSortedRowModel(),
   });
 
-  if (isLoading) {
-    return (
-      <div className="flex flex-1 items-center justify-center">
-        <div className="text-muted-foreground">A carregar eventos...</div>
-      </div>
-    );
-  }
+  const query = (table.getColumn('description')?.getFilterValue() as string) ?? '';
+  const total = table.getFilteredRowModel().rows.length;
 
   return (
-    <div className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle className="flex items-center gap-2">
-                <Activity className="h-5 w-5" />
-                Eventos do Sistema
-              </CardTitle>
-              <CardDescription>Registar todas as ações realizadas no sistema</CardDescription>
-            </div>
+    <>
+      <PageHeader
+        title="Eventos"
+        description="Registo das ações realizadas no sistema sobre clientes, serviços e notificações."
+      />
+
+      <div className="flex flex-col gap-3 px-4 py-4 lg:px-6">
+        <TableToolbar count={events ? `${total} evento${total === 1 ? '' : 's'}` : undefined}>
+          <SearchField
+            value={query}
+            onChange={(event) => table.getColumn('description')?.setFilterValue(event.target.value)}
+            onClear={() => table.getColumn('description')?.setFilterValue('')}
+            placeholder="Procurar eventos…"
+            aria-label="Procurar eventos"
+            className="w-full sm:w-72"
+          />
+          <Select value={entityTypeFilter} onValueChange={setEntityTypeFilter}>
+            <SelectTrigger className="w-40" aria-label="Filtrar por entidade">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todas as entidades</SelectItem>
+              <SelectItem value="customer">Clientes</SelectItem>
+              <SelectItem value="service">Serviços</SelectItem>
+              <SelectItem value="notification">Notificações</SelectItem>
+            </SelectContent>
+          </Select>
+        </TableToolbar>
+
+        {isLoading ? (
+          <div className="flex flex-col gap-3" aria-busy>
+            {Array.from({ length: 5 }).map((_, i) => (
+              <Skeleton key={i} className="h-6 w-full" />
+            ))}
           </div>
-        </CardHeader>
-        <CardContent>
-          <div className="mb-4 flex items-center gap-4">
-            <div className="relative flex-1">
-              <Search className="text-muted-foreground absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2" />
-              <Input
-                placeholder="Pesquisar eventos..."
-                value={(table.getColumn('description')?.getFilterValue() as string) ?? ''}
-                onChange={(event) =>
-                  table.getColumn('description')?.setFilterValue(event.target.value)
+        ) : (
+          <ClientTable
+            table={table}
+            empty={
+              <EmptyState
+                icon={<Activity />}
+                title={
+                  query || entityTypeFilter !== 'all'
+                    ? 'Nenhum evento corresponde ao filtro.'
+                    : 'Ainda não há eventos registados.'
                 }
-                className="pl-9"
               />
-            </div>
-            <Select value={entityTypeFilter} onValueChange={setEntityTypeFilter}>
-              <SelectTrigger className="w-40">
-                <SelectValue placeholder="Filtrar por tipo" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todos os Tipos</SelectItem>
-                <SelectItem value="customer">Clientes</SelectItem>
-                <SelectItem value="service">Serviços</SelectItem>
-                <SelectItem value="notification">Notificações</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="overflow-hidden rounded-lg border">
-            <Table>
-              <TableHeader className="bg-muted">
-                {table.getHeaderGroups().map((headerGroup) => (
-                  <TableRow key={headerGroup.id}>
-                    {headerGroup.headers.map((header) => (
-                      <TableHead key={header.id}>
-                        {header.isPlaceholder
-                          ? null
-                          : flexRender(header.column.columnDef.header, header.getContext())}
-                      </TableHead>
-                    ))}
-                  </TableRow>
-                ))}
-              </TableHeader>
-              <TableBody>
-                {table.getRowModel().rows?.length ? (
-                  table.getRowModel().rows.map((row) => (
-                    <TableRow key={row.id}>
-                      {row.getVisibleCells().map((cell) => (
-                        <TableCell key={cell.id}>
-                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                        </TableCell>
-                      ))}
-                    </TableRow>
-                  ))
-                ) : (
-                  <TableRow>
-                    <TableCell colSpan={columns.length} className="h-24 text-center">
-                      Nenhum evento encontrado.
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </div>
-
-          <div className="mt-4 flex items-center justify-between">
-            <div className="text-muted-foreground text-sm">
-              {table.getFilteredRowModel().rows.length} evento(s)
-            </div>
-            <div className="flex items-center gap-8">
-              <div className="flex items-center gap-2">
-                <Label htmlFor="rows-per-page" className="text-sm font-medium">
-                  Linhas por página
-                </Label>
-                <Select
-                  value={`${table.getState().pagination.pageSize}`}
-                  onValueChange={(value) => {
-                    table.setPageSize(Number(value));
-                  }}
-                >
-                  <SelectTrigger size="sm" className="w-20" id="rows-per-page">
-                    <SelectValue placeholder={table.getState().pagination.pageSize} />
-                  </SelectTrigger>
-                  <SelectContent side="top">
-                    {[10, 20, 30, 40, 50].map((pageSize) => (
-                      <SelectItem key={pageSize} value={`${pageSize}`}>
-                        {pageSize}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="size-8"
-                  onClick={() => table.setPageIndex(0)}
-                  disabled={!table.getCanPreviousPage()}
-                >
-                  <ChevronsLeft className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="size-8"
-                  onClick={() => table.previousPage()}
-                  disabled={!table.getCanPreviousPage()}
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                </Button>
-                <span className="text-sm">
-                  Página {table.getState().pagination.pageIndex + 1} de {table.getPageCount()}
-                </span>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="size-8"
-                  onClick={() => table.nextPage()}
-                  disabled={!table.getCanNextPage()}
-                >
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="size-8"
-                  onClick={() => table.setPageIndex(table.getPageCount() - 1)}
-                  disabled={!table.getCanNextPage()}
-                >
-                  <ChevronsRight className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+            }
+          />
+        )}
+      </div>
+    </>
   );
 }

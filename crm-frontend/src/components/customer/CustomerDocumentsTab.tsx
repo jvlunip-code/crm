@@ -1,7 +1,6 @@
 import { useRef } from 'react';
-import { Upload, MoreVertical, FileText, Image, File, Download } from 'lucide-react';
+import { Download, File, FileText, Image, MoreVertical, Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,6 +17,8 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { FileDropZone } from '@/components/ui/file-drop-zone';
+import { Skeleton } from '@/components/ui/skeleton';
+import { DetailPanel } from './DetailPanel';
 import { UploadProgressList } from './UploadProgressList';
 import { useDeleteDocument } from '@/hooks/use-customer-documents';
 import { useFileUpload } from '@/hooks/use-file-upload';
@@ -42,11 +43,11 @@ export function CustomerDocumentsTab({
   const getFileIcon = (type: string) => {
     switch (type) {
       case 'pdf':
-        return <FileText className="h-4 w-4 text-red-500" />;
+        return <FileText className="size-4 shrink-0 text-muted-foreground" aria-hidden />;
       case 'image':
-        return <Image className="h-4 w-4 text-blue-500" />;
+        return <Image className="size-4 shrink-0 text-muted-foreground" aria-hidden />;
       default:
-        return <File className="h-4 w-4 text-gray-500" />;
+        return <File className="size-4 shrink-0 text-muted-foreground" aria-hidden />;
     }
   };
 
@@ -75,104 +76,113 @@ export function CustomerDocumentsTab({
 
   if (isLoading) {
     return (
-      <Card>
-        <CardContent className="flex h-48 items-center justify-center">
-          <p className="text-muted-foreground">A carregar documentos...</p>
-        </CardContent>
-      </Card>
+      <DetailPanel title="Documentos">
+        <div className="flex flex-col gap-3 p-4" aria-busy>
+          {Array.from({ length: 3 }).map((_, i) => (
+            <Skeleton key={i} className="h-6 w-full" />
+          ))}
+        </div>
+      </DetailPanel>
     );
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <div>
-            <CardTitle>Documentos</CardTitle>
-            <CardDescription>Contratos, acordos e outros ficheiros deste cliente</CardDescription>
-          </div>
-          <Button size="sm" disabled={isUploading} onClick={() => fileInputRef.current?.click()}>
-            <Upload className="mr-2 h-4 w-4" />
-            {isUploading ? 'A carregar...' : 'Carregar'}
-          </Button>
-        </div>
-      </CardHeader>
-      <CardContent>
+    <DetailPanel
+      title="Documentos"
+      description="Contratos, acordos e outros ficheiros deste cliente"
+      action={
+        <Button size="sm" disabled={isUploading} onClick={() => fileInputRef.current?.click()}>
+          <Upload />
+          {isUploading ? 'A carregar…' : 'Carregar'}
+        </Button>
+      }
+    >
+      <div className="flex flex-col gap-4 p-4">
         <FileDropZone
           ref={fileInputRef}
           onFilesSelected={uploadFiles}
           accept=".pdf,.png,.jpg,.jpeg,.doc,.docx,.xls,.xlsx,.csv,.txt"
           disabled={isUploading}
-          className="mb-4"
         />
 
         {uploads.length > 0 && (
           <UploadProgressList uploads={uploads} onClearCompleted={clearCompleted} />
         )}
 
-        {documents.length === 0 ? (
-          <div className="flex h-20 flex-col items-center justify-center rounded-lg border border-dashed">
-            <p className="text-muted-foreground text-sm">Sem documentos</p>
-          </div>
-        ) : (
-          <div className="overflow-hidden rounded-lg border">
-            <Table>
-              <TableHeader className="bg-muted">
-                <TableRow>
-                  <TableHead>Nome</TableHead>
-                  <TableHead>Tipo</TableHead>
-                  <TableHead>Tamanho</TableHead>
-                  <TableHead>Carregado</TableHead>
-                  <TableHead className="w-10"></TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {documents.map((document) => (
-                  <TableRow key={document.id}>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        {getFileIcon(document.type)}
-                        <span className="font-medium">{document.name}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell className="uppercase text-xs">{document.type}</TableCell>
-                    <TableCell>{formatFileSize(document.size)}</TableCell>
-                    <TableCell>
-                      {new Date(document.uploadedAt).toLocaleDateString('pt-PT')}
-                    </TableCell>
-                    <TableCell>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-8 w-8">
-                            <MoreVertical className="h-4 w-4" />
-                            <span className="sr-only">Ações</span>
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-32">
-                          <DropdownMenuItem onClick={() => handleDownload(document)}>
-                            <Download className="mr-2 h-4 w-4" />
-                            Transferir
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleView(document)}>
-                            Ver
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem
-                            variant="destructive"
-                            onClick={() => handleDelete(document.id)}
-                          >
-                            Eliminar
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
+        {documents.length === 0 && (
+          <p className="text-center type-body text-muted-foreground">Sem documentos</p>
         )}
-      </CardContent>
-    </Card>
+      </div>
+
+      {documents.length > 0 && (
+        <div className="border-t border-border">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Nome</TableHead>
+                <TableHead>Tipo</TableHead>
+                <TableHead className="text-right">Tamanho</TableHead>
+                <TableHead>Carregado</TableHead>
+                <TableHead className="w-10">
+                  <span className="sr-only">Ações</span>
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {documents.map((document) => (
+                <TableRow key={document.id}>
+                  <TableCell className="max-w-[48ch]">
+                    <div className="flex min-w-0 items-center gap-2">
+                      {getFileIcon(document.type)}
+                      <span className="truncate font-medium" title={document.name}>
+                        {document.name}
+                      </span>
+                    </div>
+                  </TableCell>
+                  <TableCell className="type-kbd text-foreground-secondary uppercase">
+                    {document.type}
+                  </TableCell>
+                  <TableCell className="text-right type-mono text-xs text-foreground-secondary">
+                    {formatFileSize(document.size)}
+                  </TableCell>
+                  <TableCell className="type-mono text-xs text-foreground-secondary">
+                    {new Date(document.uploadedAt).toLocaleDateString('pt-PT')}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon-xs"
+                          aria-label={`Ações para ${document.name}`}
+                        >
+                          <MoreVertical />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-36">
+                        <DropdownMenuItem onClick={() => handleDownload(document)}>
+                          <Download />
+                          Transferir
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleView(document)}>
+                          Ver
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem
+                          variant="destructive"
+                          onClick={() => handleDelete(document.id)}
+                        >
+                          Eliminar
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      )}
+    </DetailPanel>
   );
 }

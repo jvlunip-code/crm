@@ -76,10 +76,10 @@ export const FileDropZone = React.forwardRef<HTMLInputElement, FileDropZoneProps
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
         className={cn(
-          'flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed px-6 py-8 transition-colors',
+          'flex cursor-pointer flex-col items-center justify-center gap-1 rounded-sm border border-dashed px-6 py-8 text-center transition-colors',
           isDragOver
-            ? 'border-primary bg-primary/5'
-            : 'border-muted-foreground/25 hover:border-muted-foreground/50',
+            ? 'border-ring bg-selection'
+            : 'border-border-dashed bg-card hover:border-border-strong',
           disabled && 'pointer-events-none opacity-50',
           className,
         )}
@@ -93,19 +93,23 @@ export const FileDropZone = React.forwardRef<HTMLInputElement, FileDropZoneProps
           className="hidden"
           disabled={disabled}
         />
-        <Upload
-          className={cn('mb-2 h-8 w-8', isDragOver ? 'text-primary' : 'text-muted-foreground')}
-        />
+        <span
+          aria-hidden
+          className={cn(
+            'mb-1 flex size-8 items-center justify-center rounded-sm border bg-muted/60 [&>svg]:size-4',
+            isDragOver ? 'border-ring text-link' : 'border-border text-muted-foreground',
+          )}
+        >
+          <Upload />
+        </span>
         {isDragOver ? (
-          <p className="text-primary text-sm font-medium">Drop files here</p>
+          <p className="type-section text-foreground">Largue os ficheiros aqui</p>
         ) : (
           <>
-            <p className="text-muted-foreground text-sm font-medium">
-              Drag & drop files here, or click to browse
+            <p className="type-section text-foreground">
+              Arraste ficheiros para aqui ou clique para escolher
             </p>
-            <p className="text-muted-foreground/70 mt-1 text-xs">
-              PDF, PNG, JPG, DOC, XLS, CSV, TXT
-            </p>
+            <p className="type-caption text-muted-foreground">PDF, PNG, JPG, DOC, XLS, CSV, TXT</p>
           </>
         )}
       </div>

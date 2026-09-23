@@ -9,7 +9,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { Field, FieldDescription, FieldLabel } from '@/components/ui/field';
 import { useUpsertCustomerAddress } from '@/hooks/use-customer-address';
 import type { CustomerAddress } from '@/types';
 import { toast } from 'sonner';
@@ -152,9 +152,11 @@ export function CustomerAddressDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="street">Morada</Label>
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          <Field>
+            <FieldLabel required htmlFor="street">
+              Morada
+            </FieldLabel>
             <Input
               id="street"
               value={formData.street}
@@ -162,10 +164,12 @@ export function CustomerAddressDialog({
               placeholder="Ex: Rua Augusta, 100"
               required
             />
-          </div>
+          </Field>
 
-          <div className="space-y-2">
-            <Label htmlFor="postalCode">Código Postal</Label>
+          <Field>
+            <FieldLabel required htmlFor="postalCode">
+              Código Postal
+            </FieldLabel>
             <Input
               id="postalCode"
               value={formData.postalCode}
@@ -174,12 +178,14 @@ export function CustomerAddressDialog({
               maxLength={8}
               required
             />
-            {isFetchingPostalCode && <p className="text-muted-foreground text-xs">A procurar...</p>}
-          </div>
+            {isFetchingPostalCode && <FieldDescription>A procurar…</FieldDescription>}
+          </Field>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="municipality">Concelho</Label>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field>
+              <FieldLabel required htmlFor="municipality">
+                Concelho
+              </FieldLabel>
               <Input
                 id="municipality"
                 value={formData.municipality}
@@ -187,28 +193,28 @@ export function CustomerAddressDialog({
                 placeholder="Ex: Lisboa"
                 required
               />
-            </div>
+            </Field>
 
-            <div className="space-y-2">
-              <Label htmlFor="parish">Freguesia ou Localidade</Label>
+            <Field>
+              <FieldLabel htmlFor="parish">Freguesia ou Localidade</FieldLabel>
               <Input
                 id="parish"
                 value={formData.parish}
                 onChange={(e) => handleChange('parish', e.target.value)}
                 placeholder="Ex: Santa Maria Maior"
               />
-            </div>
+            </Field>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="district">Distrito</Label>
+          <Field>
+            <FieldLabel htmlFor="district">Distrito</FieldLabel>
             <Input
               id="district"
               value={formData.district}
               onChange={(e) => handleChange('district', e.target.value)}
               placeholder="Ex: Lisboa"
             />
-          </div>
+          </Field>
 
           <DialogFooter>
             <Button

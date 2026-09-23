@@ -9,7 +9,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { Field, FieldLabel } from '@/components/ui/field';
 import { PhoneInput } from '@/components/ui/phone-input';
 import {
   Select,
@@ -106,9 +106,11 @@ export function CustomerDialog({ customer, open, onOpenChange }: CustomerDialogP
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="name">Nome</Label>
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          <Field>
+            <FieldLabel required htmlFor="name">
+              Nome
+            </FieldLabel>
             <Input
               id="name"
               value={formData.name}
@@ -116,10 +118,12 @@ export function CustomerDialog({ customer, open, onOpenChange }: CustomerDialogP
               placeholder="Nome completo"
               required
             />
-          </div>
+          </Field>
 
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+          <Field>
+            <FieldLabel required htmlFor="email">
+              Email
+            </FieldLabel>
             <Input
               id="email"
               type="email"
@@ -128,19 +132,23 @@ export function CustomerDialog({ customer, open, onOpenChange }: CustomerDialogP
               placeholder="email@exemplo.com"
               required
             />
-          </div>
+          </Field>
 
-          <div className="space-y-2">
-            <Label htmlFor="phone">Telefone</Label>
+          <Field>
+            <FieldLabel required htmlFor="phone">
+              Telefone
+            </FieldLabel>
             <PhoneInput
               value={formData.phone}
               onChange={(v) => handleChange('phone', v)}
               required
             />
-          </div>
+          </Field>
 
-          <div className="space-y-2">
-            <Label htmlFor="company">Empresa</Label>
+          <Field>
+            <FieldLabel required htmlFor="company">
+              Empresa
+            </FieldLabel>
             <Input
               id="company"
               value={formData.company}
@@ -148,10 +156,10 @@ export function CustomerDialog({ customer, open, onOpenChange }: CustomerDialogP
               placeholder="Nome da empresa"
               required
             />
-          </div>
+          </Field>
 
-          <div className="space-y-2">
-            <Label htmlFor="status">Estado</Label>
+          <Field>
+            <FieldLabel htmlFor="status">Estado</FieldLabel>
             <Select
               value={formData.status}
               onValueChange={(value) => handleChange('status', value)}
@@ -164,7 +172,7 @@ export function CustomerDialog({ customer, open, onOpenChange }: CustomerDialogP
                 <SelectItem value="inactive">Inativo</SelectItem>
               </SelectContent>
             </Select>
-          </div>
+          </Field>
 
           <DialogFooter>
             <Button

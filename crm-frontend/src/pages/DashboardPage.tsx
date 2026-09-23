@@ -1,6 +1,8 @@
 import { SectionCards } from '@/components/dashboard/SectionCards';
 import { ChartAreaInteractive } from '@/components/dashboard/ChartAreaInteractive';
 import { DataTable } from '@/components/dashboard/DataTable';
+import { PageHeader } from '@/components/shared/PageHeader';
+import { StatusBadge } from '@/components/shared/StatusBadge';
 
 // Sample data for the table with "unread" and "read" status
 const data = [
@@ -143,14 +145,26 @@ const data = [
 
 export function DashboardPage() {
   return (
-    <div className="@container/main flex flex-1 flex-col gap-2">
-      <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
-        <SectionCards />
-        <div className="px-4 lg:px-6">
+    <>
+      <PageHeader
+        title="Painel"
+        description="Visão geral da carteira de clientes, serviços e do que precisa de atenção."
+      />
+      <div className="@container/main flex flex-col gap-6 py-4">
+        <div className="flex flex-col gap-3 px-4 lg:px-6">
+          <SectionCards />
           <ChartAreaInteractive />
         </div>
-        <DataTable data={data} />
+        <div className="flex flex-col gap-3">
+          <div className="flex items-center gap-2 px-4 lg:px-6">
+            <h2 className="type-section text-foreground">Secções</h2>
+            <StatusBadge tone="warning" dot={false}>
+              Dados de demonstração
+            </StatusBadge>
+          </div>
+          <DataTable data={data} />
+        </div>
       </div>
-    </div>
+    </>
   );
 }
