@@ -22,6 +22,8 @@ import { DetailPanel } from './DetailPanel';
 import { cn } from '@/lib/utils';
 import { useDeleteCustomerService } from '@/hooks/use-customer-services';
 import { CustomerServiceDialog } from '@/components/customer/CustomerServiceDialog';
+import { ConfirmDeleteDialog } from '@/components/shared/ConfirmDeleteDialog';
+import { useDeleteTarget } from '@/hooks/use-delete-target';
 import type { CustomerService } from '@/types';
 import { toast } from 'sonner';
 
@@ -77,13 +79,12 @@ export function CustomerServicesTab({ customerId, services, isLoading }: Custome
     setDialogOpen(true);
   };
 
-  const handleDelete = async (id: number) => {
-    try {
-      await deleteService.mutateAsync({ id, customerId });
-      toast.success('Serviço eliminado com sucesso');
-    } catch {
-      toast.error('Erro ao eliminar serviço');
-    }
+  const pendingDelete = useDeleteTarget<CustomerService>();
+  const pendingChildren = pendingDelete.target ? getChildren(pendingDelete.target.id).length : 0;
+  const confirmDelete = async () => {
+    if (!pendingDelete.target) return;
+    await deleteService.mutateAsync({ id: pendingDelete.target.id, customerId });
+    toast.success('Serviço eliminado');
   };
 
   const formatCurrency = (valor: number, moeda: string) => {
@@ -175,7 +176,10 @@ export function CustomerServicesTab({ customerId, services, isLoading }: Custome
                   </DropdownMenuItem>
                 )}
                 <DropdownMenuSeparator />
-                <DropdownMenuItem variant="destructive" onClick={() => handleDelete(service.id)}>
+                <DropdownMenuItem
+                  variant="destructive"
+                  onSelect={() => pendingDelete.request(service)}
+                >
                   Eliminar
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -232,6 +236,19 @@ export function CustomerServicesTab({ customerId, services, isLoading }: Custome
           </Table>
         )}
       </DetailPanel>
+
+      <ConfirmDeleteDialog
+        open={pendingDelete.open}
+        onOpenChange={pendingDelete.setOpen}
+        title={`Eliminar o serviço ${pendingDelete.target?.acesso ?? ''}?`}
+        description={
+          pendingChildren > 0
+            ? `O serviço e os seus ${pendingChildren} sub-serviço${pendingChildren === 1 ? '' : 's'} serão eliminados permanentemente.`
+            : 'O serviço será eliminado permanentemente.'
+        }
+        confirmLabel="Eliminar serviço"
+        onConfirm={confirmDelete}
+      />
 
       <CustomerServiceDialog
         customerId={customerId}

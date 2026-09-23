@@ -11,6 +11,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Textarea } from '@/components/ui/textarea';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { DetailPanel } from './DetailPanel';
+import { ConfirmDeleteDialog } from '@/components/shared/ConfirmDeleteDialog';
+import { useDeleteTarget } from '@/hooks/use-delete-target';
 import { useCreateNote, useDeleteNote } from '@/hooks/use-customer-notes';
 import type { CustomerNote } from '@/types';
 
@@ -39,8 +41,10 @@ export function CustomerNotesTab({ customerId, notes, isLoading }: CustomerNotes
     setIsAdding(false);
   };
 
-  const handleDeleteNote = async (noteId: number) => {
-    await deleteNote.mutateAsync(noteId);
+  const pendingDelete = useDeleteTarget<CustomerNote>();
+  const confirmDelete = async () => {
+    if (!pendingDelete.target) return;
+    await deleteNote.mutateAsync(pendingDelete.target.id);
   };
 
   const formatDate = (dateString: string) => {
@@ -144,7 +148,10 @@ export function CustomerNotesTab({ customerId, notes, isLoading }: CustomerNotes
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-32">
-                  <DropdownMenuItem variant="destructive" onClick={() => handleDeleteNote(note.id)}>
+                  <DropdownMenuItem
+                    variant="destructive"
+                    onSelect={() => pendingDelete.request(note)}
+                  >
                     Eliminar
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -153,6 +160,13 @@ export function CustomerNotesTab({ customerId, notes, isLoading }: CustomerNotes
           ))}
         </ul>
       )}
+      <ConfirmDeleteDialog
+        open={pendingDelete.open}
+        onOpenChange={pendingDelete.setOpen}
+        title="Eliminar nota?"
+        description="A nota será eliminada permanentemente."
+        onConfirm={confirmDelete}
+      />
     </DetailPanel>
   );
 }

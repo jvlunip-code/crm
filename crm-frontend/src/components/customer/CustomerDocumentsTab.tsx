@@ -19,6 +19,8 @@ import {
 import { FileDropZone } from '@/components/ui/file-drop-zone';
 import { Skeleton } from '@/components/ui/skeleton';
 import { DetailPanel } from './DetailPanel';
+import { ConfirmDeleteDialog } from '@/components/shared/ConfirmDeleteDialog';
+import { useDeleteTarget } from '@/hooks/use-delete-target';
 import { UploadProgressList } from './UploadProgressList';
 import { useDeleteDocument } from '@/hooks/use-customer-documents';
 import { useFileUpload } from '@/hooks/use-file-upload';
@@ -59,8 +61,10 @@ export function CustomerDocumentsTab({
     return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
   };
 
-  const handleDelete = async (documentId: number) => {
-    await deleteDocument.mutateAsync(documentId);
+  const pendingDelete = useDeleteTarget<CustomerDocument>();
+  const confirmDelete = async () => {
+    if (!pendingDelete.target) return;
+    await deleteDocument.mutateAsync(pendingDelete.target.id);
   };
 
   const handleDownload = (document: CustomerDocument) => {
@@ -170,7 +174,7 @@ export function CustomerDocumentsTab({
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
                           variant="destructive"
-                          onClick={() => handleDelete(document.id)}
+                          onSelect={() => pendingDelete.request(document)}
                         >
                           Eliminar
                         </DropdownMenuItem>
@@ -183,6 +187,14 @@ export function CustomerDocumentsTab({
           </Table>
         </div>
       )}
+      <ConfirmDeleteDialog
+        open={pendingDelete.open}
+        onOpenChange={pendingDelete.setOpen}
+        title={`Eliminar ${pendingDelete.target?.name ?? 'documento'}?`}
+        description="O ficheiro será eliminado permanentemente e deixará de estar disponível para transferência."
+        confirmLabel="Eliminar documento"
+        onConfirm={confirmDelete}
+      />
     </DetailPanel>
   );
 }
