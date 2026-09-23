@@ -64,15 +64,16 @@ import {
 } from '@/components/ui/chart';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
-  Drawer,
-  DrawerClose,
-  DrawerContent,
-  DrawerDescription,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
-} from '@/components/ui/drawer';
+  Sheet,
+  SheetBody,
+  SheetClose,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet';
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -602,18 +603,18 @@ function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
   const isMobile = useIsMobile();
 
   return (
-    <Drawer direction={isMobile ? 'bottom' : 'right'}>
-      <DrawerTrigger asChild>
+    <Sheet>
+      <SheetTrigger asChild>
         <Button variant="link" className="text-foreground w-fit px-0 text-left">
           {item.header}
         </Button>
-      </DrawerTrigger>
-      <DrawerContent>
-        <DrawerHeader className="gap-1">
-          <DrawerTitle>{item.header}</DrawerTitle>
-          <DrawerDescription>Total de visitantes nos últimos 6 meses</DrawerDescription>
-        </DrawerHeader>
-        <div className="flex flex-col gap-4 overflow-y-auto px-4 text-sm">
+      </SheetTrigger>
+      <SheetContent>
+        <SheetHeader>
+          <SheetTitle>{item.header}</SheetTitle>
+          <SheetDescription>Total de visitantes nos últimos 6 meses</SheetDescription>
+        </SheetHeader>
+        <SheetBody className="flex flex-col gap-4 type-body">
           {!isMobile && (
             <>
               <ChartContainer config={chartConfig}>
@@ -727,14 +728,14 @@ function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
               </Select>
             </div>
           </form>
-        </div>
-        <DrawerFooter>
+        </SheetBody>
+        <SheetFooter>
           <Button>Submeter</Button>
-          <DrawerClose asChild>
+          <SheetClose asChild>
             <Button variant="outline">Concluído</Button>
-          </DrawerClose>
-        </DrawerFooter>
-      </DrawerContent>
-    </Drawer>
+          </SheetClose>
+        </SheetFooter>
+      </SheetContent>
+    </Sheet>
   );
 }

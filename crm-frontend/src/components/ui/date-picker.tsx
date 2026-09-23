@@ -3,7 +3,6 @@ import { format, isValid, parse } from 'date-fns';
 import { pt } from 'date-fns/locale/pt';
 import { CalendarIcon } from 'lucide-react';
 
-import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Input } from '@/components/ui/input';
@@ -79,7 +78,7 @@ export function DatePicker({ value, onChange, placeholder = 'dd/mm/aaaa', id }: 
           }
         }}
         placeholder={placeholder}
-        className={cn('pr-10', invalid && 'border-destructive focus-visible:ring-destructive')}
+        className="pr-9"
         inputMode="numeric"
         autoComplete="off"
         aria-invalid={invalid || undefined}
@@ -89,11 +88,11 @@ export function DatePicker({ value, onChange, placeholder = 'dd/mm/aaaa', id }: 
           <Button
             type="button"
             variant="ghost"
-            size="icon"
-            className="absolute right-1 top-1/2 h-7 w-7 -translate-y-1/2"
+            size="icon-xs"
+            className="absolute top-1/2 right-1 -translate-y-1/2"
             aria-label="Abrir calendário"
           >
-            <CalendarIcon className="h-4 w-4" />
+            <CalendarIcon />
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0" align="end">
