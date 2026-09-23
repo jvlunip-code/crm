@@ -1,16 +1,15 @@
 import * as React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import {
   ArrowDown,
   ArrowUp,
-  ChevronLeft,
-  ChevronRight,
+  ArrowUpDown,
+  ArrowUpRight,
   MoreVertical,
   Plus,
-  Search,
-  User,
+  Users,
 } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import {
@@ -20,27 +19,33 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useCustomersPage, useDeleteCustomer } from '@/hooks/use-customers';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { EmptyState } from '@/components/shared/EmptyState';
+import { PageHeader } from '@/components/shared/PageHeader';
+import { Pagination } from '@/components/shared/Pagination';
+import { SearchField } from '@/components/shared/SearchField';
+import { StatusBadge } from '@/components/shared/StatusBadge';
+import { TableToolbar } from '@/components/shared/TableToolbar';
 import { CustomerDialog } from '@/components/customer/CustomerDialog';
+import { useCustomersPage, useDeleteCustomer } from '@/hooks/use-customers';
+import { getStatusTone } from '@/lib/status';
+import { cn, formatNif, getStatusLabel } from '@/lib/utils';
 import type { Customer } from '@/types';
-import { toast } from 'sonner';
 
 const PAGE_SIZE = 10;
 
 type SortField = 'name' | 'company' | 'status' | 'created_at';
 type SortState = { field: SortField; dir: 'asc' | 'desc' } | null;
 
-const SORT_OPTIONS: { field: SortField; label: string }[] = [
-  { field: 'name', label: 'Nome' },
-  { field: 'company', label: 'Empresa' },
-  { field: 'status', label: 'Estado' },
-  { field: 'created_at', label: 'Criado' },
-];
-
 export function CustomersPage() {
-  const navigate = useNavigate();
   const [searchInput, setSearchInput] = React.useState('');
   const [submittedSearch, setSubmittedSearch] = React.useState('');
   const [sort, setSort] = React.useState<SortState>(null);
@@ -49,12 +54,15 @@ export function CustomersPage() {
   const [editingCustomer, setEditingCustomer] = React.useState<Customer | undefined>();
 
   const ordering = sort ? `${sort.dir === 'desc' ? '-' : ''}${sort.field}` : undefined;
-  const { data, isFetching } = useCustomersPage({ search: submittedSearch, ordering, page });
+  const { data, isFetching, isError, error, refetch } = useCustomersPage({
+    search: submittedSearch,
+    ordering,
+    page,
+  });
   const deleteCustomer = useDeleteCustomer();
 
   const customers = data?.items;
   const count = data?.count ?? 0;
-  const pageCount = Math.max(1, Math.ceil(count / PAGE_SIZE));
 
   const handleSubmitSearch = () => {
     setSubmittedSearch(searchInput.trim());
@@ -97,186 +105,221 @@ export function CustomersPage() {
   };
 
   return (
-    <div className="w-full space-y-4 p-4 lg:p-6">
-      {/* Filter bar: search + count on the left, create on the right. */}
-      <form
-        onSubmit={(event) => {
-          event.preventDefault();
-          handleSubmitSearch();
-        }}
-        className="flex flex-col gap-3 sm:flex-row sm:items-center"
-      >
-        <div className="relative min-w-0 flex-1">
-          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            value={searchInput}
-            onChange={(event) => setSearchInput(event.target.value)}
-            placeholder="Procurar por nome, empresa, NIF, email ou morada…"
-            className="pl-9"
-            aria-label="Procurar clientes"
-          />
-        </div>
-        <Button type="submit" variant="secondary" size="sm">
-          Pesquisar
-        </Button>
-        {submittedSearch && (
-          <Button type="button" variant="ghost" size="sm" onClick={handleClearSearch}>
-            Limpar
+    <>
+      <PageHeader
+        title="Clientes"
+        description="A carteira de clientes e os respetivos contactos, serviços e documentos."
+        actions={
+          <Button onClick={handleCreate}>
+            <Plus aria-hidden />
+            Adicionar cliente
           </Button>
-        )}
-        {data && (
-          <span className="whitespace-nowrap text-sm tabular-nums text-muted-foreground">
-            {count} cliente{count === 1 ? '' : 's'}
-          </span>
-        )}
-        <Button type="button" onClick={handleCreate} size="sm" className="sm:ml-auto">
-          <Plus className="h-4 w-4" />
-          Adicionar Cliente
-        </Button>
-      </form>
+        }
+      />
 
-      {/* Sort row: order results by attribute, toggling asc/desc. */}
-      <div className="flex flex-wrap items-center gap-2">
-        <span className="text-sm text-muted-foreground">Ordenar por:</span>
-        {SORT_OPTIONS.map(({ field, label }) => {
-          const active = sort?.field === field;
-          return (
-            <Button
-              key={field}
-              type="button"
-              variant={active ? 'secondary' : 'ghost'}
-              size="sm"
-              className="h-8 min-w-0 px-3"
-              onClick={() => handleSort(field)}
-              aria-pressed={active}
-            >
-              {label}
-              {active &&
-                (sort.dir === 'asc' ? (
-                  <ArrowUp className="h-3.5 w-3.5" />
-                ) : (
-                  <ArrowDown className="h-3.5 w-3.5" />
-                ))}
+      <div className="flex flex-col gap-3 px-4 py-4 lg:px-6">
+        <TableToolbar count={data ? `${count} cliente${count === 1 ? '' : 's'}` : undefined}>
+          {/* Server-side full-text search: runs on submit, not per keystroke. */}
+          <form
+            role="search"
+            onSubmit={(event) => {
+              event.preventDefault();
+              handleSubmitSearch();
+            }}
+            className="flex w-full min-w-0 items-center gap-2 sm:w-auto"
+          >
+            <SearchField
+              value={searchInput}
+              onChange={(event) => setSearchInput(event.target.value)}
+              onClear={handleClearSearch}
+              placeholder="Procurar por nome, empresa, NIF, email ou morada…"
+              aria-label="Procurar clientes"
+              className="w-full sm:w-96"
+            />
+            <Button type="submit" variant="outline">
+              Pesquisar
             </Button>
-          );
-        })}
+          </form>
+        </TableToolbar>
+
+        <Card
+          className={cn('py-0 transition-opacity', isFetching && customers && 'opacity-70')}
+          aria-busy={isFetching}
+        >
+          {isError ? (
+            <EmptyState
+              tone="error"
+              title="Não foi possível carregar os clientes."
+              description={error.message}
+              action={
+                <Button variant="outline" size="sm" onClick={() => void refetch()}>
+                  Tentar novamente
+                </Button>
+              }
+            />
+          ) : !customers ? (
+            <div className="flex flex-col gap-3 p-4" aria-busy>
+              {Array.from({ length: 5 }).map((_, i) => (
+                <Skeleton key={i} className="h-6 w-full" />
+              ))}
+            </div>
+          ) : customers.length === 0 ? (
+            <EmptyState
+              icon={<Users />}
+              title={
+                submittedSearch
+                  ? 'Nenhum cliente corresponde à pesquisa.'
+                  : 'Ainda não há clientes. Crie o primeiro com «Adicionar cliente».'
+              }
+            />
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <SortableHead field="name" sort={sort} onSort={handleSort}>
+                    Nome
+                  </SortableHead>
+                  <SortableHead field="company" sort={sort} onSort={handleSort}>
+                    Empresa
+                  </SortableHead>
+                  <TableHead className="hidden lg:table-cell">Contacto</TableHead>
+                  <TableHead className="hidden md:table-cell">NIF</TableHead>
+                  <SortableHead
+                    field="created_at"
+                    sort={sort}
+                    onSort={handleSort}
+                    className="hidden md:table-cell"
+                  >
+                    Criado
+                  </SortableHead>
+                  <SortableHead field="status" sort={sort} onSort={handleSort}>
+                    Estado
+                  </SortableHead>
+                  <TableHead className="w-16">
+                    <span className="sr-only">Ações</span>
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {customers.map((customer) => (
+                  <TableRow key={customer.id}>
+                    <TableCell className="max-w-[32ch] truncate font-medium">
+                      <Link
+                        to={`/customers/${customer.id}`}
+                        className="rounded-xs text-foreground outline-none hover:underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                      >
+                        {customer.name}
+                      </Link>
+                    </TableCell>
+                    <TableCell className="max-w-[28ch] truncate text-foreground-secondary">
+                      {customer.company || <span className="text-muted-foreground">—</span>}
+                    </TableCell>
+                    <TableCell className="hidden max-w-[36ch] truncate text-foreground-secondary lg:table-cell">
+                      {[customer.email, customer.phone].filter(Boolean).join(' · ') || '—'}
+                    </TableCell>
+                    <TableCell className="hidden type-mono text-xs text-foreground-secondary md:table-cell">
+                      {formatNif(customer.nif)}
+                    </TableCell>
+                    <TableCell className="hidden type-mono text-xs text-foreground-secondary md:table-cell">
+                      {new Date(customer.createdAt).toLocaleDateString('pt-PT')}
+                    </TableCell>
+                    <TableCell>
+                      <StatusBadge tone={getStatusTone(customer.status)}>
+                        {getStatusLabel(customer.status)}
+                      </StatusBadge>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex items-center justify-end gap-0.5">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon-xs"
+                              aria-label={`Ações para ${customer.name}`}
+                            >
+                              <MoreVertical />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="w-32">
+                            <DropdownMenuItem onClick={() => handleEdit(customer)}>
+                              Editar
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                              variant="destructive"
+                              onClick={() => handleDelete(customer.id)}
+                            >
+                              Eliminar
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                        <Button
+                          asChild
+                          variant="ghost"
+                          size="icon-xs"
+                          aria-label={`Abrir ${customer.name}`}
+                        >
+                          <Link to={`/customers/${customer.id}`}>
+                            <ArrowUpRight />
+                          </Link>
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </Card>
+
+        {/* Server-side pagination: 10 per page. */}
+        {data && count > PAGE_SIZE && (
+          <Pagination
+            offset={(page - 1) * PAGE_SIZE}
+            pageSize={PAGE_SIZE}
+            total={count}
+            onChange={(offset) => setPage(offset / PAGE_SIZE + 1)}
+          />
+        )}
       </div>
 
-      <Card className={isFetching ? 'w-full opacity-70 transition-opacity' : 'w-full'}>
-        {!customers ? (
-          <div className="space-y-3 p-4">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <Skeleton key={i} className="h-12 w-full" />
-            ))}
-          </div>
-        ) : customers.length === 0 ? (
-          <div className="p-8 text-sm text-muted-foreground">
-            {submittedSearch
-              ? 'Nenhum cliente corresponde à pesquisa.'
-              : 'Ainda não há clientes. Crie o primeiro com «Adicionar Cliente».'}
-          </div>
-        ) : (
-          <ul className="divide-y">
-            {customers.map((customer) => (
-              <li key={customer.id}>
-                <div
-                  role="link"
-                  tabIndex={0}
-                  onClick={() => navigate(`/customers/${customer.id}`)}
-                  onKeyDown={(event) => {
-                    if (event.key === 'Enter') navigate(`/customers/${customer.id}`);
-                  }}
-                  className="flex cursor-pointer items-center gap-3 px-4 py-3 transition-colors hover:bg-accent/60"
-                >
-                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-muted">
-                    <User className="h-4 w-4 text-muted-foreground" />
-                  </span>
-                  <div className="min-w-0 flex-1">
-                    <div className="truncate text-sm font-medium text-foreground">
-                      {customer.name}
-                    </div>
-                    <div className="truncate text-xs text-muted-foreground">
-                      {[customer.company, customer.email, customer.phone]
-                        .filter(Boolean)
-                        .join(' · ')}
-                    </div>
-                  </div>
-                  <span className="hidden text-xs tabular-nums text-muted-foreground md:inline">
-                    {new Date(customer.createdAt).toLocaleDateString('pt-PT')}
-                  </span>
-                  <Badge variant={customer.status === 'active' ? 'default' : 'secondary'}>
-                    {customer.status === 'active' ? 'Ativo' : 'Inativo'}
-                  </Badge>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 data-[state=open]:bg-muted"
-                        onClick={(event) => event.stopPropagation()}
-                      >
-                        <MoreVertical className="h-4 w-4" />
-                        <span className="sr-only">Abrir menu</span>
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent
-                      align="end"
-                      className="w-32"
-                      onClick={(event) => event.stopPropagation()}
-                    >
-                      <DropdownMenuItem onClick={() => navigate(`/customers/${customer.id}`)}>
-                        Ver
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleEdit(customer)}>
-                        Editar
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem
-                        variant="destructive"
-                        onClick={() => handleDelete(customer.id)}
-                      >
-                        Eliminar
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                  <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
-                </div>
-              </li>
-            ))}
-          </ul>
-        )}
-      </Card>
-
-      {/* Server-side pagination: 10 per page. */}
-      {data && pageCount > 1 && (
-        <div className="flex items-center justify-end gap-2">
-          <span className="text-sm tabular-nums text-muted-foreground">
-            Página {page} de {pageCount}
-          </span>
-          <Button
-            variant="outline"
-            size="icon"
-            className="h-8 w-8"
-            onClick={() => setPage((p) => Math.max(1, p - 1))}
-            disabled={!data.hasPrevious}
-            aria-label="Página anterior"
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="outline"
-            size="icon"
-            className="h-8 w-8"
-            onClick={() => setPage((p) => p + 1)}
-            disabled={!data.hasNext}
-            aria-label="Página seguinte"
-          >
-            <ChevronRight className="h-4 w-4" />
-          </Button>
-        </div>
-      )}
-
       <CustomerDialog customer={editingCustomer} open={dialogOpen} onOpenChange={setDialogOpen} />
-    </div>
+    </>
+  );
+}
+
+/** Column header that cycles its field's sort: asc → desc → off. */
+function SortableHead({
+  field,
+  sort,
+  onSort,
+  className,
+  children,
+}: {
+  field: SortField;
+  sort: SortState;
+  onSort: (field: SortField) => void;
+  className?: string;
+  children: React.ReactNode;
+}) {
+  const dir = sort?.field === field ? sort.dir : null;
+  const Icon = dir === 'asc' ? ArrowUp : dir === 'desc' ? ArrowDown : ArrowUpDown;
+  return (
+    <TableHead
+      className={className}
+      aria-sort={dir === 'asc' ? 'ascending' : dir === 'desc' ? 'descending' : 'none'}
+    >
+      <button
+        type="button"
+        onClick={() => onSort(field)}
+        className="-mx-1 inline-flex items-center gap-1 rounded-xs px-1 outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
+      >
+        {children}
+        <Icon
+          aria-hidden
+          className={cn('size-3.5', dir ? 'text-foreground' : 'text-muted-foreground/60')}
+        />
+      </button>
+    </TableHead>
   );
 }
