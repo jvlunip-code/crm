@@ -26,8 +26,6 @@ import {
   ChevronRight,
   ChevronsLeft,
   ChevronsRight,
-  CheckCircle2,
-  Circle,
   MoreVertical,
   GripVertical,
   Columns3,
@@ -55,6 +53,9 @@ import { z } from 'zod';
 
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Badge } from '@/components/ui/badge';
+import { StatusBadge } from '@/components/shared/StatusBadge';
+import { getStatusTone } from '@/lib/status';
+import { getStatusLabel } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import {
   ChartContainer,
@@ -176,9 +177,7 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
     header: 'Tipo de Secção',
     cell: ({ row }) => (
       <div className="w-32">
-        <Badge variant="outline" className="text-muted-foreground px-1.5">
-          {row.original.type}
-        </Badge>
+        <Badge variant="outline">{row.original.type}</Badge>
       </div>
     ),
   },
@@ -186,14 +185,9 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
     accessorKey: 'status',
     header: 'Estado',
     cell: ({ row }) => (
-      <Badge variant="outline" className="text-muted-foreground px-1.5">
-        {row.original.status === 'read' ? (
-          <CheckCircle2 className="fill-green-500 dark:fill-green-400 size-4" />
-        ) : (
-          <Circle className="size-4" />
-        )}
-        {row.original.status === 'read' ? 'Lido' : 'Não lido'}
-      </Badge>
+      <StatusBadge tone={getStatusTone(row.original.status)}>
+        {getStatusLabel(row.original.status)}
+      </StatusBadge>
     ),
   },
   {
@@ -214,7 +208,7 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
           Objetivo
         </Label>
         <Input
-          className="hover:bg-input/30 focus-visible:bg-background dark:hover:bg-input/30 dark:focus-visible:bg-input/30 h-8 w-16 border-transparent bg-transparent text-right shadow-none focus-visible:border dark:bg-transparent"
+          className="h-7 w-16 border-transparent bg-transparent text-right type-mono hover:border-input focus-visible:bg-input-bg"
           defaultValue={row.original.target}
           id={`${row.original.id}-target`}
         />
@@ -239,7 +233,7 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
           Limite
         </Label>
         <Input
-          className="hover:bg-input/30 focus-visible:bg-background dark:hover:bg-input/30 dark:focus-visible:bg-input/30 h-8 w-16 border-transparent bg-transparent text-right shadow-none focus-visible:border dark:bg-transparent"
+          className="h-7 w-16 border-transparent bg-transparent text-right type-mono hover:border-input focus-visible:bg-input-bg"
           defaultValue={row.original.limit}
           id={`${row.original.id}-limit`}
         />
@@ -401,7 +395,7 @@ export function DataTable({ data: initialData }: { data: z.infer<typeof schema>[
             <SelectItem value="focus-documents">Documentos de Foco</SelectItem>
           </SelectContent>
         </Select>
-        <TabsList className="**:data-[slot=badge]:bg-muted-foreground/30 hidden **:data-[slot=badge]:size-5 **:data-[slot=badge]:rounded-full **:data-[slot=badge]:px-1 @4xl/main:flex">
+        <TabsList className="hidden @4xl/main:flex">
           <TabsTrigger value="outline">Resumo</TabsTrigger>
           <TabsTrigger value="past-performance">
             Desempenho Anterior <Badge variant="secondary">3</Badge>
@@ -449,7 +443,7 @@ export function DataTable({ data: initialData }: { data: z.infer<typeof schema>[
         value="outline"
         className="relative flex flex-col gap-4 overflow-auto px-4 lg:px-6"
       >
-        <div className="overflow-hidden rounded-lg border">
+        <div className="overflow-hidden rounded-sm border border-border bg-card">
           <DndContext
             collisionDetection={closestCenter}
             modifiers={[restrictToVerticalAxis]}
@@ -492,15 +486,13 @@ export function DataTable({ data: initialData }: { data: z.infer<typeof schema>[
           </DndContext>
         </div>
         <div className="flex items-center justify-between px-4">
-          <div className="text-muted-foreground hidden flex-1 text-sm lg:flex">
+          <div className="hidden flex-1 type-caption text-muted-foreground tabular-nums lg:flex">
             {table.getFilteredSelectedRowModel().rows.length} de{' '}
             {table.getFilteredRowModel().rows.length} linha(s) selecionada(s).
           </div>
           <div className="flex w-full items-center gap-8 lg:w-fit">
             <div className="hidden items-center gap-2 lg:flex">
-              <Label htmlFor="rows-per-page" className="text-sm font-medium">
-                Linhas por página
-              </Label>
+              <Label htmlFor="rows-per-page">Linhas por página</Label>
               <Select
                 value={`${table.getState().pagination.pageSize}`}
                 onValueChange={(value) => {
@@ -519,7 +511,7 @@ export function DataTable({ data: initialData }: { data: z.infer<typeof schema>[
                 </SelectContent>
               </Select>
             </div>
-            <div className="flex w-fit items-center justify-center text-sm font-medium">
+            <div className="flex w-fit items-center justify-center type-caption text-muted-foreground tabular-nums">
               Página {table.getState().pagination.pageIndex + 1} de {table.getPageCount()}
             </div>
             <div className="ml-auto flex items-center gap-2 lg:ml-0">
@@ -567,13 +559,13 @@ export function DataTable({ data: initialData }: { data: z.infer<typeof schema>[
         </div>
       </TabsContent>
       <TabsContent value="past-performance" className="flex flex-col px-4 lg:px-6">
-        <div className="aspect-video w-full flex-1 rounded-lg border border-dashed"></div>
+        <div className="aspect-video w-full flex-1 rounded-sm border border-dashed border-border-dashed"></div>
       </TabsContent>
       <TabsContent value="key-personnel" className="flex flex-col px-4 lg:px-6">
-        <div className="aspect-video w-full flex-1 rounded-lg border border-dashed"></div>
+        <div className="aspect-video w-full flex-1 rounded-sm border border-dashed border-border-dashed"></div>
       </TabsContent>
       <TabsContent value="focus-documents" className="flex flex-col px-4 lg:px-6">
-        <div className="aspect-video w-full flex-1 rounded-lg border border-dashed"></div>
+        <div className="aspect-video w-full flex-1 rounded-sm border border-dashed border-border-dashed"></div>
       </TabsContent>
     </Tabs>
   );
