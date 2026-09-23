@@ -1,297 +1,365 @@
 @import 'tailwindcss';
-
-@plugin "tailwindcss-animate";
+@import 'tw-animate-css';
+@import 'shadcn/tailwind.css';
+@import '@fontsource-variable/inter';
+@import '@fontsource-variable/geist-mono';
 
 @custom-variant dark (&:is(.dark *));
 
-/*
- * Design tokens ported from @trialspark/spool (trialspark UI system).
- * Palette source: spool/src/themes/default.ts — semanticColors + colors.
- * Typography source: spool fontStyles (Suisse Intl copy/labels, Relative Pro headings).
- */
-@theme {
-  --font-sans: 'Suisse Intl', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --font-display: 'Relative Pro', 'Suisse Intl', system-ui, -apple-system, sans-serif;
-  --font-mono: 'Roboto Mono', ui-monospace, SFMono-Regular, Menlo, 'Cascadia Mono', monospace;
+/* ──────────────────────────────────────────────────────────────────────────
+   Design tokens — three layers (see docs/design/2026-09-08 spec):
 
-  --color-background: hsl(var(--background));
-  --color-foreground: hsl(var(--foreground));
-  --color-card: hsl(var(--card));
-  --color-card-foreground: hsl(var(--card-foreground));
-  --color-popover: hsl(var(--popover));
-  --color-popover-foreground: hsl(var(--popover-foreground));
-  --color-primary: hsl(var(--primary));
-  --color-primary-foreground: hsl(var(--primary-foreground));
-  --color-primary-hover: hsl(var(--primary-hover));
-  --color-primary-active: hsl(var(--primary-active));
-  --color-secondary: hsl(var(--secondary));
-  --color-secondary-foreground: hsl(var(--secondary-foreground));
-  --color-muted: hsl(var(--muted));
-  --color-muted-foreground: hsl(var(--muted-foreground));
-  --color-accent: hsl(var(--accent));
-  --color-accent-foreground: hsl(var(--accent-foreground));
-  --color-accent-hover: hsl(var(--accent-hover));
-  --color-destructive: hsl(var(--destructive));
-  --color-destructive-foreground: hsl(var(--destructive-foreground));
-  --color-destructive-hover: hsl(var(--destructive-hover));
-  --color-success: hsl(var(--success));
-  --color-success-foreground: hsl(var(--success-foreground));
-  --color-warning: hsl(var(--warning));
-  --color-warning-foreground: hsl(var(--warning-foreground));
-  --color-paper: hsl(var(--paper));
-  --color-brand: hsl(var(--brand));
-  --color-border: hsl(var(--border));
-  --color-input: hsl(var(--input));
-  --color-ring: hsl(var(--ring));
-  --color-chart-1: hsl(var(--chart-1));
-  --color-chart-2: hsl(var(--chart-2));
-  --color-chart-3: hsl(var(--chart-3));
-  --color-chart-4: hsl(var(--chart-4));
-  --color-chart-5: hsl(var(--chart-5));
+   1. Source primitives   — values extracted from the Langfuse site
+                            (docs/design/langfuse-extraction/tokens.css).
+                            Kept as `--lf-*` so nobody styles with them directly.
+   2. Dashboard semantics — the aliases components use (`--background`,
+                            `--foreground-secondary`, `--status-info`, …).
+                            shadcn's names are preserved so `ui/*` keeps compiling.
+   3. Component decisions — live in the components themselves (cva variants),
+                            never as new colours here.
 
-  --color-sidebar: hsl(var(--sidebar));
-  --color-sidebar-foreground: hsl(var(--sidebar-foreground));
-  --color-sidebar-primary: hsl(var(--sidebar-primary));
-  --color-sidebar-primary-foreground: hsl(var(--sidebar-primary-foreground));
-  --color-sidebar-accent: hsl(var(--sidebar-accent));
-  --color-sidebar-accent-foreground: hsl(var(--sidebar-accent-foreground));
-  --color-sidebar-border: hsl(var(--sidebar-border));
-  --color-sidebar-ring: hsl(var(--sidebar-ring));
-
-  /* spool radii: 4px buttons/inputs, 5px cards */
-  --radius-sm: 0.1875rem;
-  --radius-md: 0.25rem;
-  --radius-lg: 0.3125rem;
-  --radius-xl: 0.5rem;
-
-  /* spool shadows */
-  --shadow-card: 2px 2px 4px 0 hsl(var(--foreground) / 0.16);
-  --shadow-shallow: 0 2px 4px 0 rgb(0 0 0 / 0.1);
-  --shadow-deepest: 0 5px 40px rgb(0 0 0 / 0.2);
-}
+   Fonts: Inter (interface), Geist Mono (codes/ids/amounts). F37 Analog is the
+   source display face but is NOT licensed/available; `--font-heading` keeps it
+   first in the stack so a licensed @font-face can be dropped in later, and
+   renders as Inter 500 until then. This is a documented substitution, not a
+   match. The retired Suisse Intl / Relative Pro files still sit in
+   public/fonts/ (unlicensed) and are intentionally not referenced.
+   ────────────────────────────────────────────────────────────────────────── */
 
 :root {
-  --header-height: calc(var(--spacing) * 12);
-  --sidebar-width: 16rem;
-  --sidebar-width-icon: 3rem;
+  /* 1. Source primitives (light, measured/declared) */
+  --lf-surface-bg: #f6f6f3;
+  --lf-surface-1: #edede8;
+  --lf-surface-2: #e5e5e1;
+  --lf-surface-beige: #f1ede1;
+  --lf-surface-cta-primary: #fbff81;
+  --lf-home-highlight: #fbff7a;
+  --lf-text-primary: #222220;
+  --lf-text-secondary: #3d3d38;
+  --lf-text-tertiary: #6b6b66;
+  --lf-text-disabled: #a7a7a0;
+  --lf-text-links: #4f39f6;
+  --lf-line-structure: #cfcfc9;
+  --lf-line-divider-dash: #bebeb6;
+  --lf-line-cta: #404039;
+  --lf-callout-info: #b3abef;
+  --lf-callout-warning: #e09d00;
+  --lf-callout-error: #cc3314;
+  --lf-callout-success: #538a2e;
+  --lf-callout-idea: #119da4;
+  --lf-text-code-pink: #d05376;
+  --lf-white: #ffffff;
+  --lf-black: #000000;
 
-  /* backgroundLight — lightPaper #FDFAF7 */
-  --background: 30 60% 98%;
-  /* textDark — softBlack #1F1F1F */
-  --foreground: 0 0% 12%;
-  /* backgroundWhite cards */
-  --card: 0 0% 100%;
-  --card-foreground: 0 0% 12%;
-  --popover: 0 0% 100%;
-  --popover-foreground: 0 0% 12%;
-  /* backgroundPrimary — midBlue #0C83B7; hover/pressed midBlueDark/Darker */
-  --primary: 198 88% 38%;
-  --primary-foreground: 0 0% 100%;
-  --primary-hover: 198 87% 31%;
-  --primary-active: 198 88% 23%;
-  /* backgroundDisabled — grey100 #E9E9E9 */
-  --secondary: 0 0% 91%;
-  --secondary-foreground: 0 0% 12%;
-  --muted: 0 0% 91%;
-  /* textMetadata — grey800 #4C4C4C */
-  --muted-foreground: 0 0% 30%;
-  /* backgroundSelectedLight — midBlueLightest #E9F4F9; hover midBlueLight #B6DAE9 */
-  --accent: 199 57% 95%;
-  --accent-foreground: 198 87% 31%;
-  --accent-hover: 198 54% 81%;
-  /* feedbackError #A73E3A / feedbackErrorDark #87322F */
-  --destructive: 2 48% 44%;
-  --destructive-foreground: 0 0% 100%;
-  --destructive-hover: 2 48% 36%;
-  /* feedbackSuccess #3D7D5A */
-  --success: 147 34% 36%;
-  --success-foreground: 0 0% 100%;
-  /* feedbackWarning #C28000 — dark text for contrast */
-  --warning: 40 100% 38%;
-  --warning-foreground: 0 0% 12%;
-  /* backgroundPaper #FAF4EE */
-  --paper: 30 55% 96%;
-  /* backgroundPrimaryBrand — brightGreen #00A067 */
-  --brand: 159 100% 31%;
-  /* borderDefault — grey200 #D2D2D2 */
-  --border: 0 0% 82%;
-  --input: 0 0% 82%;
-  --ring: 198 87% 31%;
-  --radius: 0.3125rem;
-  /* data viz: blue, green, orange, purple, lavender */
-  --chart-1: 221 73% 43%;
-  --chart-2: 165 66% 43%;
-  --chart-3: 27 78% 50%;
-  --chart-4: 241 57% 55%;
-  --chart-5: 293 50% 54%;
-
-  --sidebar: 0 0% 100%;
-  --sidebar-foreground: 0 0% 12%;
-  --sidebar-primary: 198 88% 38%;
-  --sidebar-primary-foreground: 0 0% 100%;
-  --sidebar-accent: 199 57% 95%;
-  --sidebar-accent-foreground: 198 88% 23%;
-  --sidebar-border: 0 0% 82%;
-  --sidebar-ring: 198 87% 31%;
+  /* 2. Dashboard semantic aliases */
+  /* surfaces */
+  --background: var(--lf-surface-bg); /* surface.canvas */
+  --card: var(--lf-white); /* surface.panel (D) */
+  --card-foreground: var(--lf-text-primary);
+  --popover: var(--lf-white); /* surface.overlay */
+  --popover-foreground: var(--lf-text-primary);
+  --sidebar: var(--lf-surface-1); /* surface.navigation */
+  --muted: var(--lf-surface-2); /* surface.recessed */
+  --secondary: var(--lf-surface-2);
+  --secondary-foreground: var(--lf-text-primary);
+  --accent: var(--lf-surface-1); /* surface.hover */
+  --accent-foreground: var(--lf-text-primary);
+  --input-bg: var(--lf-white); /* surface.field */
+  --surface-beige: var(--lf-surface-beige);
+  /* text */
+  --foreground: var(--lf-text-primary);
+  --foreground-secondary: var(--lf-text-secondary);
+  --muted-foreground: var(--lf-text-tertiary); /* #7A7A74 fails AA → tertiary */
+  --foreground-disabled: var(--lf-text-disabled);
+  --link: var(--lf-text-links);
+  /* borders */
+  --border: var(--lf-line-structure);
+  --input: var(--lf-line-structure);
+  --border-subtle: var(--lf-surface-2);
+  --border-strong: var(--lf-line-cta);
+  --border-dashed: var(--lf-line-divider-dash);
+  /* actions */
+  --primary: var(--lf-text-primary); /* action.primary — the observed dark CTA */
+  --primary-foreground: var(--lf-white);
+  --primary-hover: var(--lf-text-secondary);
+  --accent-cta: var(--lf-surface-cta-primary); /* reserved yellow-green CTA */
+  --ring: var(--lf-text-links); /* action.focus */
+  --selection: color-mix(in srgb, var(--lf-text-links) 8%, var(--lf-white));
+  --highlight: var(--lf-home-highlight); /* text-span highlight only */
+  --destructive: var(--lf-callout-error);
+  --destructive-foreground: var(--lf-white);
+  /* status (hue on border/tint/icon; label text stays --foreground) */
+  --status-neutral: var(--lf-text-tertiary);
+  --status-info: var(--lf-callout-idea);
+  --status-success: var(--lf-callout-success);
+  --status-warning: var(--lf-callout-warning);
+  --status-error: var(--lf-callout-error);
+  --status-note: var(--lf-callout-info);
+  /* chart series (D — derived, distinct from status) */
+  --chart-1: var(--lf-text-links);
+  --chart-2: var(--lf-callout-idea);
+  --chart-3: var(--lf-callout-success);
+  --chart-4: var(--lf-callout-warning);
+  --chart-5: var(--lf-text-code-pink);
+  /* sidebar */
+  --sidebar-foreground: var(--lf-text-secondary);
+  --sidebar-primary: var(--lf-text-primary);
+  --sidebar-primary-foreground: var(--lf-white);
+  --sidebar-accent: var(--lf-surface-2);
+  --sidebar-accent-foreground: var(--lf-text-primary);
+  --sidebar-border: var(--lf-line-structure);
+  --sidebar-ring: var(--lf-text-links);
+  /* radius base (sonner reads it) */
+  --radius: 0.25rem;
 }
 
+/* Dark values as DECLARED by the source stylesheet. Not a supported mode: no
+   runtime toggle exists and these pairs were never rendered/verified. They are
+   here so Storybook's theme toggle shows the declared palette rather than
+   stock shadcn grey. Do not add `dark:` utilities in feature code. */
 .dark {
-  /* spool has no dark theme; approximate with softBlack surfaces + same brand hues */
-  --background: 0 0% 8%;
-  --foreground: 0 0% 91%;
-  --card: 0 0% 12%;
-  --card-foreground: 0 0% 91%;
-  --popover: 0 0% 12%;
-  --popover-foreground: 0 0% 91%;
-  --primary: 198 78% 45%;
-  --primary-foreground: 0 0% 100%;
-  --primary-hover: 198 78% 52%;
-  --primary-active: 198 78% 58%;
-  --secondary: 0 0% 18%;
-  --secondary-foreground: 0 0% 91%;
-  --muted: 0 0% 18%;
-  --muted-foreground: 0 0% 65%;
-  --accent: 198 40% 20%;
-  --accent-foreground: 198 54% 81%;
-  --accent-hover: 198 40% 28%;
-  --destructive: 2 55% 52%;
-  --destructive-foreground: 0 0% 100%;
-  --destructive-hover: 2 55% 60%;
-  --success: 147 40% 45%;
-  --success-foreground: 0 0% 100%;
-  --warning: 40 100% 45%;
-  --warning-foreground: 0 0% 8%;
-  --paper: 0 0% 10%;
-  --brand: 159 80% 38%;
-  --border: 0 0% 22%;
-  --input: 0 0% 24%;
-  --ring: 198 78% 52%;
-  --chart-1: 221 73% 60%;
-  --chart-2: 165 66% 50%;
-  --chart-3: 27 78% 58%;
-  --chart-4: 241 57% 68%;
-  --chart-5: 293 50% 65%;
+  --background: #171714;
+  --card: #1e1e1b;
+  --card-foreground: #e8e8e4;
+  --popover: #1e1e1b;
+  --popover-foreground: #e8e8e4;
+  --sidebar: #1e1e1b;
+  --muted: #252522;
+  --secondary: #252522;
+  --secondary-foreground: #e8e8e4;
+  --accent: #252522;
+  --accent-foreground: #e8e8e4;
+  --input-bg: #1e1e1b;
+  --surface-beige: #f1ede1;
+  --foreground: #e8e8e4;
+  --foreground-secondary: #b4b4ae;
+  --muted-foreground: #7a7a74;
+  --foreground-disabled: #4a4a45;
+  --link: #7b8ff8;
+  --border: #2c2c29;
+  --input: #2c2c29;
+  --border-subtle: #252522;
+  --border-strong: #b8b6a0;
+  --border-dashed: #232320;
+  --primary: #e8e8e4;
+  --primary-foreground: #171714;
+  --primary-hover: #b4b4ae;
+  --accent-cta: #4c4d23;
+  --ring: #7b8ff8;
+  --selection: color-mix(in srgb, #7b8ff8 16%, #171714);
+  --highlight: #4c4d23;
+  --destructive: #e86b5a;
+  --destructive-foreground: #171714;
+  --status-neutral: #7a7a74;
+  --status-info: #6ab8cc;
+  --status-success: #7fb35a;
+  --status-warning: #e8935a;
+  --status-error: #e86b5a;
+  --status-note: #b3abef;
+  --chart-1: #7b8ff8;
+  --chart-2: #6ab8cc;
+  --chart-3: #7fb35a;
+  --chart-4: #e8935a;
+  --chart-5: #e86b9a;
+  --sidebar-foreground: #b4b4ae;
+  --sidebar-primary: #e8e8e4;
+  --sidebar-primary-foreground: #171714;
+  --sidebar-accent: #252522;
+  --sidebar-accent-foreground: #e8e8e4;
+  --sidebar-border: #2c2c29;
+  --sidebar-ring: #7b8ff8;
+}
 
-  --sidebar: 0 0% 10%;
-  --sidebar-foreground: 0 0% 91%;
-  --sidebar-primary: 198 78% 52%;
-  --sidebar-primary-foreground: 0 0% 100%;
-  --sidebar-accent: 198 40% 20%;
-  --sidebar-accent-foreground: 198 54% 81%;
-  --sidebar-border: 0 0% 22%;
-  --sidebar-ring: 198 78% 52%;
+@theme inline {
+  --font-sans: 'Inter Variable', system-ui, sans-serif;
+  --font-heading: 'F37 Analog', 'Inter Variable', system-ui, sans-serif;
+  --font-mono: 'Geist Mono Variable', ui-monospace, 'SF Mono', Menlo, monospace;
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-foreground-secondary: var(--foreground-secondary);
+  --color-foreground-disabled: var(--foreground-disabled);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-hover: var(--primary-hover);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent-cta: var(--accent-cta);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-border-subtle: var(--border-subtle);
+  --color-border-strong: var(--border-strong);
+  --color-border-dashed: var(--border-dashed);
+  --color-input: var(--input);
+  --color-input-bg: var(--input-bg);
+  --color-ring: var(--ring);
+  --color-link: var(--link);
+  --color-selection: var(--selection);
+  --color-highlight: var(--highlight);
+  --color-surface-beige: var(--surface-beige);
+  --color-status-neutral: var(--status-neutral);
+  --color-status-info: var(--status-info);
+  --color-status-success: var(--status-success);
+  --color-status-warning: var(--status-warning);
+  --color-status-error: var(--status-error);
+  --color-status-note: var(--status-note);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  /* Radii: 1 (kbd) · 2 (controls, chips, cards) · 4 (menus, dialogs). Nothing
+     rounds past 4px except `rounded-full` (avatars, status dots). */
+  --radius-xs: 1px;
+  --radius-sm: 2px;
+  --radius-md: 2px;
+  --radius-lg: 4px;
+  --radius-xl: 4px;
+  --radius-2xl: 4px;
+  --radius-3xl: 4px;
+  --radius-4xl: 4px;
+
+  /* Elevation: 0 = border only (cards, tables); 1 = floating (menus, sheet);
+     2 = modal dialogs. */
+  --shadow-1: 0 4px 8px rgb(0 0 0 / 0.05), 0 4px 4px rgb(0 0 0 / 0.03);
+  --shadow-2: 0 8px 24px rgb(0 0 0 / 0.08), 0 2px 6px rgb(0 0 0 / 0.04);
+
+  /* Motion */
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --default-transition-duration: 150ms;
+  --default-transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ── Dashboard type styles ─────────────────────────────────────────────────
+   A small, fixed ramp. Single-property utilities (font-medium, text-xs…)
+   still override these when composed, which is intended. */
+@utility type-page-title {
+  font-family: var(--font-heading);
+  font-size: 21px;
+  line-height: 28px;
+  font-weight: 500;
+  letter-spacing: 0;
+}
+@utility type-metric {
+  font-family: var(--font-heading);
+  font-size: 24px;
+  line-height: 28px;
+  font-weight: 500;
+  letter-spacing: 0;
+  font-variant-numeric: tabular-nums;
+}
+@utility type-section {
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 500;
+  letter-spacing: -0.26px;
+}
+@utility type-body {
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 430;
+  letter-spacing: -0.26px;
+}
+@utility type-dense {
+  font-size: 13px;
+  line-height: 18px;
+  font-weight: 430;
+  letter-spacing: 0;
+}
+@utility type-nav {
+  font-size: 13px;
+  line-height: 16px;
+  font-weight: 430;
+  letter-spacing: -0.26px;
+}
+@utility type-label {
+  font-size: 13px;
+  line-height: 16px;
+  font-weight: 500;
+  letter-spacing: 0;
+}
+@utility type-control {
+  font-size: 13px;
+  line-height: 18px;
+  font-weight: 450;
+  letter-spacing: -0.06px;
+}
+@utility type-caption {
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+@utility type-eyebrow {
+  font-size: 11px;
+  line-height: 16px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+@utility type-mono {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 20px;
+  font-weight: 400;
+  letter-spacing: 0;
+  font-variant-numeric: tabular-nums;
+}
+@utility type-kbd {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 16px;
+  font-weight: 500;
+  letter-spacing: 0;
 }
 
 @layer base {
   * {
-    border-color: hsl(var(--border));
+    @apply border-border outline-ring/50;
+  }
+  html {
+    @apply font-sans;
+    font-feature-settings:
+      'cv11' 1,
+      'ss01' 1;
   }
   body {
-    background-color: hsl(var(--background));
-    color: hsl(var(--foreground));
-    font-family: var(--font-sans);
-    letter-spacing: 0.01em;
-    -webkit-font-smoothing: antialiased;
-    text-rendering: optimizeLegibility;
-  }
-}
-
-/* spool fontStyles — exact sizes/leading/tracking from the spool theme */
-@layer components {
-  .spool-h1 {
-    font-family: var(--font-display);
-    font-size: 64px;
-    font-weight: 500;
-    letter-spacing: 0.01em;
-    line-height: 80px;
-  }
-
-  .spool-h2 {
-    font-family: var(--font-display);
-    font-size: 40px;
-    font-weight: 500;
-    letter-spacing: 0.01em;
-    line-height: 50px;
-  }
-
-  .spool-h3 {
-    font-family: var(--font-display);
-    font-size: 32px;
-    font-weight: 500;
-    letter-spacing: 0.02em;
-    line-height: 40px;
-  }
-
-  .spool-h4 {
-    font-family: var(--font-display);
-    font-size: 28px;
-    font-weight: 500;
-    letter-spacing: 0.02em;
-    line-height: 35px;
-  }
-
-  .spool-h5 {
-    font-family: var(--font-display);
-    font-size: 20px;
-    font-weight: 700;
-    letter-spacing: 0.02em;
-    line-height: 25px;
-  }
-
-  .spool-h6 {
-    font-family: var(--font-display);
-    font-size: 16px;
-    font-weight: 700;
-    letter-spacing: 0.02em;
-    line-height: 20px;
-  }
-
-  .spool-copy {
-    font-family: var(--font-sans);
-    font-size: 16px;
-    font-weight: 400;
-    letter-spacing: 0.02em;
-    line-height: 24px;
-  }
-
-  .spool-copy-small {
-    font-family: var(--font-sans);
+    @apply bg-background text-foreground;
     font-size: 14px;
-    font-weight: 400;
-    letter-spacing: 0.01em;
     line-height: 20px;
   }
-
-  .spool-copy-xs {
-    font-family: var(--font-sans);
-    font-size: 12px;
-    font-weight: 400;
-    letter-spacing: 0.02em;
-    line-height: 18px;
+  ::selection {
+    background: var(--selection);
   }
 
-  .spool-label {
-    font-family: var(--font-sans);
-    font-size: 14px;
-    font-weight: 500;
-    letter-spacing: 0.01em;
-    line-height: 20px;
-  }
-
-  .spool-label-lg {
-    font-family: var(--font-sans);
-    font-size: 16px;
-    font-weight: 500;
-    letter-spacing: 0.01em;
-    line-height: 20px;
-  }
-
-  .spool-code {
-    background-color: hsl(var(--muted));
-    font-family: var(--font-mono);
-    font-size: 12px;
-    font-weight: 500;
-    letter-spacing: 0.05em;
-    line-height: 16px;
+  /* PRODUCT.md: reduced-motion alternatives for every animation. Spinners
+     stay (they are informational, not decorative). */
+  @media (prefers-reduced-motion: reduce) {
+    *:not(.animate-spin),
+    *:not(.animate-spin)::before,
+    *:not(.animate-spin)::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
   }
 }
