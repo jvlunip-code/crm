@@ -31,10 +31,10 @@ import {
 import { EmptyState } from '@/components/shared/EmptyState';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { Pagination } from '@/components/shared/Pagination';
-import { SearchField } from '@/components/shared/SearchField';
 import { StatusBadge } from '@/components/shared/StatusBadge';
 import { TableToolbar } from '@/components/shared/TableToolbar';
 import { CustomerDialog } from '@/components/customer/CustomerDialog';
+import { CustomerSearchCombobox } from '@/components/customer/CustomerSearchCombobox';
 import { useCustomersPage, useDeleteCustomer } from '@/hooks/use-customers';
 import { getStatusTone } from '@/lib/status';
 import { cn, formatNif, getStatusLabel } from '@/lib/utils';
@@ -128,12 +128,10 @@ export function CustomersPage() {
             }}
             className="flex w-full min-w-0 items-center gap-2 sm:w-auto"
           >
-            <SearchField
+            <CustomerSearchCombobox
               value={searchInput}
-              onChange={(event) => setSearchInput(event.target.value)}
+              onChange={setSearchInput}
               onClear={handleClearSearch}
-              placeholder="Procurar por nome, empresa, NIF, email ou morada…"
-              aria-label="Procurar clientes"
               className="w-full sm:w-96"
             />
             <Button type="submit" variant="outline">

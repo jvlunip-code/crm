@@ -1,20 +1,50 @@
 import re
 
 from django.contrib.postgres.indexes import GinIndex
-from django.contrib.postgres.search import SearchQuery, SearchRank, SearchVectorField
-from django.db import connection, models
-from django.db.models import F, Q
+from django.contrib.postgres.search import (
+    SearchQuery,
+    SearchRank,
+    SearchVectorField,
+    TrigramWordSimilarity,
+)
+from django.db import models
+from django.db.models import F, Func, Q, Value
+from django.db.models.functions import Coalesce, Greatest
 from django.db.models.expressions import RawSQL
 
-_TSQUERY_TOKEN_RE = re.compile(r"[^\w\s]", re.UNICODE)
+# Characters with a meaning in tsquery syntax. Everything else — including
+# the `.@_-` that make up emails — stays inside the token, so the query is
+# split by the same parser that built the vector ("a.b@c.pt" is one lexeme).
+_TSQUERY_SYNTAX_RE = re.compile(r"[&|!():*<>'\"\\]")
+_EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.\w+$")
+_NUMERIC_QUERY_RE = re.compile(r"^[\d\s+().-]+$")
+
+# Trigram fallback (typos): minimum word_similarity between the query and a
+# name/company. 0.35 accepts "ribiero" → "Ribeiro" (0.38) and rejects
+# "ribiero" → "Rodrigues" (0.25).
+FUZZY_THRESHOLD = 0.35
 
 
 def _build_prefix_tsquery(user_input: str) -> str | None:
-    cleaned = _TSQUERY_TOKEN_RE.sub(' ', user_input)
-    tokens = [t for t in cleaned.split() if t]
+    """Prefix-AND tsquery ('ana:* & rib:*') from free text, accents kept
+    (they are stripped in SQL by immutable_unaccent)."""
+    tokens = []
+    for raw in _TSQUERY_SYNTAX_RE.sub(' ', user_input).split():
+        token = raw.strip('.-_')
+        if '@' in token and not _EMAIL_RE.match(token):
+            # Half-typed email: the parser would split "jose@exem" into a
+            # phrase that never matches the stored email lexeme. Match on the
+            # local part, which is a prefix of that lexeme.
+            token = token.split('@', 1)[0]
+        if token:
+            tokens.append(token)
     if not tokens:
         return None
     return ' & '.join(f'{t}:*' for t in tokens)
+
+
+def _unaccent(expression):
+    return Func(expression, function='public.immutable_unaccent')
 
 
 def _customer_search_expression() -> RawSQL:
@@ -38,27 +68,60 @@ def _address_search_expression() -> RawSQL:
     )
 
 
-def _unaccent_text(value: str) -> str:
-    with connection.cursor() as cursor:
-        cursor.execute("SELECT public.immutable_unaccent(%s)", [value])
-        return cursor.fetchone()[0]
-
-
 class CustomerQuerySet(models.QuerySet):
     def search(self, query: str):
+        """Ranked, accent-insensitive search over name, company, NIF, email,
+        phone and address.
+
+        1. Full-text prefix match on the stored search vectors (GIN indexed).
+        2. Numeric input ("500 039 595", "921199660") also matches the NIF by
+           prefix and the phone with its separators removed.
+        3. Only when nothing matches: trigram similarity on name/company, so
+           a typo ("ribiero") still finds "Ribeiro". `fuzzy` is annotated on
+           those rows.
+        """
         query = (query or '').strip()
         if not query:
             return self
-        tsq_text = _build_prefix_tsquery(_unaccent_text(query))
+        tsq_text = _build_prefix_tsquery(query)
         if not tsq_text:
             return self
-        sq = SearchQuery(tsq_text, config='simple', search_type='raw')
-        return (
-            self.filter(Q(search_vector=sq) | Q(address__search_vector=sq))
-            .annotate(
-                rank=SearchRank(F('search_vector'), sq)
-                + SearchRank(F('address__search_vector'), sq)
+
+        # Unaccented in SQL: one round-trip instead of a SELECT unaccent() first.
+        sq = SearchQuery(_unaccent(Value(tsq_text)), config='simple', search_type='raw')
+        match = Q(search_vector=sq) | Q(address__search_vector=sq)
+
+        digits = re.sub(r'\D', '', query)
+        if _NUMERIC_QUERY_RE.match(query) and len(digits) >= 3:
+            match |= Q(nif__startswith=digits) | Q(phone_digits__contains=digits)
+
+        exact = (
+            self.annotate(
+                phone_digits=Func(
+                    F('phone'), Value(r'\D'), Value(''), Value('g'), function='regexp_replace'
+                )
             )
+            .filter(match)
+            .annotate(
+                rank=Coalesce(SearchRank(F('search_vector'), sq), 0.0)
+                + Coalesce(SearchRank(F('address__search_vector'), sq), 0.0),
+                fuzzy=Value(False),
+            )
+            .order_by('-rank', '-created_at')
+        )
+        if exact.exists():
+            return exact
+
+        term = _unaccent(Value(query))
+        return (
+            self.annotate(
+                rank=Greatest(
+                    TrigramWordSimilarity(term, _unaccent(F('name'))),
+                    TrigramWordSimilarity(term, _unaccent(Coalesce(F('company'), Value('')))),
+                ),
+                fuzzy=Value(True),
+            )
+            .filter(rank__gte=FUZZY_THRESHOLD)
             .order_by('-rank', '-created_at')
         )
 

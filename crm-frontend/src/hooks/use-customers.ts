@@ -18,6 +18,23 @@ export function useCustomersPage(params: CustomersPageParams) {
   });
 }
 
+/**
+ * Suggestions for the customer search field. Cached per term (backspacing is
+ * instant), previous results stay visible while the next term loads, and a
+ * superseded request is aborted. Keyed under ['customers'], so customer
+ * mutations invalidate it.
+ */
+export function useCustomerSuggestions(term: string) {
+  const query = term.trim();
+  return useQuery({
+    queryKey: ['customers', 'suggest', query.toLowerCase()],
+    queryFn: ({ signal }) => customersApi.suggest(query, signal),
+    enabled: query.length >= 2,
+    staleTime: 60_000,
+    placeholderData: keepPreviousData,
+  });
+}
+
 export function useCustomer(id: number) {
   return useQuery({
     queryKey: ['customers', id],

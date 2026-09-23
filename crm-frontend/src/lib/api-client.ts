@@ -168,6 +168,17 @@ export type CustomersPage = {
   hasPrevious: boolean;
 };
 
+export type CustomerSuggestion = Pick<
+  Customer,
+  'id' | 'name' | 'company' | 'nif' | 'email' | 'phone' | 'status'
+>;
+
+export type CustomerSuggestions = {
+  results: CustomerSuggestion[];
+  /** True when nothing matched exactly and these come from the typo-tolerant fallback. */
+  fuzzy: boolean;
+};
+
 export type CustomersPageParams = {
   search?: string;
   ordering?: string;
@@ -192,6 +203,15 @@ export const customersApi = {
       hasNext: data.next !== null,
       hasPrevious: data.previous !== null,
     };
+  },
+
+  // Search-as-you-type: best matches for `query` (backend requires ≥ 2 chars).
+  suggest: async (query: string, signal?: AbortSignal): Promise<CustomerSuggestions> => {
+    const response = await fetchWithAuth(
+      `/customers/suggest/?q=${encodeURIComponent(query.trim())}`,
+      { signal },
+    );
+    return response.json();
   },
 
   getAll: async (search?: string): Promise<Customer[]> => {
