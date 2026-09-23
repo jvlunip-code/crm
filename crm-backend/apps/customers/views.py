@@ -1,9 +1,18 @@
 from rest_framework import filters, viewsets, status
+from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from .models import Customer, CustomerAddress
-from .serializers import CustomerSerializer, CustomerAddressSerializer
+from .serializers import (
+    CustomerAddressSerializer,
+    CustomerSerializer,
+    CustomerSuggestionSerializer,
+)
+
+
+SUGGEST_MIN_LENGTH = 2
+SUGGEST_LIMIT = 8
 
 
 class CustomerPagination(PageNumberPagination):
@@ -23,6 +32,28 @@ class CustomerViewSet(viewsets.ModelViewSet):
         # Without an explicit ?ordering=, search results keep their rank order
         # (OrderingFilter only reorders when the param is present).
         return Customer.objects.search(self.request.query_params.get('search', ''))
+
+    @action(detail=False, methods=['get'])
+    def suggest(self, request):
+        """Search-as-you-type: the best matches for `?q=`, unpaginated.
+
+        `fuzzy` is true when nothing matched exactly and the results come from
+        the typo-tolerant fallback.
+        """
+        query = request.query_params.get('q', '').strip()
+        if len(query) < SUGGEST_MIN_LENGTH:
+            return Response({'results': [], 'fuzzy': False})
+        try:
+            limit = min(max(int(request.query_params.get('limit', SUGGEST_LIMIT)), 1), 20)
+        except ValueError:
+            limit = SUGGEST_LIMIT
+        matches = list(Customer.objects.search(query)[:limit])
+        return Response(
+            {
+                'results': CustomerSuggestionSerializer(matches, many=True).data,
+                'fuzzy': bool(matches) and matches[0].fuzzy,
+            }
+        )
 
 
 class CustomerAddressViewSet(viewsets.ViewSet):

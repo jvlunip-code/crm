@@ -9,6 +9,15 @@ class CustomerSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'created_at']
 
 
+class CustomerSuggestionSerializer(serializers.ModelSerializer):
+    """The few fields the search-as-you-type dropdown renders."""
+
+    class Meta:
+        model = Customer
+        fields = ['id', 'name', 'company', 'nif', 'email', 'phone', 'status']
+        read_only_fields = fields
+
+
 class CustomerAddressSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomerAddress
