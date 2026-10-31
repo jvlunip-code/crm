@@ -37,6 +37,7 @@ export function CustomerServicesTab({ customerId, services, isLoading }: Custome
   const [expandedRows, setExpandedRows] = React.useState<Set<number>>(new Set());
   const [dialogOpen, setDialogOpen] = React.useState(false);
   const [editingService, setEditingService] = React.useState<CustomerService | undefined>();
+  const [duplicatingService, setDuplicatingService] = React.useState<CustomerService | undefined>();
   const [parentIdForNew, setParentIdForNew] = React.useState<number | undefined>();
   const deleteService = useDeleteCustomerService();
 
@@ -57,18 +58,29 @@ export function CustomerServicesTab({ customerId, services, isLoading }: Custome
 
   const handleCreate = () => {
     setEditingService(undefined);
+    setDuplicatingService(undefined);
     setParentIdForNew(undefined);
     setDialogOpen(true);
   };
 
   const handleCreateSubService = (parentId: number) => {
     setEditingService(undefined);
+    setDuplicatingService(undefined);
     setParentIdForNew(parentId);
     setDialogOpen(true);
   };
 
   const handleEdit = (service: CustomerService) => {
     setEditingService(service);
+    setDuplicatingService(undefined);
+    setParentIdForNew(undefined);
+    setDialogOpen(true);
+  };
+
+  // Opens the create dialog pre-filled from `service` (same parent, no children copied).
+  const handleDuplicate = (service: CustomerService) => {
+    setEditingService(undefined);
+    setDuplicatingService(service);
     setParentIdForNew(undefined);
     setDialogOpen(true);
   };
@@ -164,6 +176,9 @@ export function CustomerServicesTab({ customerId, services, isLoading }: Custome
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
                 <DropdownMenuItem onClick={() => handleEdit(service)}>Editar</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleDuplicate(service)}>
+                  Duplicar
+                </DropdownMenuItem>
                 {!isChild && (
                   <DropdownMenuItem onClick={() => handleCreateSubService(service.id)}>
                     Adicionar sub-serviço
@@ -248,6 +263,7 @@ export function CustomerServicesTab({ customerId, services, isLoading }: Custome
         customerId={customerId}
         parentId={parentIdForNew}
         service={editingService}
+        duplicateOf={duplicatingService}
         open={dialogOpen}
         onOpenChange={setDialogOpen}
       />

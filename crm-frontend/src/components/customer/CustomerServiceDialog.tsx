@@ -27,6 +27,8 @@ interface CustomerServiceDialogProps {
   customerId: number;
   parentId?: number;
   service?: CustomerService;
+  /** Create mode, pre-filled from this service (same parent). */
+  duplicateOf?: CustomerService;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
@@ -35,10 +37,13 @@ export function CustomerServiceDialog({
   customerId,
   parentId,
   service,
+  duplicateOf,
   open,
   onOpenChange,
 }: CustomerServiceDialogProps) {
   const isEdit = !!service;
+  const isDuplicate = !isEdit && !!duplicateOf;
+  const source = service ?? duplicateOf;
   const createService = useCreateCustomerService();
   const updateService = useUpdateCustomerService();
 
@@ -58,20 +63,20 @@ export function CustomerServiceDialog({
   });
 
   React.useEffect(() => {
-    if (service) {
+    if (source) {
       setFormData({
-        acesso: service.acesso,
-        tarifario: service.tarifario,
-        operadora: service.operadora,
-        valor: String(service.valor),
-        moeda: service.moeda,
-        conta: service.conta,
-        cvp: service.cvp,
-        dataFim: service.dataFim ?? '',
-        numClient: service.numClient,
-        numServico: service.numServico,
-        morada: service.morada,
-        observacoes: service.observacoes,
+        acesso: source.acesso,
+        tarifario: source.tarifario,
+        operadora: source.operadora,
+        valor: String(source.valor),
+        moeda: source.moeda,
+        conta: source.conta,
+        cvp: source.cvp,
+        dataFim: source.dataFim ?? '',
+        numClient: source.numClient,
+        numServico: source.numServico,
+        morada: source.morada,
+        observacoes: source.observacoes,
       });
     } else {
       setFormData({
@@ -89,7 +94,7 @@ export function CustomerServiceDialog({
         observacoes: '',
       });
     }
-  }, [service, open]);
+  }, [source, open]);
 
   const handleChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -106,7 +111,7 @@ export function CustomerServiceDialog({
 
     const payload = {
       customerId,
-      parentId: parentId ?? service?.parentId,
+      parentId: parentId ?? source?.parentId,
       acesso: formData.acesso,
       tarifario: formData.tarifario,
       operadora: formData.operadora,
@@ -127,7 +132,7 @@ export function CustomerServiceDialog({
         toast.success('Serviço atualizado com sucesso');
       } else {
         await createService.mutateAsync(payload);
-        toast.success('Serviço criado com sucesso');
+        toast.success(isDuplicate ? 'Serviço duplicado com sucesso' : 'Serviço criado com sucesso');
       }
       onOpenChange(false);
     } catch {
@@ -142,14 +147,24 @@ export function CustomerServiceDialog({
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-[600px]">
         <DialogHeader>
           <DialogTitle>
-            {isEdit ? 'Editar Serviço' : parentId ? 'Criar Sub-serviço' : 'Criar Serviço'}
+            {isEdit
+              ? 'Editar Serviço'
+              : isDuplicate
+                ? duplicateOf.parentId
+                  ? 'Duplicar Sub-serviço'
+                  : 'Duplicar Serviço'
+                : parentId
+                  ? 'Criar Sub-serviço'
+                  : 'Criar Serviço'}
           </DialogTitle>
           <DialogDescription>
             {isEdit
               ? 'Altere os dados do serviço abaixo.'
-              : parentId
-                ? 'Preencha os dados do sub-serviço.'
-                : 'Preencha os dados do novo serviço.'}
+              : isDuplicate
+                ? `Cópia de ${duplicateOf.acesso}. Altere o que for diferente e guarde para criar um novo serviço.`
+                : parentId
+                  ? 'Preencha os dados do sub-serviço.'
+                  : 'Preencha os dados do novo serviço.'}
           </DialogDescription>
         </DialogHeader>
 
@@ -163,6 +178,9 @@ export function CustomerServiceDialog({
                 id="acesso"
                 value={formData.acesso}
                 onChange={(e) => handleChange('acesso', e.target.value)}
+                // A duplicate usually differs by its access number: select it to type over.
+                onFocus={isDuplicate ? (e) => e.currentTarget.select() : undefined}
+                autoFocus={isDuplicate}
                 placeholder="Ex: ACC-001"
                 required
               />
