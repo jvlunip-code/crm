@@ -32,6 +32,7 @@ const initialCustomers: Customer[] = [
     decisor: null,
     segment: null,
     status: 'active',
+    tags: [],
     createdAt: '2024-01-15T10:30:00Z',
   },
   {
@@ -45,6 +46,7 @@ const initialCustomers: Customer[] = [
     decisor: null,
     segment: null,
     status: 'active',
+    tags: [],
     createdAt: '2024-02-20T14:45:00Z',
   },
   {
@@ -58,6 +60,7 @@ const initialCustomers: Customer[] = [
     decisor: null,
     segment: null,
     status: 'active',
+    tags: [],
     createdAt: '2024-03-10T09:15:00Z',
   },
   {
@@ -71,6 +74,7 @@ const initialCustomers: Customer[] = [
     decisor: null,
     segment: null,
     status: 'inactive',
+    tags: [],
     createdAt: '2024-01-25T16:20:00Z',
   },
   {
@@ -84,6 +88,7 @@ const initialCustomers: Customer[] = [
     decisor: null,
     segment: null,
     status: 'active',
+    tags: [],
     createdAt: '2024-04-05T11:00:00Z',
   },
   {
@@ -97,6 +102,7 @@ const initialCustomers: Customer[] = [
     decisor: null,
     segment: null,
     status: 'active',
+    tags: [],
     createdAt: '2024-02-14T08:30:00Z',
   },
   {
@@ -110,6 +116,7 @@ const initialCustomers: Customer[] = [
     decisor: null,
     segment: null,
     status: 'active',
+    tags: [],
     createdAt: '2024-03-22T13:45:00Z',
   },
   {
@@ -123,6 +130,7 @@ const initialCustomers: Customer[] = [
     decisor: null,
     segment: null,
     status: 'inactive',
+    tags: [],
     createdAt: '2024-01-30T15:10:00Z',
   },
   {
@@ -136,6 +144,7 @@ const initialCustomers: Customer[] = [
     decisor: null,
     segment: null,
     status: 'active',
+    tags: [],
     createdAt: '2024-04-12T10:20:00Z',
   },
   {
@@ -149,6 +158,7 @@ const initialCustomers: Customer[] = [
     decisor: null,
     segment: null,
     status: 'active',
+    tags: [],
     createdAt: '2024-02-28T12:00:00Z',
   },
   {
@@ -162,6 +172,7 @@ const initialCustomers: Customer[] = [
     decisor: null,
     segment: null,
     status: 'active',
+    tags: [],
     createdAt: '2024-03-18T09:30:00Z',
   },
   {
@@ -175,6 +186,7 @@ const initialCustomers: Customer[] = [
     decisor: null,
     segment: null,
     status: 'active',
+    tags: [],
     createdAt: '2024-01-08T14:15:00Z',
   },
   {
@@ -188,6 +200,7 @@ const initialCustomers: Customer[] = [
     decisor: null,
     segment: null,
     status: 'inactive',
+    tags: [],
     createdAt: '2024-04-01T11:45:00Z',
   },
   {
@@ -201,6 +214,7 @@ const initialCustomers: Customer[] = [
     decisor: null,
     segment: null,
     status: 'active',
+    tags: [],
     createdAt: '2024-02-09T16:30:00Z',
   },
   {
@@ -214,6 +228,7 @@ const initialCustomers: Customer[] = [
     decisor: null,
     segment: null,
     status: 'active',
+    tags: [],
     createdAt: '2024-03-05T08:00:00Z',
   },
 ];
@@ -822,12 +837,13 @@ export const customersApi = {
     const customers = await customersApi.getAll();
     return customers.find((c) => c.id === id);
   },
-  create: async (customer: Omit<Customer, 'id' | 'createdAt'>): Promise<Customer> => {
+  create: async (customer: Omit<Customer, 'id' | 'createdAt' | 'tags'>): Promise<Customer> => {
     await delay(300);
     const customers = await customersApi.getAll();
     const newCustomer: Customer = {
       ...customer,
       id: Math.max(...customers.map((c) => c.id), 0) + 1,
+      tags: [],
       createdAt: new Date().toISOString(),
     };
     localStorage.setItem(STORAGE_KEYS.CUSTOMERS, JSON.stringify([...customers, newCustomer]));

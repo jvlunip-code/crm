@@ -1,6 +1,5 @@
 import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query';
-import { customersApi, type CustomersPageParams } from '@/lib/api-client';
-import type { Customer } from '@/types';
+import { customersApi, type CustomerUpdate, type CustomersPageParams } from '@/lib/api-client';
 
 export function useCustomers(search?: string) {
   return useQuery({
@@ -57,7 +56,7 @@ export function useUpdateCustomer() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, updates }: { id: number; updates: Partial<Customer> }) =>
+    mutationFn: ({ id, updates }: { id: number; updates: CustomerUpdate }) =>
       customersApi.update(id, updates),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['customers'] });

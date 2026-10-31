@@ -11,6 +11,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
   Table,
@@ -26,11 +33,13 @@ import { Pagination } from '@/components/shared/Pagination';
 import { StatusBadge } from '@/components/shared/StatusBadge';
 import { SortableHead, type SortHeadState } from '@/components/shared/SortableHead';
 import { TableToolbar } from '@/components/shared/TableToolbar';
+import { TagChip, TagDot } from '@/components/shared/TagChip';
 import { CustomerDialog } from '@/components/customer/CustomerDialog';
 import { ConfirmDeleteDialog } from '@/components/shared/ConfirmDeleteDialog';
 import { CustomerSearchCombobox } from '@/components/customer/CustomerSearchCombobox';
 import { useCustomersPage, useDeleteCustomer } from '@/hooks/use-customers';
 import { useDeleteTarget } from '@/hooks/use-delete-target';
+import { useTags } from '@/hooks/use-tags';
 import { getStatusTone } from '@/lib/status';
 import { cn, formatNif, getStatusLabel } from '@/lib/utils';
 import type { Customer } from '@/types';
@@ -45,12 +54,15 @@ export function CustomersPage() {
   const [submittedSearch, setSubmittedSearch] = React.useState('');
   const [sort, setSort] = React.useState<SortState>(null);
   const [page, setPage] = React.useState(1);
+  const [tagFilter, setTagFilter] = React.useState<number | undefined>();
+  const { data: tags = [] } = useTags();
   const [dialogOpen, setDialogOpen] = React.useState(false);
   const [editingCustomer, setEditingCustomer] = React.useState<Customer | undefined>();
 
   const ordering = sort ? `${sort.dir === 'desc' ? '-' : ''}${sort.field}` : undefined;
   const { data, isFetching, isError, error, refetch } = useCustomersPage({
     search: submittedSearch,
+    tag: tagFilter,
     ordering,
     page,
   });
@@ -131,6 +143,28 @@ export function CustomersPage() {
               Pesquisar
             </Button>
           </form>
+          {tags.length > 0 && (
+            <Select
+              value={tagFilter ? String(tagFilter) : 'all'}
+              onValueChange={(value) => {
+                setTagFilter(value === 'all' ? undefined : Number(value));
+                setPage(1);
+              }}
+            >
+              <SelectTrigger className="w-full sm:w-52" aria-label="Filtrar por etiqueta">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todas as etiquetas</SelectItem>
+                {tags.map((tag) => (
+                  <SelectItem key={tag.id} value={String(tag.id)}>
+                    <TagDot color={tag.color} />
+                    {tag.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
         </TableToolbar>
 
         <Card
@@ -158,7 +192,7 @@ export function CustomersPage() {
             <EmptyState
               icon={<Users />}
               title={
-                submittedSearch
+                submittedSearch || tagFilter
                   ? 'Nenhum cliente corresponde à pesquisa.'
                   : 'Ainda não há clientes. Crie o primeiro com «Adicionar cliente».'
               }
@@ -201,6 +235,18 @@ export function CustomersPage() {
                       >
                         {customer.name}
                       </Link>
+                      {customer.tags.length > 0 && (
+                        <div className="mt-1 flex flex-wrap gap-1">
+                          {customer.tags.slice(0, 3).map((tag) => (
+                            <TagChip key={tag.id} tag={tag} />
+                          ))}
+                          {customer.tags.length > 3 && (
+                            <span className="type-caption text-muted-foreground">
+                              +{customer.tags.length - 3}
+                            </span>
+                          )}
+                        </div>
+                      )}
                     </TableCell>
                     <TableCell className="max-w-[28ch] truncate text-foreground-secondary">
                       {customer.company || <span className="text-muted-foreground">—</span>}

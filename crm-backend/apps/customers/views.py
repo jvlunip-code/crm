@@ -1,13 +1,15 @@
+from django.db.models import Count
 from rest_framework import filters, viewsets, status
 from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
-from .models import Customer, CustomerAddress
+from .models import Customer, CustomerAddress, Tag
 from .serializers import (
     CustomerAddressSerializer,
     CustomerSerializer,
     CustomerSuggestionSerializer,
+    TagSerializer,
 )
 
 
@@ -31,7 +33,11 @@ class CustomerViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         # Without an explicit ?ordering=, search results keep their rank order
         # (OrderingFilter only reorders when the param is present).
-        return Customer.objects.search(self.request.query_params.get('search', ''))
+        queryset = Customer.objects.search(self.request.query_params.get('search', ''))
+        tag = self.request.query_params.get('tag')
+        if tag and tag.isdigit():
+            queryset = queryset.filter(tags__id=tag)
+        return queryset.prefetch_related('tags')
 
     @action(detail=False, methods=['get'])
     def suggest(self, request):
@@ -114,3 +120,13 @@ class CustomerAddressViewSet(viewsets.ViewSet):
         address = get_object_or_404(CustomerAddress, customer=customer)
         address.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class TagViewSet(viewsets.ModelViewSet):
+    """Customer tags. Unpaginated: a handful of user-defined labels."""
+
+    serializer_class = TagSerializer
+    pagination_class = None
+
+    def get_queryset(self):
+        return Tag.objects.annotate(customer_count=Count('customers'))

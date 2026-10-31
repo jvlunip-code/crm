@@ -9,7 +9,7 @@ from django.contrib.postgres.search import (
 )
 from django.db import models
 from django.db.models import F, Func, Q, Value
-from django.db.models.functions import Coalesce, Greatest
+from django.db.models.functions import Coalesce, Greatest, Lower
 from django.db.models.expressions import RawSQL
 
 # Characters with a meaning in tsquery syntax. Everything else — including
@@ -134,6 +134,30 @@ class CustomerManager(models.Manager):
         return self.get_queryset().search(query)
 
 
+class Tag(models.Model):
+    """User-defined label for customers (Finder-style: a name and a colour)."""
+
+    class Color(models.TextChoices):
+        RED = 'red', 'Vermelho'
+        ORANGE = 'orange', 'Laranja'
+        YELLOW = 'yellow', 'Amarelo'
+        GREEN = 'green', 'Verde'
+        BLUE = 'blue', 'Azul'
+        PURPLE = 'purple', 'Roxo'
+        GRAY = 'gray', 'Cinzento'
+
+    name = models.CharField(max_length=50)
+    color = models.CharField(max_length=10, choices=Color.choices, default=Color.GRAY)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['name']
+        constraints = [models.UniqueConstraint(Lower('name'), name='tag_name_ci_unique')]
+
+    def __str__(self):
+        return self.name
+
+
 class Customer(models.Model):
     class Status(models.TextChoices):
         ACTIVE = 'active', 'Active'
@@ -148,6 +172,7 @@ class Customer(models.Model):
     decisor = models.CharField(max_length=255, null=True, blank=True)
     segment = models.CharField(max_length=255, null=True, blank=True)
     status = models.CharField(max_length=10, choices=Status.choices, default=Status.ACTIVE)
+    tags = models.ManyToManyField(Tag, blank=True, related_name='customers')
     created_at = models.DateTimeField(auto_now_add=True)
 
     search_vector = models.GeneratedField(

@@ -4,6 +4,8 @@ import { Button } from '@/components/ui/button';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { StatusBadge } from '@/components/shared/StatusBadge';
 import { CustomerDialog } from '@/components/customer/CustomerDialog';
+import { CustomerTagsPicker } from '@/components/customer/CustomerTagsPicker';
+import { TagChip } from '@/components/shared/TagChip';
 import { getStatusTone } from '@/lib/status';
 import { formatNif, getStatusLabel } from '@/lib/utils';
 import type { Customer } from '@/types';
@@ -23,9 +25,15 @@ export function CustomerHeader({ customer, children }: CustomerHeaderProps) {
         title={customer.name}
         identifier={customer.nif ? `NIF ${formatNif(customer.nif)}` : undefined}
         meta={
-          <StatusBadge tone={getStatusTone(customer.status)}>
-            {getStatusLabel(customer.status)}
-          </StatusBadge>
+          <>
+            <StatusBadge tone={getStatusTone(customer.status)}>
+              {getStatusLabel(customer.status)}
+            </StatusBadge>
+            {customer.tags.map((tag) => (
+              <TagChip key={tag.id} tag={tag} />
+            ))}
+            <CustomerTagsPicker customer={customer} />
+          </>
         }
         description={customer.company || undefined}
         actions={

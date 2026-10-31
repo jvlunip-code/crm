@@ -9,7 +9,18 @@ export type Customer = {
   decisor: string | null;
   segment: string | null;
   status: 'active' | 'inactive';
+  tags: Tag[];
   createdAt: string;
+};
+
+export type TagColor = 'red' | 'orange' | 'yellow' | 'green' | 'blue' | 'purple' | 'gray';
+
+/** Finder-style customer label. `customerCount` only comes from the tags list. */
+export type Tag = {
+  id: number;
+  name: string;
+  color: TagColor;
+  customerCount?: number;
 };
 
 export type Service = {

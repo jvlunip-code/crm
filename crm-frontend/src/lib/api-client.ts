@@ -7,6 +7,8 @@ import type {
   Notification,
   ServiceEndingFilter,
   ServiceListItem,
+  Tag,
+  TagColor,
 } from '@/types';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
@@ -42,7 +44,11 @@ async function fetchWithAuth(url: string, options: RequestInit = {}): Promise<Re
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({ detail: 'Request failed' }));
-    throw new Error(error.detail || `HTTP ${response.status}`);
+    // DRF: {"detail": "..."} or field errors like {"name": ["..."]}.
+    const fieldError = Object.values(error as Record<string, unknown>)
+      .flat()
+      .find((v): v is string => typeof v === 'string');
+    throw new Error(error.detail || fieldError || `HTTP ${response.status}`);
   }
 
   return response;
@@ -182,8 +188,11 @@ export type CustomerSuggestions = {
   fuzzy: boolean;
 };
 
+export type CustomerUpdate = Partial<Omit<Customer, 'tags'>> & { tagIds?: number[] };
+
 export type CustomersPageParams = {
   search?: string;
+  tag?: number;
   ordering?: string;
   page?: number;
 };
@@ -195,6 +204,7 @@ export const customersApi = {
     const qs = new URLSearchParams();
     const trimmed = params.search?.trim();
     if (trimmed) qs.set('search', trimmed);
+    if (params.tag) qs.set('tag', String(params.tag));
     if (params.ordering) qs.set('ordering', params.ordering);
     if (params.page && params.page > 1) qs.set('page', String(params.page));
     const suffix = qs.size > 0 ? `?${qs.toString()}` : '';
@@ -252,7 +262,7 @@ export const customersApi = {
     }
   },
 
-  create: async (customer: Omit<Customer, 'id' | 'createdAt'>): Promise<Customer> => {
+  create: async (customer: Omit<Customer, 'id' | 'createdAt' | 'tags'>): Promise<Customer> => {
     const response = await fetchWithAuth('/customers/', {
       method: 'POST',
       body: JSON.stringify(toBackend(customer)),
@@ -261,7 +271,8 @@ export const customersApi = {
     return toFrontend<Customer>(data);
   },
 
-  update: async (id: number, updates: Partial<Customer>): Promise<Customer> => {
+  // `tagIds` replaces the customer's tags (sent as tag_ids).
+  update: async (id: number, updates: CustomerUpdate): Promise<Customer> => {
     const response = await fetchWithAuth(`/customers/${id}/`, {
       method: 'PATCH',
       body: JSON.stringify(toBackend(updates)),
@@ -629,6 +640,29 @@ export const dashboardApi = {
       topOperators: data.top_operators,
       notifications: data.notifications,
     };
+  },
+};
+
+export type TagInput = { name: string; color: TagColor };
+
+export const tagsApi = {
+  list: async (): Promise<Tag[]> => {
+    const response = await fetchWithAuth('/tags/');
+    return toFrontend<Tag[]>(await response.json());
+  },
+  create: async (tag: TagInput): Promise<Tag> => {
+    const response = await fetchWithAuth('/tags/', { method: 'POST', body: JSON.stringify(tag) });
+    return toFrontend<Tag>(await response.json());
+  },
+  update: async (id: number, tag: Partial<TagInput>): Promise<Tag> => {
+    const response = await fetchWithAuth(`/tags/${id}/`, {
+      method: 'PATCH',
+      body: JSON.stringify(tag),
+    });
+    return toFrontend<Tag>(await response.json());
+  },
+  delete: async (id: number): Promise<void> => {
+    await fetchWithAuth(`/tags/${id}/`, { method: 'DELETE' });
   },
 };
 

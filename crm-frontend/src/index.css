@@ -48,6 +48,13 @@
   --lf-callout-success: #538a2e;
   --lf-callout-idea: #119da4;
   --lf-text-code-pink: #d05376;
+  --lf-tag-red: #e5484d;
+  --lf-tag-orange: #f08a24;
+  --lf-tag-yellow: #e2b512;
+  --lf-tag-green: #46a758;
+  --lf-tag-blue: #3478e5;
+  --lf-tag-purple: #8e5cd9;
+  --lf-tag-gray: #8e8e88;
   --lf-white: #ffffff;
   --lf-black: #000000;
 
@@ -101,6 +108,14 @@
   --chart-3: var(--lf-callout-success);
   --chart-4: var(--lf-callout-warning);
   --chart-5: var(--lf-text-code-pink);
+  /* customer tags (Finder-style dot colours; user-chosen, carry no status meaning) */
+  --tag-red: var(--lf-tag-red);
+  --tag-orange: var(--lf-tag-orange);
+  --tag-yellow: var(--lf-tag-yellow);
+  --tag-green: var(--lf-tag-green);
+  --tag-blue: var(--lf-tag-blue);
+  --tag-purple: var(--lf-tag-purple);
+  --tag-gray: var(--lf-tag-gray);
   /* sidebar */
   --sidebar-foreground: var(--lf-text-secondary);
   --sidebar-primary: var(--lf-text-primary);
@@ -212,6 +227,13 @@
   --color-status-warning: var(--status-warning);
   --color-status-error: var(--status-error);
   --color-status-note: var(--status-note);
+  --color-tag-red: var(--tag-red);
+  --color-tag-orange: var(--tag-orange);
+  --color-tag-yellow: var(--tag-yellow);
+  --color-tag-green: var(--tag-green);
+  --color-tag-blue: var(--tag-blue);
+  --color-tag-purple: var(--tag-purple);
+  --color-tag-gray: var(--tag-gray);
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
   --color-chart-3: var(--chart-3);

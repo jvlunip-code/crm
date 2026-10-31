@@ -1,9 +1,10 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import CustomerViewSet, CustomerAddressViewSet
+from .views import CustomerViewSet, CustomerAddressViewSet, TagViewSet
 
 router = DefaultRouter()
 router.register(r'customers', CustomerViewSet)
+router.register(r'tags', TagViewSet, basename='tag')
 
 address_view = CustomerAddressViewSet.as_view({
     'get': 'retrieve',
