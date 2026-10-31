@@ -40,8 +40,8 @@ React 19 + TypeScript 5.9 (strict) + Vite 7 + TanStack Query + React Router 7 + 
 
 Two parallel data layers exist:
 
-1. **Real API** (`lib/api-client.ts`) — Used for: customers (incl. `suggest` and the address singleton), customer services, customer documents, notifications, authentication. Talks to Django backend via session cookies + CSRF.
-2. **Mock data** (`lib/mock-data.ts`) — localStorage-based, used for: services catalog, events, customer notes. These features have no backend endpoints yet. The dashboard chart and "Secções" table use inline demo data.
+1. **Real API** (`lib/api-client.ts`) — Used for: customers (incl. `suggest` and the address singleton), customer services, customer documents, the cross-customer services list (`/services` page), notifications, dashboard summary, authentication. Talks to Django backend via session cookies + CSRF.
+2. **Mock data** (`lib/mock-data.ts`) — localStorage-based, used for: events, customer notes. These features have no backend endpoints yet. The dashboard chart and "Secções" table use inline demo data.
 
 Hooks in `hooks/` abstract this — some call the real API, others call mock data. Check the hook implementation to know which layer you're working with.
 
@@ -75,7 +75,7 @@ Hooks in `hooks/` abstract this — some call the real API, others call mock dat
 ### UI Framework
 
 - **UI primitives** in `components/ui/` — the phmcare web-app's radix-nova shadcn components (`radix-ui` monopackage), restyled on the design tokens. Port changes from the web-app instead of editing ad hoc; see `DESIGN.md`
-- **Page molecules** in `components/shared/` — `PageHeader`, `TableToolbar`, `SearchField`, `Pagination`, `ClientTable`, `MetricCard`, `StatStrip`, `EmptyState`, `StatusBadge`, `SectionEyebrow`
+- **Page molecules** in `components/shared/` — `PageHeader`, `TableToolbar`, `SearchField`, `SortableHead`, `CopyButton`, `Pagination`, `ClientTable`, `MetricCard`, `StatStrip`, `EmptyState`, `StatusBadge`, `SectionEyebrow`
 - **Custom components**: `components/customer/` (customer detail tabs, dialogs, `DetailPanel`), `components/dashboard/` (charts, data table), `components/layout/` (sidebar, header, user menu, notifications bell)
 - **Icons**: Lucide React (`lucide-react`)
 - **Charts**: Recharts (`recharts`)

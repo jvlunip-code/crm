@@ -17,6 +17,8 @@ export function useCreateCustomerService() {
     mutationFn: customerServicesApi.create,
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['customer-services', variables.customerId] });
+      queryClient.invalidateQueries({ queryKey: ['services'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard-summary'] });
     },
   });
 }
@@ -36,6 +38,8 @@ export function useUpdateCustomerService() {
     }) => customerServicesApi.update(id, updates, customerId),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['customer-services', variables.customerId] });
+      queryClient.invalidateQueries({ queryKey: ['services'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard-summary'] });
     },
   });
 }
@@ -48,6 +52,8 @@ export function useDeleteCustomerService() {
       customerServicesApi.delete(id, customerId),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['customer-services', variables.customerId] });
+      queryClient.invalidateQueries({ queryKey: ['services'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard-summary'] });
     },
   });
 }

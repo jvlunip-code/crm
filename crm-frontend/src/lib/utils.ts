@@ -65,3 +65,10 @@ export function formatNif(value: string | null | undefined): string {
   const digits = value.replace(/\D/g, '');
   return digits.replace(/(\d{3})(?=\d)/g, '$1 ').trim();
 }
+
+/** "YYYY-MM-DD" (DRF DateField) → "DD/MM/YYYY", without timezone shifts. */
+export function formatServiceDate(value: string | null | undefined): string {
+  if (!value) return '—';
+  const [y, m, d] = value.split('-');
+  return y && m && d ? `${d}/${m}/${y}` : value;
+}

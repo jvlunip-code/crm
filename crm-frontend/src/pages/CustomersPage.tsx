@@ -1,14 +1,6 @@
 import * as React from 'react';
 import { Link } from 'react-router-dom';
-import {
-  ArrowDown,
-  ArrowUp,
-  ArrowUpDown,
-  ArrowUpRight,
-  MoreVertical,
-  Plus,
-  Users,
-} from 'lucide-react';
+import { ArrowUpRight, MoreVertical, Plus, Users } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -32,6 +24,7 @@ import { EmptyState } from '@/components/shared/EmptyState';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { Pagination } from '@/components/shared/Pagination';
 import { StatusBadge } from '@/components/shared/StatusBadge';
+import { SortableHead, type SortHeadState } from '@/components/shared/SortableHead';
 import { TableToolbar } from '@/components/shared/TableToolbar';
 import { CustomerDialog } from '@/components/customer/CustomerDialog';
 import { ConfirmDeleteDialog } from '@/components/shared/ConfirmDeleteDialog';
@@ -45,7 +38,7 @@ import type { Customer } from '@/types';
 const PAGE_SIZE = 10;
 
 type SortField = 'name' | 'company' | 'status' | 'created_at';
-type SortState = { field: SortField; dir: 'asc' | 'desc' } | null;
+type SortState = SortHeadState<SortField>;
 
 export function CustomersPage() {
   const [searchInput, setSearchInput] = React.useState('');
@@ -291,41 +284,5 @@ export function CustomersPage() {
         onConfirm={confirmDelete}
       />
     </>
-  );
-}
-
-/** Column header that cycles its field's sort: asc → desc → off. */
-function SortableHead({
-  field,
-  sort,
-  onSort,
-  className,
-  children,
-}: {
-  field: SortField;
-  sort: SortState;
-  onSort: (field: SortField) => void;
-  className?: string;
-  children: React.ReactNode;
-}) {
-  const dir = sort?.field === field ? sort.dir : null;
-  const Icon = dir === 'asc' ? ArrowUp : dir === 'desc' ? ArrowDown : ArrowUpDown;
-  return (
-    <TableHead
-      className={className}
-      aria-sort={dir === 'asc' ? 'ascending' : dir === 'desc' ? 'descending' : 'none'}
-    >
-      <button
-        type="button"
-        onClick={() => onSort(field)}
-        className="-mx-1 inline-flex items-center gap-1 rounded-xs px-1 outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
-      >
-        {children}
-        <Icon
-          aria-hidden
-          className={cn('size-3.5', dir ? 'text-foreground' : 'text-muted-foreground/60')}
-        />
-      </button>
-    </TableHead>
   );
 }

@@ -71,3 +71,19 @@ class CustomerServiceCreateSerializer(serializers.ModelSerializer):
         customer = self.context.get('customer')
         validated_data['customer'] = customer
         return super().create(validated_data)
+
+
+class ServiceListSerializer(serializers.ModelSerializer):
+    """Flat row for the cross-customer services list (sub-services included)."""
+
+    customer_name = serializers.CharField(source='customer.name', read_only=True)
+    customer_company = serializers.CharField(source='customer.company', read_only=True)
+
+    class Meta:
+        model = CustomerService
+        fields = [
+            'id', 'customer', 'customer_name', 'customer_company', 'parent',
+            'acesso', 'tarifario', 'operadora', 'valor', 'moeda', 'conta', 'cvp',
+            'data_fim', 'num_client', 'num_servico', 'morada', 'observacoes', 'created_at',
+        ]
+        read_only_fields = fields

@@ -159,3 +159,11 @@ export type DashboardSummary = {
   topOperators: { operadora: string; count: number }[];
   notifications: { unread: number };
 };
+
+/** Row of the cross-customer services list (sub-services are rows too). */
+export type ServiceListItem = CustomerService & {
+  customerName: string;
+  customerCompany: string;
+};
+
+export type ServiceEndingFilter = 'expired' | '90' | '180' | '270';

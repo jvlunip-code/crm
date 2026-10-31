@@ -5,6 +5,8 @@ import type {
   CustomerAddress,
   DashboardSummary,
   Notification,
+  ServiceEndingFilter,
+  ServiceListItem,
 } from '@/types';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
@@ -554,6 +556,46 @@ export const notificationsApi = {
 };
 
 // Auth API
+export type ServicesPageParams = {
+  search?: string;
+  ending?: ServiceEndingFilter;
+  ordering?: string;
+  page?: number;
+};
+
+export type ServicesPage = {
+  items: ServiceListItem[];
+  count: number;
+};
+
+type BackendServiceListItem = BackendCustomerService & {
+  customer_name: string;
+  customer_company: string;
+};
+
+// Cross-customer services list (flat, server-side pages of 10).
+export const servicesListApi = {
+  getPage: async (params: ServicesPageParams = {}): Promise<ServicesPage> => {
+    const qs = new URLSearchParams();
+    const trimmed = params.search?.trim();
+    if (trimmed) qs.set('search', trimmed);
+    if (params.ending) qs.set('ending', params.ending);
+    if (params.ordering) qs.set('ordering', params.ordering);
+    if (params.page && params.page > 1) qs.set('page', String(params.page));
+    const suffix = qs.size > 0 ? `?${qs.toString()}` : '';
+    const response = await fetchWithAuth(`/services/${suffix}`);
+    const data: PaginatedResponse<BackendServiceListItem> = await response.json();
+    return {
+      items: data.results.map((s) => ({
+        ...transformCustomerService(s, s.customer),
+        customerName: s.customer_name,
+        customerCompany: s.customer_company,
+      })),
+      count: data.count,
+    };
+  },
+};
+
 type BackendDashboardSummary = {
   as_of: string;
   customers: DashboardSummary['customers'];

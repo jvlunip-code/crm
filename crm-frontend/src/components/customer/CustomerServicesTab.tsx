@@ -19,19 +19,13 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { DetailPanel } from './DetailPanel';
-import { cn } from '@/lib/utils';
+import { cn, formatServiceDate } from '@/lib/utils';
 import { useDeleteCustomerService } from '@/hooks/use-customer-services';
 import { CustomerServiceDialog } from '@/components/customer/CustomerServiceDialog';
 import { ConfirmDeleteDialog } from '@/components/shared/ConfirmDeleteDialog';
 import { useDeleteTarget } from '@/hooks/use-delete-target';
 import type { CustomerService } from '@/types';
 import { toast } from 'sonner';
-
-function formatServiceDate(value: string | null | undefined): string {
-  if (!value) return '—';
-  const [y, m, d] = value.split('-');
-  return y && m && d ? `${d}/${m}/${y}` : value;
-}
 
 interface CustomerServicesTabProps {
   customerId: number;
