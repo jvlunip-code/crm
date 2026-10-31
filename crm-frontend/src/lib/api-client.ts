@@ -632,6 +632,15 @@ export const dashboardApi = {
   },
 };
 
+// Known tarifário names (suggestions in the service form).
+export const tarifariosApi = {
+  list: async (): Promise<string[]> => {
+    const response = await fetchWithAuth('/tarifarios/');
+    const data: { results: string[] } = await response.json();
+    return data.results;
+  },
+};
+
 export const authApi = {
   login: async (username: string, password: string) => {
     const response = await fetchWithAuth('/auth/login/', {

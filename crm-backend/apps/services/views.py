@@ -4,9 +4,11 @@ from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from rest_framework import filters, viewsets
 from rest_framework.pagination import PageNumberPagination
+from rest_framework.response import Response
+from rest_framework.views import APIView
 from apps.customers.models import Customer
 from apps.notifications.use_cases.generate_service_ending import today_lisbon
-from .models import CustomerService
+from .models import CustomerService, Tarifario
 from .serializers import (
     CustomerServiceCreateSerializer,
     CustomerServiceSerializer,
@@ -83,3 +85,13 @@ class ServiceListViewSet(viewsets.ReadOnlyModelViewSet):
                 data_fim__lte=today + timedelta(days=ENDING_WINDOWS[ending]),
             )
         return queryset
+
+
+class TarifarioListView(APIView):
+    """GET /api/tarifarios/ — every known tarifário name, alphabetical, unpaginated.
+
+    Small (hundreds of short strings); the frontend caches it and filters locally.
+    """
+
+    def get(self, request):
+        return Response({'results': list(Tarifario.objects.values_list('name', flat=True))})

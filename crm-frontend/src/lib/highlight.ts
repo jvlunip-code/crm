@@ -38,3 +38,8 @@ export function highlightParts(text: string, query: string): HighlightPart[] {
   });
   return parts;
 }
+
+/** Lower-case, accent-free form of `text`, for matching ("Móvel" → "movel"). */
+export function foldText(text: string): string {
+  return Array.from(text).map(fold).join('');
+}

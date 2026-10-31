@@ -153,7 +153,7 @@ Response (both modes, `200` when the file could be read; `400` only for file-lev
   - `parser.py` — bytes + filename → list of `(row_number, {key: raw_value})`, file errors/warnings.
   - `validator.py` — raw rows + customer → typed rows, per-field errors/warnings, resolved parents.
   - `template.py` — builds the CSV and the xlsx (openpyxl).
-  - `service.py` — `import_services(customer, file, dry_run)` orchestrating the above; commit creates main services first, then children, inside one transaction (model `full_clean()` still runs on save).
+  - `service.py` — `import_services(customer, file, dry_run)` orchestrating the above; commit creates main services first, then children, inside one transaction (model `full_clean()` still runs on save). Create rows with `.save()`/`.create()` (not `bulk_create`) so the `post_save` signal registers each tarifário in the `Tarifario` table — or call `register_tarifario` explicitly if switching to `bulk_create`.
 - Views: two `@action`s on `CustomerServiceViewSet` (`import`, `import-template`), or a small `APIView` pair — whichever keeps the router simplest.
 - **Model change:** `CustomerService.conta` and `.cvp` → `blank=True, default=''` (+ migration, no data change). Serializers follow. Frontend form: drop `required` on Conta/CVP.
 - **Dependency:** `openpyxl` → `requirements.txt` (and `pyproject.toml`). `deploy-backend.sh` already runs `pip install -r requirements.txt`.

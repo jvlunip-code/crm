@@ -19,6 +19,7 @@ export function useCreateCustomerService() {
       queryClient.invalidateQueries({ queryKey: ['customer-services', variables.customerId] });
       queryClient.invalidateQueries({ queryKey: ['services'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard-summary'] });
+      queryClient.invalidateQueries({ queryKey: ['tarifarios'] });
     },
   });
 }
@@ -40,6 +41,7 @@ export function useUpdateCustomerService() {
       queryClient.invalidateQueries({ queryKey: ['customer-services', variables.customerId] });
       queryClient.invalidateQueries({ queryKey: ['services'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard-summary'] });
+      queryClient.invalidateQueries({ queryKey: ['tarifarios'] });
     },
   });
 }

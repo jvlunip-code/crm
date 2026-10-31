@@ -19,7 +19,9 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import { AutocompleteInput } from '@/components/shared/AutocompleteInput';
 import { useCreateCustomerService, useUpdateCustomerService } from '@/hooks/use-customer-services';
+import { useTarifarios } from '@/hooks/use-tarifarios';
 import type { CustomerService, Moeda } from '@/types';
 import { toast } from 'sonner';
 
@@ -46,6 +48,7 @@ export function CustomerServiceDialog({
   const source = service ?? duplicateOf;
   const createService = useCreateCustomerService();
   const updateService = useUpdateCustomerService();
+  const { data: tarifarios = [] } = useTarifarios();
 
   const [formData, setFormData] = React.useState({
     acesso: '',
@@ -188,11 +191,12 @@ export function CustomerServiceDialog({
 
             <Field>
               <FieldLabel htmlFor="tarifario">Tarifário</FieldLabel>
-              <Input
+              <AutocompleteInput
                 id="tarifario"
                 value={formData.tarifario}
-                onChange={(e) => handleChange('tarifario', e.target.value)}
-                placeholder="Ex: Empresarial Plus"
+                onChange={(value) => handleChange('tarifario', value)}
+                options={tarifarios}
+                placeholder="Comece a escrever para ver sugestões"
               />
             </Field>
 

@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models.functions import Lower
 from django.core.exceptions import ValidationError
 
 
@@ -56,3 +57,24 @@ class CustomerService(models.Model):
     def save(self, *args, **kwargs):
         self.full_clean()
         super().save(*args, **kwargs)
+
+
+class Tarifario(models.Model):
+    """Known tarifário names, for suggestions in the service form.
+
+    Filled by a post_save signal on CustomerService and backfilled by
+    `manage.py sync_tarifarios`. Unique ignoring case; names are stored with
+    whitespace collapsed (see `tarifarios.normalize_tarifario`).
+    """
+
+    name = models.CharField(max_length=100)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['name']
+        constraints = [
+            models.UniqueConstraint(Lower('name'), name='tarifario_name_ci_unique'),
+        ]
+
+    def __str__(self):
+        return self.name

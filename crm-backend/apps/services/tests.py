@@ -9,7 +9,8 @@ from rest_framework.test import APIClient
 from apps.customers.models import Customer
 from apps.notifications.use_cases.generate_service_ending import today_lisbon
 
-from .models import CustomerService
+from .models import CustomerService, Tarifario
+from .tarifarios import sync_tarifarios
 
 
 class ServiceListTests(TestCase):
@@ -72,3 +73,51 @@ class ServiceListTests(TestCase):
             response = self.client.post('/api/services/', {'acesso': 'x'})
         self.assertEqual(response.status_code, 405)
         save.assert_not_called()
+
+
+class TarifarioTests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.customer = Customer.objects.create(
+            name='Ana', email='ana@exemplo.pt', phone='1', company='Padaria',
+        )
+
+    def service(self, tarifario, **kwargs):
+        return CustomerService.objects.create(
+            customer=self.customer, acesso='1', operadora='MEO', valor=Decimal('1'),
+            conta='C', cvp='V', tarifario=tarifario, **kwargs,
+        )
+
+    def names(self):
+        return list(Tarifario.objects.values_list('name', flat=True))
+
+    def test_saving_a_service_registers_its_tarifario_once(self):
+        self.service('  Empresas   5G ')
+        self.service('EMPRESAS 5G')
+        svc = self.service('')
+        svc.tarifario = 'Fibra 1Gbps'
+        svc.save()
+        self.assertEqual(self.names(), ['Empresas 5G', 'Fibra 1Gbps'])
+
+    def test_sync_backfills_bulk_created_services_with_most_used_variant(self):
+        # bulk_create skips the signal, like the legacy import.
+        CustomerService.objects.bulk_create([
+            CustomerService(customer=self.customer, acesso=str(i), operadora='MEO',
+                            valor=Decimal('1'), conta='C', cvp='V', tarifario=t)
+            for i, t in enumerate(['2P FIBRA', '2p fibra', '2P  FIBRA', 'Voz'])
+        ])
+        self.assertEqual(self.names(), [])
+        self.assertEqual(sync_tarifarios(dry_run=True)['created'], 2)
+        self.assertEqual(self.names(), [])
+        self.assertEqual(sync_tarifarios(), {'distinct': 2, 'existing': 0, 'created': 2})
+        self.assertEqual(self.names(), ['2P FIBRA', 'Voz'])
+        self.assertEqual(sync_tarifarios()['created'], 0)
+
+    def test_endpoint_lists_names(self):
+        self.service('Voz')
+        self.service('Fibra')
+        client = APIClient()
+        client.force_authenticate(get_user_model().objects.create_user('staff'))
+        response = client.get('/api/tarifarios/')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data, {'results': ['Fibra', 'Voz']})
