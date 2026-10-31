@@ -148,3 +148,14 @@ export type CustomerAddress = {
   parish: string;
   country: string;
 };
+
+export type DashboardSummary = {
+  asOf: string;
+  customers: { total: number; active: number; inactive: number };
+  services: { total: number; active: number; activeValue: number };
+  // Services by end date, using the notification flag windows (days from today).
+  ending: { expired: number; within90: number; within180: number; within270: number };
+  endingByMonth: { month: string; count: number }[];
+  topOperators: { operadora: string; count: number }[];
+  notifications: { unread: number };
+};

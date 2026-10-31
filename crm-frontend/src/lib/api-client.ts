@@ -3,6 +3,7 @@ import type {
   CustomerService,
   CustomerDocument,
   CustomerAddress,
+  DashboardSummary,
   Notification,
 } from '@/types';
 
@@ -553,6 +554,42 @@ export const notificationsApi = {
 };
 
 // Auth API
+type BackendDashboardSummary = {
+  as_of: string;
+  customers: DashboardSummary['customers'];
+  services: { total: number; active: number; active_value: string };
+  ending: { expired: number; within_90: number; within_180: number; within_270: number };
+  ending_by_month: DashboardSummary['endingByMonth'];
+  top_operators: DashboardSummary['topOperators'];
+  notifications: DashboardSummary['notifications'];
+};
+
+export const dashboardApi = {
+  // Mapped by hand: the generic snakeToCamel leaves `within_90` as is.
+  getSummary: async (): Promise<DashboardSummary> => {
+    const response = await fetchWithAuth('/dashboard/summary/');
+    const data: BackendDashboardSummary = await response.json();
+    return {
+      asOf: data.as_of,
+      customers: data.customers,
+      services: {
+        total: data.services.total,
+        active: data.services.active,
+        activeValue: Number(data.services.active_value),
+      },
+      ending: {
+        expired: data.ending.expired,
+        within90: data.ending.within_90,
+        within180: data.ending.within_180,
+        within270: data.ending.within_270,
+      },
+      endingByMonth: data.ending_by_month,
+      topOperators: data.top_operators,
+      notifications: data.notifications,
+    };
+  },
+};
+
 export const authApi = {
   login: async (username: string, password: string) => {
     const response = await fetchWithAuth('/auth/login/', {

@@ -40,8 +40,8 @@ React 19 + TypeScript 5.9 (strict) + Vite 7 + TanStack Query + React Router 7 + 
 
 Two parallel data layers exist:
 
-1. **Real API** (`lib/api-client.ts`) — Used for: customers, customer services, customer documents, authentication. Talks to Django backend via session cookies + CSRF.
-2. **Mock data** (`lib/mock-data.ts`) — localStorage-based, used for: services catalog, notifications, events, customer notes, customer addresses. These features have no backend endpoints yet.
+1. **Real API** (`lib/api-client.ts`) — Used for: customers (incl. `suggest` and the address singleton), customer services, customer documents, notifications, authentication. Talks to Django backend via session cookies + CSRF.
+2. **Mock data** (`lib/mock-data.ts`) — localStorage-based, used for: services catalog, events, customer notes. These features have no backend endpoints yet. The dashboard chart and "Secções" table use inline demo data.
 
 Hooks in `hooks/` abstract this — some call the real API, others call mock data. Check the hook implementation to know which layer you're working with.
 
@@ -58,9 +58,11 @@ Hooks in `hooks/` abstract this — some call the real API, others call mock dat
 
 | Export | Endpoint pattern | Methods |
 |---|---|---|
-| `customersApi` | `/customers/` | CRUD |
+| `customersApi` | `/customers/` | `getPage` (server-side page), `getAll` (all pages), `suggest`, CRUD |
+| `customerAddressApi` | `/customers/{id}/address/` | get, upsert (PUT), delete |
 | `customerServicesApi` | `/customers/{id}/services/` | CRUD (nested) |
 | `customerDocumentsApi` | `/customers/{id}/documents/` | list, upload, delete, download URL |
+| `notificationsApi` | `/notifications/` | list, unread count, mark read/unread/all, dismiss, generate |
 | `authApi` | `/auth/` | login, logout, me |
 
 ### TanStack Query Conventions
