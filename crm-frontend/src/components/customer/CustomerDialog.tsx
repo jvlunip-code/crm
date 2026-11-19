@@ -37,6 +37,7 @@ export function CustomerDialog({ customer, open, onOpenChange }: CustomerDialogP
     name: '',
     email: '',
     phone: '',
+    secondaryPhone: '',
     company: '',
     nif: null as string | null,
     iban: null as string | null,
@@ -51,6 +52,7 @@ export function CustomerDialog({ customer, open, onOpenChange }: CustomerDialogP
         name: customer.name,
         email: customer.email,
         phone: customer.phone,
+        secondaryPhone: customer.secondaryPhone ?? '',
         company: customer.company,
         nif: customer.nif,
         iban: customer.iban,
@@ -63,6 +65,7 @@ export function CustomerDialog({ customer, open, onOpenChange }: CustomerDialogP
         name: '',
         email: '',
         phone: '',
+        secondaryPhone: '',
         company: '',
         nif: null,
         iban: null,
@@ -139,9 +142,19 @@ export function CustomerDialog({ customer, open, onOpenChange }: CustomerDialogP
               Telefone
             </FieldLabel>
             <PhoneInput
+              id="phone"
               value={formData.phone}
               onChange={(v) => handleChange('phone', v)}
               required
+            />
+          </Field>
+
+          <Field>
+            <FieldLabel htmlFor="secondaryPhone">Telefone alternativo</FieldLabel>
+            <PhoneInput
+              id="secondaryPhone"
+              value={formData.secondaryPhone}
+              onChange={(v) => handleChange('secondaryPhone', v)}
             />
           </Field>
 

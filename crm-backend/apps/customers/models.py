@@ -75,7 +75,7 @@ class CustomerQuerySet(models.QuerySet):
 
         1. Full-text prefix match on the stored search vectors (GIN indexed).
         2. Numeric input ("500 039 595", "921199660") also matches the NIF by
-           prefix and the phone with its separators removed.
+           prefix and the main/secondary phone with separators removed.
         3. Only when nothing matches: trigram similarity on name/company, so
            a typo ("ribiero") still finds "Ribeiro". `fuzzy` is annotated on
            those rows.
@@ -93,13 +93,23 @@ class CustomerQuerySet(models.QuerySet):
 
         digits = re.sub(r'\D', '', query)
         if _NUMERIC_QUERY_RE.match(query) and len(digits) >= 3:
-            match |= Q(nif__startswith=digits) | Q(phone_digits__contains=digits)
+            match |= (
+                Q(nif__startswith=digits)
+                | Q(phone_digits__contains=digits)
+                | Q(secondary_phone_digits__contains=digits)
+            )
 
         exact = (
             self.annotate(
                 phone_digits=Func(
                     F('phone'), Value(r'\D'), Value(''), Value('g'), function='regexp_replace'
-                )
+                ),
+                # Not in search_vector (changing that GeneratedField would
+                # rebuild the column); matched by digits only.
+                secondary_phone_digits=Func(
+                    F('secondary_phone'), Value(r'\D'), Value(''), Value('g'),
+                    function='regexp_replace',
+                ),
             )
             .filter(match)
             .annotate(
@@ -166,6 +176,8 @@ class Customer(models.Model):
     name = models.CharField(max_length=255)
     email = models.EmailField()
     phone = models.CharField(max_length=50)
+    # Alternative contact number, same "+<dialcode><digits>" format as phone.
+    secondary_phone = models.CharField(max_length=50, blank=True, default='')
     company = models.CharField(max_length=255)
     nif = models.CharField(max_length=9, unique=True, null=True, blank=True)
     iban = models.CharField(max_length=255, null=True, blank=True)

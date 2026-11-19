@@ -15,18 +15,24 @@ import { cn } from '@/lib/utils';
 /**
  * A client-side TanStack table in the dashboard style: flush table in a
  * panel, an empty state in place of the rows, and offset pagination below
- * once there is more than one page.
+ * once there is more than one page. With `pageSizeOptions` the footer (and its
+ * "Linhas por página" selector) shows whenever there are rows; changing the
+ * size goes back to the first page and is reported through `onPageSizeChange`.
  */
 export function ClientTable<T>({
   table,
   empty,
   rowClassName,
   onRowClick,
+  pageSizeOptions,
+  onPageSizeChange,
 }: {
   table: TanstackTable<T>;
   empty: React.ReactNode;
   rowClassName?: (row: Row<T>) => string | undefined;
   onRowClick?: (row: Row<T>) => void;
+  pageSizeOptions?: number[];
+  onPageSizeChange?: (pageSize: number) => void;
 }) {
   const rows = table.getRowModel().rows;
   const total = table.getFilteredRowModel().rows.length;
@@ -43,7 +49,16 @@ export function ClientTable<T>({
               {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow key={headerGroup.id}>
                   {headerGroup.headers.map((header) => (
-                    <TableHead key={header.id}>
+                    <TableHead
+                      key={header.id}
+                      aria-sort={
+                        header.column.getIsSorted() === 'asc'
+                          ? 'ascending'
+                          : header.column.getIsSorted() === 'desc'
+                            ? 'descending'
+                            : undefined
+                      }
+                    >
                       {header.isPlaceholder
                         ? null
                         : flexRender(header.column.columnDef.header, header.getContext())}
@@ -71,12 +86,20 @@ export function ClientTable<T>({
         )}
       </Card>
 
-      {total > pageSize && (
+      {(total > pageSize || (pageSizeOptions && total > 0)) && (
         <Pagination
           offset={pageIndex * pageSize}
           pageSize={pageSize}
           total={total}
           onChange={(offset) => table.setPageIndex(offset / pageSize)}
+          pageSizeOptions={pageSizeOptions}
+          onPageSizeChange={
+            pageSizeOptions &&
+            ((size) => {
+              table.setPagination({ pageIndex: 0, pageSize: size });
+              onPageSizeChange?.(size);
+            })
+          }
         />
       )}
     </>

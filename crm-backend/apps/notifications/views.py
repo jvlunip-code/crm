@@ -1,12 +1,20 @@
+from django.db.models.fields.json import KT
 from django.utils import timezone
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAdminUser
 from rest_framework.response import Response
 
 from .models import Notification, NotificationSubtype, NotificationType
 from .serializers import NotificationSerializer
 from .use_cases.generate_service_ending import generate_service_ending
+
+
+class NotificationPagination(PageNumberPagination):
+    page_size = 20
+    page_size_query_param = 'page_size'
+    max_page_size = 500
 
 
 class NotificationViewSet(
@@ -16,6 +24,7 @@ class NotificationViewSet(
 ):
     serializer_class = NotificationSerializer
     queryset = Notification.objects.all()
+    pagination_class = NotificationPagination
 
     def get_queryset(self):
         qs = Notification.objects.all()
@@ -36,7 +45,12 @@ class NotificationViewSet(
         if subtype:
             qs = qs.filter(subtype=subtype)
 
-        return qs
+        # Most urgent first: the service ending soonest (expired ones at the
+        # top). metadata.service_data_fim is an ISO date string, so text order
+        # is date order; rows without it (or with JSON null) go last.
+        return qs.order_by(
+            KT('metadata__service_data_fim').asc(nulls_last=True), '-created_at', '-id',
+        )
 
     @action(detail=True, methods=['post'], url_path='mark_read')
     def mark_read(self, request, pk=None):

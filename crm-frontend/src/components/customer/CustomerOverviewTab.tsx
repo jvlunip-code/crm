@@ -13,7 +13,17 @@ import type { Customer, CustomerAddress } from '@/types';
 import { formatNif, getStatusLabel } from '@/lib/utils';
 import { toast } from 'sonner';
 
-type EditableField = 'email' | 'phone' | 'company' | 'nif' | 'iban' | 'decisor' | 'segment';
+type EditableField =
+  | 'email'
+  | 'phone'
+  | 'secondaryPhone'
+  | 'company'
+  | 'nif'
+  | 'iban'
+  | 'decisor'
+  | 'segment';
+
+const PHONE_FIELDS: EditableField[] = ['phone', 'secondaryPhone'];
 
 /** One-line postal address: "Rua X 12, 4700-123 Freguesia, Concelho". */
 function formatFullAddress(address: CustomerAddress): string {
@@ -48,7 +58,10 @@ export function CustomerOverviewTab({ customer, customerId, address }: CustomerO
     try {
       await updateCustomer.mutateAsync({
         id: customer.id,
-        updates: { [editingField]: editValue || null },
+        // Phone columns are non-null text: an empty alternative phone is ''.
+        updates: {
+          [editingField]: PHONE_FIELDS.includes(editingField) ? editValue : editValue || null,
+        },
       });
       toast.success('Dados atualizados com sucesso');
       setEditingField(null);
@@ -76,8 +89,15 @@ export function CustomerOverviewTab({ customer, customerId, address }: CustomerO
         <dd className="mt-0.5 type-dense text-foreground">
           {isEditing ? (
             <div className="flex items-center gap-1">
-              {field === 'phone' ? (
-                <PhoneInput value={editValue} onChange={setEditValue} className="flex-1" />
+              {PHONE_FIELDS.includes(field) ? (
+                <PhoneInput
+                  value={editValue}
+                  onChange={setEditValue}
+                  className="flex-1"
+                  aria-label={label}
+                  autoFocus
+                  onKeyDown={onKeyDown}
+                />
               ) : (
                 <Input
                   value={editValue}
@@ -187,6 +207,18 @@ export function CustomerOverviewTab({ customer, customerId, address }: CustomerO
                 empty
               ),
               customer.phone,
+            )}
+            {renderEditableField(
+              'secondaryPhone',
+              'Telefone alternativo',
+              customer.secondaryPhone ? (
+                <a href={`tel:${customer.secondaryPhone}`} className="type-mono hover:underline">
+                  {customer.secondaryPhone}
+                </a>
+              ) : (
+                empty
+              ),
+              customer.secondaryPhone,
             )}
           </dl>
         </DetailPanel>

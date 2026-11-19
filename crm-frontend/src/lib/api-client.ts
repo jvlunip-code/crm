@@ -100,6 +100,7 @@ type BackendCustomer = {
   name: string;
   email: string;
   phone: string;
+  secondary_phone: string;
   company: string;
   nif: string | null;
   iban: string | null;
@@ -179,7 +180,7 @@ export type CustomersPage = {
 
 export type CustomerSuggestion = Pick<
   Customer,
-  'id' | 'name' | 'company' | 'nif' | 'email' | 'phone' | 'status'
+  'id' | 'name' | 'company' | 'nif' | 'email' | 'phone' | 'secondaryPhone' | 'status'
 >;
 
 export type CustomerSuggestions = {
@@ -513,7 +514,9 @@ export const notificationsApi = {
     params: Omit<NotificationsListParams, 'page' | 'pageSize'> = {},
   ): Promise<Notification[]> => {
     const all: Notification[] = [];
-    let url: string | null = `/notifications/${buildNotificationsQuery(params)}`;
+    // Big pages (backend max 500) so the whole list loads in one or two requests.
+    let url: string | null =
+      `/notifications/${buildNotificationsQuery({ ...params, pageSize: 500 })}`;
     while (url) {
       const response = await fetchWithAuth(url);
       const data: PaginatedResponse<BackendNotification> = await response.json();

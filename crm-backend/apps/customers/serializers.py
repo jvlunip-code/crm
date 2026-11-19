@@ -33,7 +33,7 @@ class CustomerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Customer
         fields = [
-            'id', 'name', 'email', 'phone', 'company', 'nif', 'iban', 'decisor', 'segment',
+            'id', 'name', 'email', 'phone', 'secondary_phone', 'company', 'nif', 'iban', 'decisor', 'segment',
             'status', 'tags', 'tag_ids', 'created_at',
         ]
         read_only_fields = ['id', 'created_at']
@@ -44,7 +44,7 @@ class CustomerSuggestionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Customer
-        fields = ['id', 'name', 'company', 'nif', 'email', 'phone', 'status']
+        fields = ['id', 'name', 'company', 'nif', 'email', 'phone', 'secondary_phone', 'status']
         read_only_fields = fields
 
 

@@ -19,12 +19,13 @@ import type { Notification } from '@/types';
 export function NotificationsBell() {
   const navigate = useNavigate();
   const { data: unreadCount = 0 } = useUnreadCount();
-  const { data: recent } = useNotifications({ isRead: false, pageSize: 8 });
+  // Backend order is urgency: the services ending soonest come first.
+  const { data: mostUrgent } = useNotifications({ isRead: false, pageSize: 8 });
   const markAsRead = useMarkAsRead();
   const markAllRead = useMarkAllAsRead();
   const dismiss = useDismissNotification();
 
-  const rows = recent?.results ?? [];
+  const rows = mostUrgent?.results ?? [];
 
   const handleRowClick = (n: Notification) => {
     if (!n.isRead) markAsRead.mutate(n.id);

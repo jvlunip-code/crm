@@ -3,6 +3,8 @@ export type Customer = {
   name: string;
   email: string;
   phone: string;
+  /** Alternative contact number; '' when none. */
+  secondaryPhone?: string;
   company: string;
   nif: string | null;
   iban: string | null;

@@ -109,7 +109,7 @@ class CustomerSuggestEndpointTests(TestCase):
         self.assertEqual(len(body['results']), 8)
         self.assertFalse(body['fuzzy'])
         self.assertEqual(
-            set(body['results'][0]), {'id', 'name', 'company', 'nif', 'email', 'phone', 'status'}
+            set(body['results'][0]), {'id', 'name', 'company', 'nif', 'email', 'phone', 'secondary_phone', 'status'}
         )
 
     def test_limit_is_clamped(self):
