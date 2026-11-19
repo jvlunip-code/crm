@@ -199,7 +199,7 @@ function SuggestionOption({
   const digits = query.replace(/\s/g, '');
   const nifMatches = !fuzzy && digits.length > 0 && !!customer.nif?.startsWith(digits);
   const contact =
-    [customer.phone, customer.email].find((field) =>
+    [customer.phone, customer.secondaryPhone, customer.email].find((field) =>
       highlightParts(field ?? '', query).some((part) => part.match),
     ) ?? customer.phone;
 

@@ -20,23 +20,43 @@ export function SortableHead<F extends string>({
   children: React.ReactNode;
 }) {
   const dir = sort?.field === field ? sort.dir : null;
-  const Icon = dir === 'asc' ? ArrowUp : dir === 'desc' ? ArrowDown : ArrowUpDown;
   return (
     <TableHead
       className={className}
       aria-sort={dir === 'asc' ? 'ascending' : dir === 'desc' ? 'descending' : 'none'}
     >
-      <button
-        type="button"
-        onClick={() => onSort(field)}
-        className="-mx-1 inline-flex items-center gap-1 rounded-xs px-1 outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
-      >
+      <SortHeaderButton dir={dir} onClick={() => onSort(field)}>
         {children}
-        <Icon
-          aria-hidden
-          className={cn('size-3.5', dir ? 'text-foreground' : 'text-muted-foreground/60')}
-        />
-      </button>
+      </SortHeaderButton>
     </TableHead>
+  );
+}
+
+/**
+ * The clickable label + direction arrow inside a sortable header. Use it on
+ * its own where the `<th>` is already rendered (TanStack headers in `ClientTable`).
+ */
+export function SortHeaderButton({
+  dir,
+  onClick,
+  children,
+}: {
+  dir: 'asc' | 'desc' | null | false;
+  onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void;
+  children: React.ReactNode;
+}) {
+  const Icon = dir === 'asc' ? ArrowUp : dir === 'desc' ? ArrowDown : ArrowUpDown;
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="-mx-1 inline-flex items-center gap-1 rounded-xs px-1 outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
+    >
+      {children}
+      <Icon
+        aria-hidden
+        className={cn('size-3.5', dir ? 'text-foreground' : 'text-muted-foreground/60')}
+      />
+    </button>
   );
 }

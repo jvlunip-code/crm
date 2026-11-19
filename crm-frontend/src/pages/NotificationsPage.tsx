@@ -8,6 +8,7 @@ import {
   useReactTable,
   type ColumnDef,
   type ColumnFiltersState,
+  type HeaderContext,
   type SortingState,
 } from '@tanstack/react-table';
 import { Bell, MoreVertical } from 'lucide-react';
@@ -31,6 +32,7 @@ import { ClientTable } from '@/components/shared/ClientTable';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { SearchField } from '@/components/shared/SearchField';
+import { SortHeaderButton } from '@/components/shared/SortableHead';
 import { StatusBadge } from '@/components/shared/StatusBadge';
 import { TableToolbar } from '@/components/shared/TableToolbar';
 import {
@@ -44,9 +46,30 @@ import {
 import { renderNotification } from '@/lib/notifications/renderers';
 import { FLAG } from '@/lib/notifications/flag-style';
 import { getStatusTone } from '@/lib/status';
-import { formatRelativeTime } from '@/lib/utils';
+import { PAGE_SIZE_ALL, readStoredPageSize, storePageSize } from '@/lib/pagination';
+import { formatRelativeTime, formatServiceDate } from '@/lib/utils';
 import type { Notification } from '@/types';
 import { toast } from 'sonner';
+
+const PAGE_SIZE_OPTIONS = [20, 50, 100, 150, PAGE_SIZE_ALL];
+const DEFAULT_PAGE_SIZE = 20;
+const PAGE_SIZE_STORAGE_KEY = 'crm.notifications.pageSize';
+
+/** Urgency = the service end date (ISO, so text order is date order); missing sorts last. */
+const serviceEnd = (n: Notification) => n.metadata?.serviceDataFim || undefined;
+
+/** Most urgent first: soonest-ending (and already expired) services at the top. */
+const URGENCY_SORT: SortingState = [{ id: 'dataFim', desc: false }];
+
+function sortableHeader(label: string) {
+  return function SortableHeader({ column }: HeaderContext<Notification, unknown>) {
+    return (
+      <SortHeaderButton dir={column.getIsSorted()} onClick={column.getToggleSortingHandler()}>
+        {label}
+      </SortHeaderButton>
+    );
+  };
+}
 
 export function NotificationsPage() {
   const navigate = useNavigate();
@@ -57,9 +80,12 @@ export function NotificationsPage() {
   const markAllRead = useMarkAllAsRead();
   const dismiss = useDismissNotification();
 
-  const [sorting, setSorting] = React.useState<SortingState>([]);
+  const [sorting, setSorting] = React.useState<SortingState>(URGENCY_SORT);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
-  const [pagination, setPagination] = React.useState({ pageIndex: 0, pageSize: 10 });
+  const [pagination, setPagination] = React.useState(() => ({
+    pageIndex: 0,
+    pageSize: readStoredPageSize(PAGE_SIZE_STORAGE_KEY, PAGE_SIZE_OPTIONS, DEFAULT_PAGE_SIZE),
+  }));
   const [statusFilter, setStatusFilter] = React.useState<'all' | 'unread' | 'read'>('all');
 
   const filtered = React.useMemo(() => {
@@ -73,7 +99,9 @@ export function NotificationsPage() {
     () => [
       {
         id: 'flag',
-        header: 'Estado',
+        accessorFn: serviceEnd,
+        sortUndefined: 'last',
+        header: sortableHeader('Estado'),
         cell: ({ row }) => {
           const r = renderNotification(row.original);
           return <StatusBadge tone={FLAG[r.flag].tone}>{FLAG[r.flag].label}</StatusBadge>;
@@ -109,8 +137,20 @@ export function NotificationsPage() {
         ),
       },
       {
+        id: 'dataFim',
+        accessorFn: serviceEnd,
+        sortUndefined: 'last',
+        header: sortableHeader('Termina'),
+        cell: ({ row }) => (
+          <span className="whitespace-nowrap type-mono text-foreground-secondary">
+            {formatServiceDate(serviceEnd(row.original))}
+          </span>
+        ),
+      },
+      {
         accessorKey: 'createdAt',
-        header: 'Data',
+        sortDescFirst: true,
+        header: sortableHeader('Criada'),
         cell: ({ row }) => (
           <span className="whitespace-nowrap type-caption text-muted-foreground">
             {formatRelativeTime(row.original.createdAt)}
@@ -225,15 +265,24 @@ export function NotificationsPage() {
         >
           <SearchField
             value={query}
-            onChange={(event) => table.getColumn('title')?.setFilterValue(event.target.value)}
-            onClear={() => table.getColumn('title')?.setFilterValue('')}
+            onChange={(event) => {
+              table.getColumn('title')?.setFilterValue(event.target.value);
+              table.setPageIndex(0);
+            }}
+            onClear={() => {
+              table.getColumn('title')?.setFilterValue('');
+              table.setPageIndex(0);
+            }}
             placeholder="Procurar notificações…"
             aria-label="Procurar notificações"
             className="w-full sm:w-72"
           />
           <Select
             value={statusFilter}
-            onValueChange={(v) => setStatusFilter(v as 'all' | 'unread' | 'read')}
+            onValueChange={(v) => {
+              setStatusFilter(v as 'all' | 'unread' | 'read');
+              setPagination((p) => ({ ...p, pageIndex: 0 }));
+            }}
           >
             <SelectTrigger className="w-36" aria-label="Filtrar por estado">
               <SelectValue />
@@ -256,6 +305,8 @@ export function NotificationsPage() {
           <ClientTable
             table={table}
             onRowClick={(row) => handleRowClick(row.original)}
+            pageSizeOptions={PAGE_SIZE_OPTIONS}
+            onPageSizeChange={(size) => storePageSize(PAGE_SIZE_STORAGE_KEY, size)}
             rowClassName={(row) => (row.original.isRead ? undefined : 'bg-selection/60')}
             empty={
               <EmptyState
