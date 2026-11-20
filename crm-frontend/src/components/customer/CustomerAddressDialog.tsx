@@ -142,9 +142,9 @@ export function CustomerAddressDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-130">
         <DialogHeader>
-          <DialogTitle>{address ? 'Editar Morada' : 'Adicionar Morada'}</DialogTitle>
+          <DialogTitle>{address ? 'Editar morada' : 'Adicionar morada'}</DialogTitle>
           <DialogDescription>
             {address
               ? 'Altere os dados da morada abaixo.'
@@ -153,71 +153,78 @@ export function CustomerAddressDialog({
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <Field>
-            <FieldLabel required htmlFor="street">
-              Morada
-            </FieldLabel>
-            <Input
-              id="street"
-              value={formData.street}
-              onChange={(e) => handleChange('street', e.target.value)}
-              placeholder="Ex: Rua Augusta, 100"
-              required
-            />
-          </Field>
-
-          <Field>
-            <FieldLabel required htmlFor="postalCode">
-              Código Postal
-            </FieldLabel>
-            <Input
-              id="postalCode"
-              value={formData.postalCode}
-              onChange={(e) => handlePostalCodeChange(e.target.value)}
-              placeholder="0000-000"
-              maxLength={8}
-              required
-            />
-            {isFetchingPostalCode && <FieldDescription>A procurar…</FieldDescription>}
-          </Field>
-
           <div className="grid gap-4 sm:grid-cols-2">
-            <Field>
-              <FieldLabel required htmlFor="municipality">
-                Concelho
+            <Field className="sm:col-span-2">
+              <FieldLabel required htmlFor="street">
+                Morada
               </FieldLabel>
-              <Input
-                id="municipality"
-                value={formData.municipality}
-                onChange={(e) => handleChange('municipality', e.target.value)}
-                placeholder="Ex: Lisboa"
+              <Input size="sm"
+                id="street"
+                value={formData.street}
+                onChange={(e) => handleChange('street', e.target.value)}
+                placeholder="Ex: Rua Augusta, 100"
+                autoComplete="off"
                 required
               />
             </Field>
 
             <Field>
-              <FieldLabel htmlFor="parish">Freguesia ou Localidade</FieldLabel>
-              <Input
+              <FieldLabel required htmlFor="postalCode">
+                Código postal
+              </FieldLabel>
+              <Input size="sm"
+                id="postalCode"
+                value={formData.postalCode}
+                onChange={(e) => handlePostalCodeChange(e.target.value)}
+                placeholder="0000-000"
+                inputMode="numeric"
+                autoComplete="off"
+                maxLength={8}
+                className="tabular-nums"
+                required
+              />
+              {isFetchingPostalCode && <FieldDescription>A procurar…</FieldDescription>}
+            </Field>
+
+            <Field>
+              <FieldLabel htmlFor="district">Distrito</FieldLabel>
+              <Input size="sm"
+                id="district"
+                value={formData.district}
+                onChange={(e) => handleChange('district', e.target.value)}
+                placeholder="Ex: Lisboa"
+                autoComplete="off"
+              />
+            </Field>
+
+            <Field>
+              <FieldLabel required htmlFor="municipality">
+                Concelho
+              </FieldLabel>
+              <Input size="sm"
+                id="municipality"
+                value={formData.municipality}
+                onChange={(e) => handleChange('municipality', e.target.value)}
+                placeholder="Ex: Lisboa"
+                autoComplete="off"
+                required
+              />
+            </Field>
+
+            <Field>
+              <FieldLabel htmlFor="parish">Freguesia ou localidade</FieldLabel>
+              <Input size="sm"
                 id="parish"
                 value={formData.parish}
                 onChange={(e) => handleChange('parish', e.target.value)}
                 placeholder="Ex: Santa Maria Maior"
+                autoComplete="off"
               />
             </Field>
           </div>
 
-          <Field>
-            <FieldLabel htmlFor="district">Distrito</FieldLabel>
-            <Input
-              id="district"
-              value={formData.district}
-              onChange={(e) => handleChange('district', e.target.value)}
-              placeholder="Ex: Lisboa"
-            />
-          </Field>
-
           <DialogFooter>
-            <Button
+            <Button size="sm"
               type="button"
               variant="outline"
               onClick={() => onOpenChange(false)}
@@ -225,8 +232,8 @@ export function CustomerAddressDialog({
             >
               Cancelar
             </Button>
-            <Button type="submit" disabled={isPending}>
-              {isPending ? 'A guardar...' : 'Guardar'}
+            <Button size="sm" type="submit" disabled={isPending}>
+              {isPending ? 'A guardar…' : 'Guardar'}
             </Button>
           </DialogFooter>
         </form>

@@ -6,6 +6,14 @@ import { Tabs as TabsPrimitive } from 'radix-ui';
 
 import { cn } from '@/lib/utils';
 
+/**
+ * Tabs (Radix: roving focus + tabpanel semantics).
+ * - `variant="line"` is the Hearth tab bar: hairline rule, 14px labels
+ *   (muted → foreground on hover, foreground 500 when active) and a 2px Slate
+ *   underline. `size="default"` is 44px (page), `size="card"` 48px (inside a
+ *   card). Put counts in `<TabsCount>`.
+ * - `variant="default"` is a segmented control on `bg-muted`.
+ */
 function Tabs({
   className,
   orientation = 'horizontal',
@@ -22,16 +30,26 @@ function Tabs({
 }
 
 const tabsListVariants = cva(
-  'group/tabs-list inline-flex w-fit items-center justify-center text-muted-foreground group-data-vertical/tabs:h-fit group-data-vertical/tabs:flex-col',
+  'group/tabs-list inline-flex w-fit items-center text-muted-foreground group-data-vertical/tabs:h-fit group-data-vertical/tabs:flex-col',
   {
     variants: {
       variant: {
-        default: 'rounded-sm bg-muted p-0.5 group-data-horizontal/tabs:h-8',
-        line: 'gap-4 border-b border-border bg-transparent group-data-horizontal/tabs:h-9',
+        default: 'justify-center gap-0.5 rounded-md bg-muted p-1',
+        line: 'justify-start gap-1 border-b border-border bg-transparent',
+      },
+      size: {
+        default: '',
+        card: '',
       },
     },
+    compoundVariants: [
+      { variant: 'default', className: 'h-10' },
+      { variant: 'line', size: 'default', className: 'h-11' },
+      { variant: 'line', size: 'card', className: 'h-12' },
+    ],
     defaultVariants: {
       variant: 'default',
+      size: 'default',
     },
   },
 );
@@ -39,13 +57,15 @@ const tabsListVariants = cva(
 function TabsList({
   className,
   variant = 'default',
+  size = 'default',
   ...props
 }: React.ComponentProps<typeof TabsPrimitive.List> & VariantProps<typeof tabsListVariants>) {
   return (
     <TabsPrimitive.List
       data-slot="tabs-list"
       data-variant={variant}
-      className={cn(tabsListVariants({ variant }), className)}
+      data-size={size}
+      className={cn(tabsListVariants({ variant, size }), className)}
       {...props}
     />
   );
@@ -56,11 +76,26 @@ function TabsTrigger({ className, ...props }: React.ComponentProps<typeof TabsPr
     <TabsPrimitive.Trigger
       data-slot="tabs-trigger"
       className={cn(
-        "relative inline-flex h-full flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-xs border border-transparent px-2.5 type-nav font-medium whitespace-nowrap text-foreground-secondary transition-colors group-data-vertical/tabs:w-full group-data-vertical/tabs:justify-start hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
-        // segmented (default) — active tab lifts to the panel surface
-        'group-data-[variant=default]/tabs-list:data-active:bg-card group-data-[variant=default]/tabs-list:data-active:text-foreground group-data-[variant=default]/tabs-list:data-active:border-border',
-        // line — active tab underlines in primary text colour
-        'group-data-[variant=line]/tabs-list:rounded-none group-data-[variant=line]/tabs-list:px-0.5 group-data-[variant=line]/tabs-list:data-active:text-foreground after:absolute after:inset-x-0 after:-bottom-px after:h-0.5 after:bg-foreground after:opacity-0 after:transition-opacity group-data-[variant=line]/tabs-list:data-active:after:opacity-100',
+        "relative inline-flex h-full flex-1 cursor-pointer items-center justify-center gap-2 rounded-sm border border-transparent px-3 type-nav whitespace-nowrap text-muted-foreground transition-colors group-data-vertical/tabs:w-full group-data-vertical/tabs:justify-start hover:text-foreground disabled:pointer-events-none disabled:opacity-50 data-active:font-medium data-active:text-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+        // segmented (default): the active tab lifts to the panel surface
+        'group-data-[variant=default]/tabs-list:data-active:border-border group-data-[variant=default]/tabs-list:data-active:bg-card',
+        // line: tabs keep their width; the active one gets a 2px Slate underline
+        // laid over the list's hairline rule
+        'group-data-[variant=line]/tabs-list:flex-none after:absolute after:inset-x-0 after:-bottom-[0.5px] after:h-0.5 after:bg-foreground after:opacity-0 after:transition-opacity group-data-[variant=line]/tabs-list:data-active:after:opacity-100',
+        className,
+      )}
+      {...props}
+    />
+  );
+}
+
+/** Count chip inside a tab label: 12px on `bg-muted`, 2px 8px, fully rounded. */
+function TabsCount({ className, ...props }: React.ComponentProps<'span'>) {
+  return (
+    <span
+      data-slot="tabs-count"
+      className={cn(
+        'inline-flex min-w-5 items-center justify-center rounded-full bg-muted px-2 py-0.5 type-caption font-normal text-muted-foreground tabular-nums',
         className,
       )}
       {...props}
@@ -72,10 +107,10 @@ function TabsContent({ className, ...props }: React.ComponentProps<typeof TabsPr
   return (
     <TabsPrimitive.Content
       data-slot="tabs-content"
-      className={cn('flex-1 outline-none', className)}
+      className={cn('flex-1 focus-visible:outline-offset-[-2px]', className)}
       {...props}
     />
   );
 }
 
-export { Tabs, TabsList, TabsTrigger, TabsContent, tabsListVariants };
+export { Tabs, TabsList, TabsTrigger, TabsCount, TabsContent, tabsListVariants };

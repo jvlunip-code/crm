@@ -33,7 +33,8 @@ export function SortableHead<F extends string>({
 }
 
 /**
- * The clickable label + direction arrow inside a sortable header. Use it on
+ * The clickable label + direction arrow inside a sortable header (12/500 like
+ * every `th`; the arrow is quiet until the column is sorted). Use it on
  * its own where the `<th>` is already rendered (TanStack headers in `ClientTable`).
  */
 export function SortHeaderButton({
@@ -50,12 +51,12 @@ export function SortHeaderButton({
     <button
       type="button"
       onClick={onClick}
-      className="-mx-1 inline-flex items-center gap-1 rounded-xs px-1 outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
+      className="-mx-1 inline-flex cursor-pointer items-center gap-1 rounded-xs px-1 type-eyebrow transition-colors hover:text-foreground"
     >
       {children}
       <Icon
         aria-hidden
-        className={cn('size-3.5', dir ? 'text-foreground' : 'text-muted-foreground/60')}
+        className={cn('size-3.5', dir ? 'text-foreground' : 'text-foreground-disabled')}
       />
     </button>
   );

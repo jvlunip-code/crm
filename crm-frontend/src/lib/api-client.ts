@@ -9,6 +9,7 @@ import type {
   ServiceListItem,
   Tag,
   TagColor,
+  User,
 } from '@/types';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
@@ -194,6 +195,7 @@ export type CustomerUpdate = Partial<Omit<Customer, 'tags'>> & { tagIds?: number
 export type CustomersPageParams = {
   search?: string;
   tag?: number;
+  status?: 'active' | 'inactive';
   ordering?: string;
   page?: number;
 };
@@ -206,6 +208,7 @@ export const customersApi = {
     const trimmed = params.search?.trim();
     if (trimmed) qs.set('search', trimmed);
     if (params.tag) qs.set('tag', String(params.tag));
+    if (params.status) qs.set('status', params.status);
     if (params.ordering) qs.set('ordering', params.ordering);
     if (params.page && params.page > 1) qs.set('page', String(params.page));
     const suffix = qs.size > 0 ? `?${qs.toString()}` : '';
@@ -575,6 +578,8 @@ export type ServicesPageParams = {
   ending?: ServiceEndingFilter;
   ordering?: string;
   page?: number;
+  /** Rows per page (backend default 10, max 100). */
+  pageSize?: number;
 };
 
 export type ServicesPage = {
@@ -596,6 +601,7 @@ export const servicesListApi = {
     if (params.ending) qs.set('ending', params.ending);
     if (params.ordering) qs.set('ordering', params.ordering);
     if (params.page && params.page > 1) qs.set('page', String(params.page));
+    if (params.pageSize) qs.set('page_size', String(params.pageSize));
     const suffix = qs.size > 0 ? `?${qs.toString()}` : '';
     const response = await fetchWithAuth(`/services/${suffix}`);
     const data: PaginatedResponse<BackendServiceListItem> = await response.json();
@@ -679,12 +685,12 @@ export const tarifariosApi = {
 };
 
 export const authApi = {
-  login: async (username: string, password: string) => {
+  login: async (username: string, password: string): Promise<User> => {
     const response = await fetchWithAuth('/auth/login/', {
       method: 'POST',
       body: JSON.stringify({ username, password }),
     });
-    return response.json();
+    return toFrontend<User>(await response.json());
   },
 
   logout: async () => {
@@ -693,8 +699,8 @@ export const authApi = {
     });
   },
 
-  me: async () => {
+  me: async (): Promise<User> => {
     const response = await fetchWithAuth('/auth/me/');
-    return response.json();
+    return toFrontend<User>(await response.json());
   },
 };

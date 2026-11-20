@@ -6,8 +6,10 @@ export function ProtectedRoute() {
 
   if (isLoading) {
     return (
-      <div className="flex h-screen items-center justify-center">
-        <p className="text-muted-foreground">A carregar...</p>
+      <div className="flex min-h-svh items-center justify-center bg-background">
+        <p role="status" className="type-body text-muted-foreground">
+          A carregar…
+        </p>
       </div>
     );
   }

@@ -1,11 +1,10 @@
 import { useState } from 'react';
 import { useNavigate, Navigate } from 'react-router-dom';
-import { CircleDot } from 'lucide-react';
 import { useAuth, useLogin } from '@/hooks/use-auth';
+import { BrandMark } from '@/components/layout/BrandMark';
 import { Button } from '@/components/ui/button';
 import { Field, FieldGroup, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
-import { CornerMarkers } from '@/components/shared/EmptyState';
 
 export function LoginPage() {
   const navigate = useNavigate();
@@ -16,7 +15,7 @@ export function LoginPage() {
 
   if (authLoading) {
     return (
-      <div className="flex min-h-svh items-center justify-center bg-background">
+      <div role="status" className="flex min-h-svh items-center justify-center bg-background">
         <p className="type-body text-muted-foreground">A carregar…</p>
       </div>
     );
@@ -32,30 +31,34 @@ export function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-svh w-full flex-col items-center justify-center gap-4 bg-background p-6">
-      <div className="relative flex w-full max-w-[360px] flex-col items-center gap-5 border border-border bg-card px-6 py-8">
-        <CornerMarkers />
-        <div className="flex size-10 items-center justify-center rounded-sm bg-primary text-primary-foreground">
-          <CircleDot className="size-5" aria-hidden />
+    <main className="flex min-h-svh w-full flex-col items-center justify-center gap-6 bg-background px-4 py-10">
+      <div className="flex items-center gap-2.5">
+        <BrandMark />
+        <span className="type-heading text-foreground">JVL</span>
+      </div>
+
+      <div className="flex w-full max-w-95 flex-col gap-6 rounded-xl border border-border bg-card p-8">
+        <div className="flex flex-col gap-1.5">
+          <h1 className="type-title text-foreground">Iniciar sessão</h1>
+          <p className="type-lead text-muted-foreground">Gestão de clientes JVL Comunicações</p>
         </div>
-        <div className="flex flex-col gap-1 text-center">
-          <h1 className="type-page-title text-foreground">Sistema CRM</h1>
-          <p className="type-caption text-muted-foreground">Gestão de clientes</p>
-        </div>
+
         {login.isError && (
           <p
             role="alert"
-            className="w-full rounded-sm border border-status-error/40 bg-status-error/10 px-3 py-2 type-caption text-foreground"
+            className="rounded-md bg-status-error-bg px-3 py-2.5 type-body text-status-error-fg"
           >
             {login.error.message || 'Credenciais inválidas'}
           </p>
         )}
-        <form onSubmit={handleSubmit} className="flex w-full flex-col gap-5">
+
+        <form onSubmit={handleSubmit} className="flex flex-col gap-6">
           <FieldGroup>
             <Field>
               <FieldLabel htmlFor="username">Utilizador</FieldLabel>
               <Input
                 id="username"
+                size="lg"
                 autoComplete="username"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
@@ -68,6 +71,7 @@ export function LoginPage() {
               <Input
                 id="password"
                 type="password"
+                size="lg"
                 autoComplete="current-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -80,6 +84,6 @@ export function LoginPage() {
           </Button>
         </form>
       </div>
-    </div>
+    </main>
   );
 }

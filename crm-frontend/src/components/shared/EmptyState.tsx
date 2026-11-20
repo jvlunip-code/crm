@@ -3,9 +3,10 @@ import * as React from 'react';
 import { cn } from '@/lib/utils';
 
 /**
- * Empty / error / "nothing selected" messaging. `framed` adds the structural
- * border with corner markers — reserved for page-level emptiness, never for
- * a slot inside a table or a side panel.
+ * Empty / error / "nothing selected" messaging: a 40px icon disc on the
+ * sunken surface, a short title and one line of help. Inside a table or a
+ * card slot use it bare (sans 14/500 title); `framed` makes it a page-level
+ * panel (white, hairline, r16, serif 20 title) — never inside another card.
  */
 export function EmptyState({
   icon,
@@ -31,45 +32,37 @@ export function EmptyState({
     <div
       data-slot="empty-state"
       data-tone={tone}
+      // Load failures are announced (also when a retry fails again).
+      role={tone === 'error' ? 'alert' : undefined}
       className={cn(
-        'relative flex flex-col items-center justify-center gap-1.5 text-center',
+        'flex flex-col items-center justify-center gap-1.5 text-center',
         size === 'default' ? 'px-6 py-12' : 'px-4 py-8',
-        framed && 'border border-border bg-card',
+        framed && 'rounded-xl border border-border bg-card',
         className,
       )}
       {...props}
     >
-      {framed && <CornerMarkers />}
       {icon && (
         <span
           aria-hidden
           className={cn(
-            'mb-1 flex size-8 items-center justify-center rounded-sm border border-border bg-muted/60 [&>svg]:size-4',
+            'mb-1.5 flex size-10 items-center justify-center rounded-full [&>svg]:size-4.5 [&>svg]:stroke-[1.75]',
             tone === 'error'
-              ? 'border-status-error/40 bg-status-error/10 text-status-error'
-              : 'text-muted-foreground',
+              ? 'bg-status-error-bg text-status-error-fg'
+              : 'border border-border bg-surface-sunken text-foreground-secondary',
           )}
         >
           {icon}
         </span>
       )}
-      {title && <div className="type-section text-foreground">{title}</div>}
+      {title && (
+        <div className={cn('text-foreground', framed ? 'type-heading-sm' : 'type-section')}>
+          {title}
+        </div>
+      )}
       {description && <p className="max-w-[44ch] type-body text-muted-foreground">{description}</p>}
       {children}
-      {action && <div className="mt-2 flex items-center gap-2">{action}</div>}
+      {action && <div className="mt-3 flex flex-wrap items-center justify-center gap-2">{action}</div>}
     </div>
-  );
-}
-
-/** Four 8px L-marks inset −1px, the source card decoration. */
-export function CornerMarkers({ className }: { className?: string }) {
-  const base = 'pointer-events-none absolute size-2 border-border-strong';
-  return (
-    <span aria-hidden className={cn('contents', className)}>
-      <span className={cn(base, '-top-px -left-px border-t border-l')} />
-      <span className={cn(base, '-top-px -right-px border-t border-r')} />
-      <span className={cn(base, '-bottom-px -left-px border-b border-l')} />
-      <span className={cn(base, '-right-px -bottom-px border-r border-b')} />
-    </span>
   );
 }

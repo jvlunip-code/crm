@@ -64,7 +64,7 @@ export function ConfirmDeleteDialog({
         {error && (
           <p
             role="alert"
-            className="rounded-sm border border-status-error/40 bg-status-error/10 px-3 py-2 type-caption text-foreground"
+            className="rounded-md bg-status-error-bg px-3 py-2 type-dense text-status-error-fg"
           >
             {error}
           </p>
@@ -75,7 +75,7 @@ export function ConfirmDeleteDialog({
               request finishes. */}
           <button
             type="button"
-            className={cn(buttonVariants({ variant: 'destructive' }))}
+            className={cn(buttonVariants({ variant: 'destructive-solid' }))}
             onClick={confirm}
             disabled={pending}
           >

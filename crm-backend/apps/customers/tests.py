@@ -121,3 +121,34 @@ class CustomerSuggestEndpointTests(TestCase):
     def test_flags_fuzzy_results(self):
         response = self.client.get('/api/customers/suggest/', {'q': 'silvz'})
         self.assertTrue(response.json()['fuzzy'])
+
+
+class CustomerStatusFilterTests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        Customer.objects.create(name='Ana', email='a@x.pt', phone='1', company='A')
+        Customer.objects.create(name='Rui', email='r@x.pt', phone='2', company='R')
+        Customer.objects.create(
+            name='Eva', email='e@x.pt', phone='3', company='E', status=Customer.Status.INACTIVE
+        )
+        cls.user = get_user_model().objects.create_user('staff', password='x')
+
+    def setUp(self):
+        self.client = APIClient()
+        self.client.force_authenticate(self.user)
+
+    def names(self, params):
+        response = self.client.get('/api/customers/', {'ordering': 'name', **params})
+        self.assertEqual(response.status_code, 200)
+        return [c['name'] for c in response.json()['results']]
+
+    def test_filters_by_status(self):
+        self.assertEqual(self.names({'status': 'active'}), ['Ana', 'Rui'])
+        self.assertEqual(self.names({'status': 'inactive'}), ['Eva'])
+
+    def test_unknown_or_blank_status_is_ignored(self):
+        self.assertEqual(self.names({'status': 'bogus'}), ['Ana', 'Eva', 'Rui'])
+        self.assertEqual(self.names({'status': ''}), ['Ana', 'Eva', 'Rui'])
+
+    def test_combines_with_search(self):
+        self.assertEqual(self.names({'status': 'inactive', 'search': 'ana'}), [])

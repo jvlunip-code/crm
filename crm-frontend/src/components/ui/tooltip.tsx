@@ -5,6 +5,7 @@ import { Tooltip as TooltipPrimitive } from 'radix-ui';
 
 import { cn } from '@/lib/utils';
 
+/** Slate tooltip, Ivory 12px text, r8, 6px 10px. */
 function TooltipProvider({
   delayDuration = 150,
   ...props
@@ -38,13 +39,13 @@ function TooltipContent({
         data-slot="tooltip-content"
         sideOffset={sideOffset}
         className={cn(
-          'z-50 inline-flex w-fit max-w-xs origin-(--radix-tooltip-content-transform-origin) items-center gap-1.5 rounded-sm bg-foreground px-2 py-1 type-caption text-background shadow-1 duration-150 data-[side=bottom]:slide-in-from-top-1 data-[side=left]:slide-in-from-right-1 data-[side=right]:slide-in-from-left-1 data-[side=top]:slide-in-from-bottom-1 data-[state=delayed-open]:animate-in data-[state=delayed-open]:fade-in-0 data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0',
+          'z-50 inline-flex w-fit max-w-xs origin-(--radix-tooltip-content-transform-origin) items-center gap-1.5 rounded-sm bg-tooltip px-2.5 py-1.5 type-caption text-tooltip-foreground duration-150 data-[side=bottom]:slide-in-from-top-1 data-[side=left]:slide-in-from-right-1 data-[side=right]:slide-in-from-left-1 data-[side=top]:slide-in-from-bottom-1 data-[state=delayed-open]:animate-in data-[state=delayed-open]:fade-in-0 data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0',
           className,
         )}
         {...props}
       >
         {children}
-        <TooltipPrimitive.Arrow className="z-50 size-2 translate-y-[calc(-50%_-_1px)] rotate-45 rounded-[1px] bg-foreground fill-foreground" />
+        <TooltipPrimitive.Arrow className="z-50 size-2 translate-y-[calc(-50%_-_1px)] rotate-45 bg-tooltip fill-tooltip" />
       </TooltipPrimitive.Content>
     </TooltipPrimitive.Portal>
   );

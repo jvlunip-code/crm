@@ -1,27 +1,23 @@
+import { useId } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import {
-  Activity,
-  Bell,
-  CircleDot,
-  HelpCircle,
-  LayoutDashboard,
-  Package,
-  Settings,
-  Users,
-} from 'lucide-react';
+import { Activity, Bell, LayoutDashboard, Package, Users } from 'lucide-react';
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
+  SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuBadge,
   SidebarMenuButton,
   SidebarMenuItem,
+  useSidebar,
 } from '@/components/ui/sidebar';
+import { BrandMark } from '@/components/layout/BrandMark';
 import { NavUser } from '@/components/layout/NavUser';
+import { NotificationsBell } from '@/components/layout/NotificationsBell';
 import { useUnreadCount } from '@/hooks/use-notifications';
 
 const navMain = [
@@ -32,83 +28,76 @@ const navMain = [
   { title: 'Eventos', url: '/events', icon: Activity },
 ];
 
-// Not implemented yet: rendered as inert items, not links.
-const navSecondary = [
-  { title: 'Definições', icon: Settings },
-  { title: 'Ajuda', icon: HelpCircle },
-];
-
 const isActive = (pathname: string, url: string) =>
   url === '/' ? pathname === '/' : pathname === url || pathname.startsWith(`${url}/`);
 
+/**
+ * Hearth sidebar (DESIGN.md › Shell): brand row with the notifications bell,
+ * "Área de trabalho" nav, user card at the bottom. On mobile the same content
+ * opens as a sheet from the top bar, which carries its own bell.
+ */
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { pathname } = useLocation();
+  const { isMobile, setOpenMobile } = useSidebar();
   const { data: unreadCount = 0 } = useUnreadCount();
+  const navLabelId = useId();
+
+  // In the mobile sheet, following a link should reveal the page.
+  const closeSheet = () => {
+    if (isMobile) setOpenMobile(false);
+  };
 
   return (
     <Sidebar collapsible="offcanvas" {...props}>
-      <SidebarHeader className="border-b border-sidebar-border">
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton size="lg" asChild>
-              <Link to="/">
-                <div className="flex aspect-square size-8 items-center justify-center rounded-sm bg-sidebar-primary text-sidebar-primary-foreground">
-                  <CircleDot className="size-4" />
-                </div>
-                <div className="grid flex-1 text-left type-nav leading-tight">
-                  <span className="truncate font-medium text-foreground">Sistema CRM</span>
-                  <span className="truncate type-caption text-foreground-secondary">
-                    Gestão de clientes
-                  </span>
-                </div>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
+      <SidebarHeader className="flex-row items-center justify-between gap-2">
+        <Link
+          to="/"
+          onClick={closeSheet}
+          className="ml-3 flex min-h-9 items-center gap-2.5 rounded-sm text-foreground"
+        >
+          <BrandMark />
+          <span className="type-heading">JVL</span>
+        </Link>
+        {!isMobile && <NotificationsBell side="right" align="start" />}
       </SidebarHeader>
 
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {navMain.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton
-                    asChild
-                    tooltip={item.title}
-                    isActive={isActive(pathname, item.url)}
-                  >
-                    <Link to={item.url}>
-                      <item.icon />
-                      <span>{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                  {item.hasBadge && unreadCount > 0 && (
-                    <SidebarMenuBadge>{unreadCount > 99 ? '99+' : unreadCount}</SidebarMenuBadge>
-                  )}
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        <SidebarGroup className="mt-auto">
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {navSecondary.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton>
-                    <item.icon />
-                    <span>{item.title}</span>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
+          <nav aria-labelledby={navLabelId}>
+            <SidebarGroupLabel id={navLabelId}>Área de trabalho</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {navMain.map((item) => {
+                  const active = isActive(pathname, item.url);
+                  const showBadge = item.hasBadge && unreadCount > 0;
+                  return (
+                    <SidebarMenuItem key={item.title}>
+                      <SidebarMenuButton asChild isActive={active}>
+                        <Link
+                          to={item.url}
+                          aria-current={active ? 'page' : undefined}
+                          onClick={closeSheet}
+                        >
+                          <item.icon aria-hidden />
+                          <span>{item.title}</span>
+                          {showBadge && <span className="sr-only">, {unreadCount} por ler</span>}
+                        </Link>
+                      </SidebarMenuButton>
+                      {showBadge && (
+                        <SidebarMenuBadge aria-hidden>
+                          {unreadCount > 99 ? '99+' : unreadCount}
+                        </SidebarMenuBadge>
+                      )}
+                    </SidebarMenuItem>
+                  );
+                })}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </nav>
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="border-t border-sidebar-border">
+      <SidebarFooter>
         <NavUser />
       </SidebarFooter>
     </Sidebar>

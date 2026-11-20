@@ -101,94 +101,100 @@ export function CustomerDialog({ customer, open, onOpenChange }: CustomerDialogP
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-150">
         <DialogHeader>
-          <DialogTitle>{isEdit ? 'Editar Cliente' : 'Adicionar Cliente'}</DialogTitle>
+          <DialogTitle>{isEdit ? 'Editar cliente' : 'Novo cliente'}</DialogTitle>
           <DialogDescription>
             {isEdit ? 'Altere os dados do cliente abaixo.' : 'Preencha os dados do novo cliente.'}
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <Field>
-            <FieldLabel required htmlFor="name">
-              Nome
-            </FieldLabel>
-            <Input
-              id="name"
-              value={formData.name}
-              onChange={(e) => handleChange('name', e.target.value)}
-              placeholder="Nome completo"
-              required
-            />
-          </Field>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field className="sm:col-span-2">
+              <FieldLabel required htmlFor="name">
+                Nome
+              </FieldLabel>
+              <Input size="sm"
+                id="name"
+                value={formData.name}
+                onChange={(e) => handleChange('name', e.target.value)}
+                placeholder="Nome completo"
+                autoComplete="off"
+                required
+              />
+            </Field>
 
-          <Field>
-            <FieldLabel required htmlFor="email">
-              Email
-            </FieldLabel>
-            <Input
-              id="email"
-              type="email"
-              value={formData.email}
-              onChange={(e) => handleChange('email', e.target.value)}
-              placeholder="email@exemplo.com"
-              required
-            />
-          </Field>
+            <Field className="sm:col-span-2">
+              <FieldLabel required htmlFor="email">
+                Email
+              </FieldLabel>
+              <Input size="sm"
+                id="email"
+                type="email"
+                value={formData.email}
+                onChange={(e) => handleChange('email', e.target.value)}
+                placeholder="email@exemplo.com"
+                autoComplete="off"
+                spellCheck={false}
+                required
+              />
+            </Field>
 
-          <Field>
-            <FieldLabel required htmlFor="phone">
-              Telefone
-            </FieldLabel>
-            <PhoneInput
-              id="phone"
-              value={formData.phone}
-              onChange={(v) => handleChange('phone', v)}
-              required
-            />
-          </Field>
+            <Field>
+              <FieldLabel required htmlFor="phone">
+                Telefone
+              </FieldLabel>
+              <PhoneInput size="sm"
+                id="phone"
+                value={formData.phone}
+                onChange={(v) => handleChange('phone', v)}
+                required
+              />
+            </Field>
 
-          <Field>
-            <FieldLabel htmlFor="secondaryPhone">Telefone alternativo</FieldLabel>
-            <PhoneInput
-              id="secondaryPhone"
-              value={formData.secondaryPhone}
-              onChange={(v) => handleChange('secondaryPhone', v)}
-            />
-          </Field>
+            <Field>
+              <FieldLabel htmlFor="secondaryPhone">Telefone alternativo</FieldLabel>
+              <PhoneInput size="sm"
+                id="secondaryPhone"
+                value={formData.secondaryPhone}
+                onChange={(v) => handleChange('secondaryPhone', v)}
+              />
+            </Field>
 
-          <Field>
-            <FieldLabel required htmlFor="company">
-              Empresa
-            </FieldLabel>
-            <Input
-              id="company"
-              value={formData.company}
-              onChange={(e) => handleChange('company', e.target.value)}
-              placeholder="Nome da empresa"
-              required
-            />
-          </Field>
+            <Field>
+              <FieldLabel required htmlFor="company">
+                Empresa
+              </FieldLabel>
+              <Input size="sm"
+                id="company"
+                value={formData.company}
+                onChange={(e) => handleChange('company', e.target.value)}
+                placeholder="Nome da empresa"
+                autoComplete="off"
+                required
+              />
+            </Field>
 
-          <Field>
-            <FieldLabel htmlFor="status">Estado</FieldLabel>
-            <Select
-              value={formData.status}
-              onValueChange={(value) => handleChange('status', value)}
-            >
-              <SelectTrigger id="status">
-                <SelectValue placeholder="Selecionar estado" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="active">Ativo</SelectItem>
-                <SelectItem value="inactive">Inativo</SelectItem>
-              </SelectContent>
-            </Select>
-          </Field>
+            <Field>
+              <FieldLabel htmlFor="status">Estado</FieldLabel>
+              <Select
+                value={formData.status}
+                onValueChange={(value) => handleChange('status', value)}
+              >
+                <SelectTrigger size="sm" id="status" className="w-full">
+                  <SelectValue placeholder="Selecionar estado" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="active">Ativo</SelectItem>
+                  <SelectItem value="inactive">Inativo</SelectItem>
+                </SelectContent>
+              </Select>
+            </Field>
+          </div>
 
           <DialogFooter>
-            <Button
+            <Button size="sm"
               type="button"
               variant="outline"
               onClick={() => onOpenChange(false)}
@@ -196,8 +202,8 @@ export function CustomerDialog({ customer, open, onOpenChange }: CustomerDialogP
             >
               Cancelar
             </Button>
-            <Button type="submit" disabled={isPending}>
-              {isPending ? 'A guardar...' : isEdit ? 'Guardar Alterações' : 'Criar Cliente'}
+            <Button size="sm" type="submit" disabled={isPending}>
+              {isPending ? 'A guardar…' : isEdit ? 'Guardar alterações' : 'Criar cliente'}
             </Button>
           </DialogFooter>
         </form>

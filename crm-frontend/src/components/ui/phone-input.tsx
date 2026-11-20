@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { cn } from '@/lib/utils';
-import { Input } from '@/components/ui/input';
+import { Input, type FieldSize } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
@@ -228,6 +228,8 @@ interface PhoneInputProps {
   'aria-label'?: string;
   autoFocus?: boolean;
   onKeyDown?: React.KeyboardEventHandler<HTMLInputElement>;
+  /** Field height for both controls: sm 32 (inline edit), default 40, lg 44. */
+  size?: FieldSize;
 }
 
 export function PhoneInput({
@@ -239,6 +241,7 @@ export function PhoneInput({
   'aria-label': ariaLabel,
   autoFocus,
   onKeyDown,
+  size = 'default',
 }: PhoneInputProps) {
   // The stored value only carries the dial code, so remember which of the
   // regions sharing it (+1 US/CA, +44 GB/JE…) the user picked while editing.
@@ -313,10 +316,10 @@ export function PhoneInput({
   return (
     <div className={cn('flex gap-2', className)}>
       <Select value={country.iso} onValueChange={handleCountryChange}>
-        <SelectTrigger className="w-28 shrink-0" aria-label="Indicativo do país">
+        <SelectTrigger size={size} className="w-28 shrink-0" aria-label="Indicativo do país">
           <SelectValue>
             <span aria-hidden>{country.flag}</span>
-            <span className="type-mono">{formatDialCode(country.dialCode)}</span>
+            <span className="tabular-nums">{formatDialCode(country.dialCode)}</span>
           </SelectValue>
         </SelectTrigger>
         <SelectContent className="max-h-80 w-72">
@@ -329,7 +332,9 @@ export function PhoneInput({
             >
               <span aria-hidden>{c.flag}</span>
               <span className="min-w-0 flex-1 truncate">{c.name}</span>
-              <span className="type-mono text-muted-foreground">{formatDialCode(c.dialCode)}</span>
+              <span className="text-muted-foreground tabular-nums">
+                {formatDialCode(c.dialCode)}
+              </span>
             </SelectItem>
           ))}
         </SelectContent>
@@ -348,7 +353,8 @@ export function PhoneInput({
         aria-label={ariaLabel}
         autoFocus={autoFocus}
         title={isRaw ? 'Formato não reconhecido: edite para normalizar' : undefined}
-        className="flex-1 type-mono"
+        size={size}
+        className="flex-1 tabular-nums"
       />
     </div>
   );

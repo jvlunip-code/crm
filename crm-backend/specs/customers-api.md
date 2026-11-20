@@ -35,6 +35,19 @@ GET /api/customers
 
 Retorna todos os clientes registados no sistema.
 
+**Parâmetros de query (opcionais):**
+
+| Parâmetro   | Tipo   | Descrição                                                                                   |
+|-------------|--------|---------------------------------------------------------------------------------------------|
+| `page`      | number | Página (10 clientes por página)                                                             |
+| `page_size` | number | Tamanho da página, até 100                                                                  |
+| `ordering`  | string | `name`, `company`, `status`, `created_at` (prefixo `-` para ordem descendente)              |
+| `search`    | string | Pesquisa por nome, empresa, email, NIF, telefone ou morada                                  |
+| `tag`       | number | Apenas clientes com esta etiqueta (`id`)                                                    |
+| `status`    | enum   | `active` ou `inactive`: apenas clientes nesse estado. Outros valores são ignorados (sem filtro) |
+
+Os filtros combinam-se (ex.: `?status=inactive&search=ana&tag=3`).
+
 **Resposta de sucesso:** `200 OK`
 
 ```json

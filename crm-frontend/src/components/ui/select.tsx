@@ -2,7 +2,7 @@ import * as React from 'react';
 import { Select as SelectPrimitive } from 'radix-ui';
 
 import { cn } from '@/lib/utils';
-import { fieldBoxClass } from '@/components/ui/input';
+import { fieldBoxBaseClass, type FieldSize } from '@/components/ui/input';
 import { ChevronDownIcon, CheckIcon, ChevronUpIcon } from 'lucide-react';
 
 function Select({ ...props }: React.ComponentProps<typeof SelectPrimitive.Root>) {
@@ -29,22 +29,23 @@ function SelectTrigger({
   children,
   ...props
 }: React.ComponentProps<typeof SelectPrimitive.Trigger> & {
-  size?: 'sm' | 'default';
+  /** sm 32 (dialogs, page-size), default 40, lg 44 (toolbars). */
+  size?: FieldSize;
 }) {
   return (
     <SelectPrimitive.Trigger
       data-slot="select-trigger"
       data-size={size}
       className={cn(
-        fieldBoxClass,
-        "flex w-fit items-center justify-between gap-1.5 pr-2 pl-2.5 whitespace-nowrap select-none data-placeholder:text-muted-foreground data-[size=default]:h-8 data-[size=sm]:h-7 data-[size=sm]:text-xs *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-1.5 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+        fieldBoxBaseClass,
+        "flex w-fit cursor-pointer items-center justify-between gap-2 type-control whitespace-nowrap select-none data-placeholder:font-normal data-placeholder:text-foreground-tertiary data-[size=default]:h-10 data-[size=default]:pr-3 data-[size=default]:pl-3 data-[size=lg]:h-11 data-[size=lg]:pr-3 data-[size=lg]:pl-3.5 data-[size=sm]:h-8 data-[size=sm]:pr-2 data-[size=sm]:pl-2.5 data-[state=open]:border-ring *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-1.5 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
         className,
       )}
       {...props}
     >
       {children}
       <SelectPrimitive.Icon asChild>
-        <ChevronDownIcon className="pointer-events-none size-4 text-muted-foreground" />
+        <ChevronDownIcon className="pointer-events-none size-3.5 text-muted-foreground" />
       </SelectPrimitive.Icon>
     </SelectPrimitive.Trigger>
   );
@@ -91,7 +92,7 @@ function SelectLabel({ className, ...props }: React.ComponentProps<typeof Select
   return (
     <SelectPrimitive.Label
       data-slot="select-label"
-      className={cn('px-2 py-1 type-eyebrow text-muted-foreground', className)}
+      className={cn('px-3 pt-2 pb-1 type-eyebrow text-muted-foreground', className)}
       {...props}
     />
   );
@@ -106,12 +107,12 @@ function SelectItem({
     <SelectPrimitive.Item
       data-slot="select-item"
       className={cn(
-        "relative flex w-full cursor-default items-center gap-1.5 rounded-sm py-1.5 pr-8 pl-2 type-dense outline-hidden select-none focus:bg-accent focus:text-foreground data-[state=checked]:bg-selection data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 *:[span]:last:flex *:[span]:last:items-center *:[span]:last:gap-2",
+        "relative flex min-h-9 w-full cursor-default items-center gap-2 rounded-sm py-2 pr-9 pl-3 type-body outline-hidden select-none focus:bg-accent focus:text-foreground data-[state=checked]:bg-selection data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 *:[span]:last:flex *:[span]:last:items-center *:[span]:last:gap-2",
         className,
       )}
       {...props}
     >
-      <span className="pointer-events-none absolute right-2 flex size-4 items-center justify-center">
+      <span className="pointer-events-none absolute right-3 flex size-4 items-center justify-center">
         <SelectPrimitive.ItemIndicator>
           <CheckIcon className="pointer-events-none" />
         </SelectPrimitive.ItemIndicator>

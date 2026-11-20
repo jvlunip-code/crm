@@ -1,10 +1,10 @@
 import * as React from 'react';
-import { Check, Pencil, Plus, Tag as TagIcon } from 'lucide-react';
+import { Check, Pencil, Plus } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { TagDot } from '@/components/shared/TagChip';
+import { TagDot, tagAddChipClass } from '@/components/shared/TagChip';
 import { useUpdateCustomer } from '@/hooks/use-customers';
 import { useCreateTag, useDeleteTag, useTags, useUpdateTag } from '@/hooks/use-tags';
 import { TAG_COLORS } from '@/lib/tags';
@@ -54,10 +54,18 @@ export function CustomerTagsPicker({ customer }: { customer: Customer }) {
   return (
     <Popover onOpenChange={(open) => !open && setEditingId(null)}>
       <PopoverTrigger asChild>
-        <Button variant="ghost" size="xs" className="text-muted-foreground">
-          {customer.tags.length > 0 ? <TagIcon aria-hidden /> : <Plus aria-hidden />}
-          {customer.tags.length > 0 ? 'Etiquetas' : 'Adicionar etiqueta'}
-        </Button>
+        <button
+          type="button"
+          className={tagAddChipClass}
+          // The picker also untags and edits; say so to assistive tech while
+          // keeping the visible text at the start of the name (WCAG 2.5.3).
+          aria-label={
+            customer.tags.length > 0 ? 'Adicionar etiqueta ou remover etiquetas' : undefined
+          }
+        >
+          <Plus aria-hidden />
+          Adicionar etiqueta
+        </button>
       </PopoverTrigger>
       <PopoverContent align="start" className="w-72 p-0">
         <div className="border-b border-border px-3 py-2 type-eyebrow text-muted-foreground">
@@ -76,7 +84,7 @@ export function CustomerTagsPicker({ customer }: { customer: Customer }) {
                     aria-pressed={assigned.has(tag.id)}
                     onClick={() => void toggle(tag)}
                     disabled={updateCustomer.isPending}
-                    className="flex min-w-0 flex-1 items-center gap-2 rounded-sm px-2 py-1.5 text-left type-dense outline-none hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-60"
+                    className="flex min-h-9 min-w-0 flex-1 items-center gap-2 rounded-sm px-2 py-1.5 text-left type-body transition-colors hover:bg-accent focus-visible:-outline-offset-2 disabled:opacity-60"
                   >
                     <TagDot color={tag.color} />
                     <span className="min-w-0 flex-1 truncate">{tag.name}</span>
@@ -106,7 +114,7 @@ export function CustomerTagsPicker({ customer }: { customer: Customer }) {
             placeholder="Nova etiqueta (ex.: Importante)"
             aria-label="Nome da nova etiqueta"
             maxLength={50}
-            className="h-8"
+            size="sm"
           />
           <div className="flex items-center justify-between gap-2">
             <ColorPicker value={newColor} onChange={setNewColor} />
@@ -155,18 +163,18 @@ function TagEditor({ tag, onDone }: { tag: Tag; onDone: () => void }) {
 
   return (
     <li className="px-3 py-2">
-      <form onSubmit={save} className="flex flex-col gap-2 rounded-sm bg-accent/60 p-2">
+      <form onSubmit={save} className="flex flex-col gap-2 rounded-md bg-surface-sunken p-2">
         <Input
           value={name}
           onChange={(e) => setName(e.target.value)}
           aria-label="Nome da etiqueta"
           maxLength={50}
           autoFocus
-          className="h-8"
+          size="sm"
         />
         <ColorPicker value={color} onChange={setColor} />
         {confirmDelete && (
-          <p className="type-caption text-status-error">
+          <p className="type-caption text-status-error-fg">
             {count > 0
               ? `Será removida de ${count} cliente${count === 1 ? '' : 's'}. Clique de novo para eliminar.`
               : 'Clique de novo para eliminar.'}
@@ -177,7 +185,7 @@ function TagEditor({ tag, onDone }: { tag: Tag; onDone: () => void }) {
             type="button"
             variant="ghost"
             size="sm"
-            className="text-destructive"
+            className="text-destructive-ink hover:bg-status-error-bg"
             onClick={() => void remove()}
             disabled={deleteTag.isPending}
           >
@@ -216,8 +224,9 @@ function ColorPicker({
           title={c.label}
           onClick={() => onChange(c.value)}
           className={cn(
-            'flex size-6 items-center justify-center rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring',
-            value === c.value && 'ring-2 ring-border-strong ring-offset-1 ring-offset-popover',
+            'flex size-6 items-center justify-center rounded-full border-2 border-transparent',
+            // Selected = a Slate ring around the swatch (a border, so it survives forced colours).
+            value === c.value && 'border-foreground',
           )}
         >
           <span className={cn('size-4 rounded-full', c.dot)} />

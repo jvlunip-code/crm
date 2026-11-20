@@ -1,4 +1,5 @@
 import type { Notification, NotificationFlag } from '@/types';
+import { formatServiceDate } from '@/lib/utils';
 
 export type RenderedNotification = {
   title: string;
@@ -7,18 +8,13 @@ export type RenderedNotification = {
   href: string;
 };
 
-function formatDmy(iso: string): string {
-  const [y, m, d] = iso.split('-');
-  return y && m && d ? `${d}/${m}/${y}` : iso;
-}
-
 export function renderNotification(n: Notification): RenderedNotification {
   switch (n.subtype) {
     case 'SERVICO_A_TERMINAR': {
       const m = n.metadata;
       return {
         title: `Serviço a terminar — ${m.serviceAcesso}`,
-        message: `${m.customerName} — termina ${formatDmy(m.serviceDataFim)}`,
+        message: `${m.customerName} — termina ${formatServiceDate(m.serviceDataFim)}`,
         flag: m.flag,
         href: `/customers/${m.customerId}`,
       };

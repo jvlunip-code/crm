@@ -127,7 +127,7 @@ export function AutocompleteInput({
         <ul
           id={listId}
           role="listbox"
-          className="absolute top-full right-0 left-0 z-30 mt-1 max-h-64 overflow-y-auto rounded-lg border border-border bg-popover py-1 text-popover-foreground shadow-1"
+          className="absolute top-full right-0 left-0 z-30 mt-1 max-h-64 overflow-y-auto rounded-lg border border-border bg-popover p-1 text-popover-foreground shadow-1"
           // Keep focus in the input when clicking inside the list.
           onMouseDown={(event) => event.preventDefault()}
         >
@@ -140,7 +140,7 @@ export function AutocompleteInput({
               onMouseEnter={() => setActive(i)}
               onClick={() => pick(option)}
               className={cn(
-                'cursor-pointer truncate px-3 py-1.5 type-dense',
+                'cursor-pointer truncate rounded-sm px-3 py-2 type-body',
                 active === i && 'bg-accent',
               )}
             >

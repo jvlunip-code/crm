@@ -2,17 +2,62 @@ import * as React from 'react';
 
 import { cn } from '@/lib/utils';
 
+/** Tracks whether an element's content is wider than its box. */
+function useHorizontalOverflow<E extends HTMLElement>() {
+  const [node, setNode] = React.useState<E | null>(null);
+  const [overflows, setOverflows] = React.useState(false);
+
+  React.useEffect(() => {
+    if (!node || typeof ResizeObserver === 'undefined') return;
+    const measure = () => setOverflows(node.scrollWidth > node.clientWidth + 1);
+    const observer = new ResizeObserver(measure);
+    observer.observe(node);
+    if (node.firstElementChild) observer.observe(node.firstElementChild);
+    measure();
+    return () => observer.disconnect();
+  }, [node]);
+
+  return [setNode, overflows] as const;
+}
+
 /**
- * Data table: navigation-tinted header row, 13px cells at 10px vertical
- * padding (38px rows), subtle row rules, hover and selected surfaces. Wide
- * tables scroll inside the container, never the page.
+ * Data table (DESIGN.md › Space): 14px tabular cells at 12px padding, header
+ * labels 12/500 muted with no fill over a hairline rule, row dividers in
+ * `border-subtle`, row hover on the Ivory canvas. Wide tables scroll inside
+ * the container, never the page.
+ *
+ * Edge inset: inside a card whose padding is removed (`<Card className="py-0">`
+ * or a flush table card), pass `inset` so the first and last cell of every
+ * row get 24px instead of 12px and line up with the card's content edge.
+ * It is applied as `[&_tr>*:first-child]:pl-6 [&_tr>*:last-child]:pr-6` on
+ * the `<table>`; reuse that className pattern for a custom inset.
+ *
+ * While the table is wider than its container, the scroller becomes a
+ * focusable region (named by `scrollLabel`) so keyboard users can scroll it
+ * with the arrow keys; it is not a tab stop otherwise.
  */
-function Table({ className, ...props }: React.ComponentProps<'table'>) {
+function Table({
+  className,
+  inset = false,
+  scrollLabel = 'Tabela',
+  ...props
+}: React.ComponentProps<'table'> & { inset?: boolean; scrollLabel?: string }) {
+  const [setScroller, overflows] = useHorizontalOverflow<HTMLDivElement>();
   return (
-    <div data-slot="table-container" className="relative w-full overflow-x-auto">
+    <div
+      ref={setScroller}
+      data-slot="table-container"
+      {...(overflows && { tabIndex: 0, role: 'region', 'aria-label': scrollLabel })}
+      className="relative w-full overflow-x-auto focus-visible:-outline-offset-2"
+    >
       <table
         data-slot="table"
-        className={cn('w-full caption-bottom type-dense', className)}
+        data-inset={inset || undefined}
+        className={cn(
+          'w-full caption-bottom type-body tabular-nums',
+          inset && '[&_tr>*:first-child]:pl-6 [&_tr>*:last-child]:pr-6',
+          className,
+        )}
         {...props}
       />
     </div>
@@ -23,7 +68,10 @@ function TableHeader({ className, ...props }: React.ComponentProps<'thead'>) {
   return (
     <thead
       data-slot="table-header"
-      className={cn('bg-sidebar [&_tr]:border-b [&_tr]:border-border', className)}
+      className={cn(
+        '[&_tr]:border-b [&_tr]:border-border [&_tr]:hover:bg-transparent',
+        className,
+      )}
       {...props}
     />
   );
@@ -43,10 +91,7 @@ function TableFooter({ className, ...props }: React.ComponentProps<'tfoot'>) {
   return (
     <tfoot
       data-slot="table-footer"
-      className={cn(
-        'border-t border-border bg-sidebar font-medium [&>tr]:last:border-b-0',
-        className,
-      )}
+      className={cn('border-t border-border font-medium [&>tr]:last:border-b-0', className)}
       {...props}
     />
   );
@@ -57,7 +102,7 @@ function TableRow({ className, ...props }: React.ComponentProps<'tr'>) {
     <tr
       data-slot="table-row"
       className={cn(
-        'border-b border-border-subtle transition-colors hover:bg-accent/60 has-aria-expanded:bg-accent/60 data-[state=selected]:bg-selection',
+        'border-b border-border-subtle transition-colors hover:bg-background has-aria-expanded:bg-background data-[state=selected]:bg-selection',
         className,
       )}
       {...props}
@@ -70,7 +115,7 @@ function TableHead({ className, ...props }: React.ComponentProps<'th'>) {
     <th
       data-slot="table-head"
       className={cn(
-        'h-9 px-3 text-left align-middle text-[13px] leading-4 font-semibold whitespace-nowrap text-foreground-secondary [&:has([role=checkbox])]:pr-0',
+        'p-3 text-left align-middle type-eyebrow whitespace-nowrap text-muted-foreground [&:has([role=checkbox])]:pr-0',
         className,
       )}
       {...props}
@@ -83,7 +128,7 @@ function TableCell({ className, ...props }: React.ComponentProps<'td'>) {
     <td
       data-slot="table-cell"
       className={cn(
-        'px-3 py-2.5 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0',
+        'p-3 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0',
         className,
       )}
       {...props}
