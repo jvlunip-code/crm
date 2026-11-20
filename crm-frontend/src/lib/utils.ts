@@ -39,6 +39,34 @@ export function formatRelativeTime(date: string | Date) {
   return formatDate(date);
 }
 
+const COUNT = new Intl.NumberFormat('pt-PT');
+
+/** pt-PT grouped integer ("2418", "12 345"). */
+export function formatCount(n: number): string {
+  return COUNT.format(n);
+}
+
+const MONTH_SHORT_UTC = new Intl.DateTimeFormat('pt-PT', { month: 'short', timeZone: 'UTC' });
+
+/** "YYYY-MM-DD" → "28 nov. 2026", read as a calendar day (no timezone shift). */
+export function formatDayMonthYear(iso: string): string {
+  const [y, m, d] = iso.split('-').map(Number);
+  if (!y || !m || !d) return iso;
+  const date = new Date(Date.UTC(y, m - 1, d));
+  return `${d} ${MONTH_SHORT_UTC.format(date)} ${y}`;
+}
+
+const FILE_SIZE = new Intl.NumberFormat('pt-PT', { maximumFractionDigits: 1 });
+
+/** Bytes → "1,5 MB" (pt-PT decimals). */
+export function formatFileSize(bytes: number): string {
+  if (bytes <= 0) return '0 Bytes';
+  const k = 1024;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+  const i = Math.min(Math.floor(Math.log(bytes) / Math.log(k)), sizes.length - 1);
+  return `${FILE_SIZE.format(bytes / Math.pow(k, i))} ${sizes[i]}`;
+}
+
 export function formatCurrency(amount: number) {
   return new Intl.NumberFormat('pt-PT', {
     style: 'currency',

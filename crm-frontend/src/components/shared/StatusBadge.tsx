@@ -1,20 +1,23 @@
+import * as React from 'react';
 import { LoaderIcon } from 'lucide-react';
 
 import { Badge, type BadgeTone } from '@/components/ui/badge';
-import { STATUS_DOT } from '@/lib/status';
 import { cn } from '@/lib/utils';
 
 /**
- * The one status renderer. Domain maps (customer/service status in
- * `lib/status.ts`, notification flags…) resolve their label and a
- * `tone`; this component turns that into a chip whose hue sits on the border,
- * tint and dot while the label stays primary text (never colour alone).
+ * The one status renderer (DESIGN.md › Status is a pill). Domain maps
+ * (`lib/status.ts`, `lib/notifications/flag-style.ts`, the Events action map)
+ * resolve a label and a `tone`; this draws the tinted pill with dark ink and
+ * a 6px dot in the tone's hue. The label is always present, never colour
+ * alone. Pass `icon` for outcome pills (replaces the dot) or `spinning` for
+ * in-flight states.
  */
 export function StatusBadge({
   tone,
   children,
   spinning = false,
   dot = true,
+  icon,
   className,
   ...props
 }: React.ComponentProps<'span'> & {
@@ -22,14 +25,25 @@ export function StatusBadge({
   /** Show a spinner instead of the dot (in-flight states). */
   spinning?: boolean;
   dot?: boolean;
+  /** 12px icon instead of the dot (outcomes: done, failed…). Decorative. */
+  icon?: React.ReactNode;
 }) {
+  const lead = spinning ? (
+    <LoaderIcon className="animate-spin" aria-hidden />
+  ) : icon ? (
+    <span aria-hidden className="contents">
+      {icon}
+    </span>
+  ) : null;
+
   return (
-    <Badge tone={tone} className={cn('shrink-0', className)} {...props}>
-      {spinning ? (
-        <LoaderIcon className="animate-spin text-status-info" aria-hidden />
-      ) : dot ? (
-        <span aria-hidden className={cn('size-1.5 shrink-0 rounded-full', STATUS_DOT[tone])} />
-      ) : null}
+    <Badge
+      tone={tone}
+      dot={dot && !lead}
+      className={cn('shrink-0 [&_svg]:pointer-events-none [&_svg]:size-3 [&_svg]:stroke-[2.5]', className)}
+      {...props}
+    >
+      {lead}
       {children}
     </Badge>
   );

@@ -25,6 +25,16 @@ import { useTarifarios } from '@/hooks/use-tarifarios';
 import type { CustomerService, Moeda } from '@/types';
 import { toast } from 'sonner';
 
+/**
+ * What the service dialog opens for. The detail page owns this state so the
+ * profile card ("Novo serviço") and the services table (edit, duplicate,
+ * sub-service) share one dialog.
+ */
+export type ServiceDialogTarget =
+  | { mode: 'create'; parentId?: number }
+  | { mode: 'edit'; service: CustomerService }
+  | { mode: 'duplicate'; service: CustomerService };
+
 interface CustomerServiceDialogProps {
   customerId: number;
   parentId?: number;
@@ -147,18 +157,19 @@ export function CustomerServiceDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-[600px]">
+      {/* The dialog itself scrolls (max-h 100svh − 2rem); the footer stays pinned. */}
+      <DialogContent className="sm:max-w-150">
         <DialogHeader>
           <DialogTitle>
             {isEdit
-              ? 'Editar Serviço'
+              ? 'Editar serviço'
               : isDuplicate
                 ? duplicateOf.parentId
-                  ? 'Duplicar Sub-serviço'
-                  : 'Duplicar Serviço'
+                  ? 'Duplicar sub-serviço'
+                  : 'Duplicar serviço'
                 : parentId
-                  ? 'Criar Sub-serviço'
-                  : 'Criar Serviço'}
+                  ? 'Novo sub-serviço'
+                  : 'Novo serviço'}
           </DialogTitle>
           <DialogDescription>
             {isEdit
@@ -177,7 +188,7 @@ export function CustomerServiceDialog({
               <FieldLabel required htmlFor="acesso">
                 Acesso (ID)
               </FieldLabel>
-              <Input
+              <Input size="sm"
                 id="acesso"
                 value={formData.acesso}
                 onChange={(e) => handleChange('acesso', e.target.value)}
@@ -191,7 +202,7 @@ export function CustomerServiceDialog({
 
             <Field>
               <FieldLabel htmlFor="tarifario">Tarifário</FieldLabel>
-              <AutocompleteInput
+              <AutocompleteInput size="sm"
                 id="tarifario"
                 value={formData.tarifario}
                 onChange={(value) => handleChange('tarifario', value)}
@@ -204,7 +215,7 @@ export function CustomerServiceDialog({
               <FieldLabel required htmlFor="operadora">
                 Operadora
               </FieldLabel>
-              <Input
+              <Input size="sm"
                 id="operadora"
                 value={formData.operadora}
                 onChange={(e) => handleChange('operadora', e.target.value)}
@@ -215,9 +226,9 @@ export function CustomerServiceDialog({
 
             <Field>
               <FieldLabel required htmlFor="valor">
-                Valor
+                Valor mensal
               </FieldLabel>
-              <Input
+              <Input size="sm"
                 id="valor"
                 type="number"
                 step="0.01"
@@ -225,6 +236,7 @@ export function CustomerServiceDialog({
                 value={formData.valor}
                 onChange={(e) => handleChange('valor', e.target.value)}
                 placeholder="Ex: 20.32"
+                className="tabular-nums"
                 required
               />
             </Field>
@@ -235,7 +247,7 @@ export function CustomerServiceDialog({
                 value={formData.moeda}
                 onValueChange={(value) => handleChange('moeda', value)}
               >
-                <SelectTrigger id="moeda">
+                <SelectTrigger size="sm" id="moeda" className="w-full">
                   <SelectValue placeholder="Selecionar moeda" />
                 </SelectTrigger>
                 <SelectContent>
@@ -248,7 +260,7 @@ export function CustomerServiceDialog({
               <FieldLabel required htmlFor="conta">
                 Conta
               </FieldLabel>
-              <Input
+              <Input size="sm"
                 id="conta"
                 value={formData.conta}
                 onChange={(e) => handleChange('conta', e.target.value)}
@@ -261,7 +273,7 @@ export function CustomerServiceDialog({
               <FieldLabel required htmlFor="cvp">
                 CVP
               </FieldLabel>
-              <Input
+              <Input size="sm"
                 id="cvp"
                 value={formData.cvp}
                 onChange={(e) => handleChange('cvp', e.target.value)}
@@ -272,7 +284,7 @@ export function CustomerServiceDialog({
 
             <Field>
               <FieldLabel htmlFor="dataFim">Data de Fim</FieldLabel>
-              <DatePicker
+              <DatePicker size="sm"
                 id="dataFim"
                 value={formData.dataFim}
                 onChange={(v) => handleChange('dataFim', v)}
@@ -281,7 +293,7 @@ export function CustomerServiceDialog({
 
             <Field>
               <FieldLabel htmlFor="numClient">Número de Cliente</FieldLabel>
-              <Input
+              <Input size="sm"
                 id="numClient"
                 value={formData.numClient}
                 onChange={(e) => handleChange('numClient', e.target.value)}
@@ -291,7 +303,7 @@ export function CustomerServiceDialog({
 
             <Field>
               <FieldLabel htmlFor="numServico">Número de Serviço</FieldLabel>
-              <Input
+              <Input size="sm"
                 id="numServico"
                 value={formData.numServico}
                 onChange={(e) => handleChange('numServico', e.target.value)}
@@ -321,13 +333,13 @@ export function CustomerServiceDialog({
               onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
                 handleChange('observacoes', e.target.value)
               }
-              placeholder="Notas adicionais sobre o serviço..."
+              placeholder="Notas adicionais sobre o serviço…"
               rows={3}
             />
           </Field>
 
-          <DialogFooter>
-            <Button
+          <DialogFooter className="sticky bottom-0 z-10 -mx-6 -mb-6 border-t border-border bg-card px-6 py-4">
+            <Button size="sm"
               type="button"
               variant="outline"
               onClick={() => onOpenChange(false)}
@@ -335,8 +347,8 @@ export function CustomerServiceDialog({
             >
               Cancelar
             </Button>
-            <Button type="submit" disabled={isPending}>
-              {isPending ? 'A guardar...' : isEdit ? 'Guardar Alterações' : 'Criar Serviço'}
+            <Button size="sm" type="submit" disabled={isPending}>
+              {isPending ? 'A guardar…' : isEdit ? 'Guardar alterações' : 'Criar serviço'}
             </Button>
           </DialogFooter>
         </form>

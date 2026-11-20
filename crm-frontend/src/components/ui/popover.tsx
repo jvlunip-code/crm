@@ -5,7 +5,7 @@ import { Popover as PopoverPrimitive } from 'radix-ui';
 
 import { cn } from '@/lib/utils';
 
-/** Non-menu floating panel (notifications, pickers). Elevation 1, 4px radius. */
+/** Non-menu floating panel (notifications, pickers): white, r12, hairline, shadow-1. */
 function Popover({ ...props }: React.ComponentProps<typeof PopoverPrimitive.Root>) {
   return <PopoverPrimitive.Root data-slot="popover" {...props} />;
 }

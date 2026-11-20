@@ -4,44 +4,20 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 See also the root `../CLAUDE.md` for full-stack context including backend and Docker setup.
 
-## Development Commands
-
-```bash
-npm install                          # Install dependencies
-npm run dev                          # Vite dev server on localhost:5173
-npm run build                        # TypeScript check + production build (tsc -b && vite build)
-npm run lint                         # ESLint
-npm run preview                      # Preview production build
-npx shadcn@latest add <component>    # Add new shadcn/ui component
-```
-
-No test framework is currently configured.
+`npm run build` (`tsc -b && vite build`) is the real type check. No test framework is currently configured.
 
 ## Architecture
 
-React 19 + TypeScript 5.9 (strict) + Vite 7 + TanStack Query + React Router 7 + shadcn/ui (Radix) + Tailwind CSS 4.
-
 ### Path Alias
 
-`@` maps to `src/` (configured in both `vite.config.ts` and `tsconfig.app.json`). Always use `@/` imports.
-
-### Routing (App.tsx)
-
-- `/login` — public, `LoginPage`
-- All other routes wrapped in `ProtectedRoute` (redirects to `/login` if unauthenticated) and `Layout` (sidebar + header):
-  - `/` — `DashboardPage`
-  - `/customers` — `CustomersPage`
-  - `/customers/:id` — `CustomerDetailPage`
-  - `/services` — `ServicesPage`
-  - `/notifications` — `NotificationsPage`
-  - `/events` — `EventsPage`
+`@` maps to `src/`. Always use `@/` imports (never relative `../` paths).
 
 ### Data Layer: Real API vs Mock Data
 
 Two parallel data layers exist:
 
 1. **Real API** (`lib/api-client.ts`) — Used for: customers (incl. `suggest` and the address singleton), customer services, customer documents, the cross-customer services list (`/services` page), notifications, dashboard summary, authentication. Talks to Django backend via session cookies + CSRF.
-2. **Mock data** (`lib/mock-data.ts`) — localStorage-based, used for: events, customer notes. These features have no backend endpoints yet. The dashboard chart and "Secções" table use inline demo data.
+2. **Mock data** (`lib/mock-data.ts`) — localStorage-based, used for: events, customer notes. These features have no backend endpoints yet, so their screens carry a "Dados de demonstração" pill.
 
 Hooks in `hooks/` abstract this — some call the real API, others call mock data. Check the hook implementation to know which layer you're working with.
 
@@ -49,21 +25,18 @@ Hooks in `hooks/` abstract this — some call the real API, others call mock dat
 
 - `fetchWithAuth()` — Core fetch wrapper. Attaches CSRF token (from `csrftoken` cookie) on mutating requests, sends `credentials: 'include'`, redirects to `/login` on 401.
 - **Key transformation**: `toFrontend()` / `toBackend()` recursively transform snake_case↔camelCase for generic fields.
-- **Exception — CustomerService fields**: Portuguese domain fields (`acesso`, `tarifario`, `operadora`, `valor`, `moeda`, `conta`, `cvp`, `data_fim`, `num_client`, `num_servico`, `observacoes`) use **manual mapping** in `transformCustomerService()` and explicit backend payloads in create/update. Do NOT rely on the generic `toBackend()` for CustomerService mutations.
+- **Exception — CustomerService fields**: Portuguese domain fields (`acesso`, `tarifario`, `operadora`, `valor`, `moeda`, `conta`, `cvp`, `data_fim`, `num_client`, `num_servico`, `observacoes`, `morada`) use **manual mapping** in `transformCustomerService()` and explicit backend payloads in create/update. Do NOT rely on the generic `toBackend()` for CustomerService mutations.
 - **Pagination**: `getAll()` and `getByCustomerId()` auto-follow DRF `next` URLs to fetch all pages client-side.
 - **Service hierarchy**: Backend returns parent services with nested `children[]`. The client flattens them into a single array via `flattenServices()`.
 - **Document upload**: Uses `FormData` directly (no JSON Content-Type header), bypasses `fetchWithAuth` for the upload request.
 
-### API Groups
+- **List screens** use server-side pages (`customersApi.getPage`).
 
-| Export | Endpoint pattern | Methods |
-|---|---|---|
-| `customersApi` | `/customers/` | `getPage` (server-side page), `getAll` (all pages), `suggest`, CRUD |
-| `customerAddressApi` | `/customers/{id}/address/` | get, upsert (PUT), delete |
-| `customerServicesApi` | `/customers/{id}/services/` | CRUD (nested) |
-| `customerDocumentsApi` | `/customers/{id}/documents/` | list, upload, delete, download URL |
-| `notificationsApi` | `/notifications/` | list, unread count, mark read/unread/all, dismiss, generate |
-| `authApi` | `/auth/` | login, logout, me |
+### Dashboard (`pages/DashboardPage.tsx`)
+- All real data, no demo parts. Cards live in `components/dashboard/`: `DashboardKpis`, `EndingByMonthCard` (`ColumnChart` of `endingByMonth`) and `OperatorsCard` (`RankedBars` of `topOperators`) read `useDashboardSummary()` (`/api/dashboard/summary/`); `EndingSoonTable` reads `useServicesPage({ ending: '90', ordering: 'data_fim' })`; `UnreadNotificationsCard` and the unread KPI use the notifications hooks (`useUnreadCount()`), so notification mutations refresh them.
+- Mutations that change the summary (customers, services) also invalidate `['dashboard-summary']`; the Customers and Services list headers/tab counts read it too.
+- Deep links: `/services?ending=90|180|270|expired`, `/customers?estado=ativos|inativos`, `/notifications?estado=por-ler|lidas` — list tabs are URL-synced (`replace`).
+- Imported customers' `created_at` is the import date, so "new customers over time" charts are meaningless for legacy data (and "Cliente desde" is hidden).
 
 ### TanStack Query Conventions
 
@@ -74,20 +47,19 @@ Hooks in `hooks/` abstract this — some call the real API, others call mock dat
 
 ### UI Framework
 
-- **UI primitives** in `components/ui/` — the phmcare web-app's radix-nova shadcn components (`radix-ui` monopackage), restyled on the design tokens. Port changes from the web-app instead of editing ad hoc; see `DESIGN.md`
-- **Page molecules** in `components/shared/` — `PageHeader`, `TableToolbar`, `SearchField`, `SortableHead`, `CopyButton`, `Pagination`, `ClientTable`, `MetricCard`, `StatStrip`, `EmptyState`, `StatusBadge`, `SectionEyebrow`
-- **Custom components**: `components/customer/` (customer detail tabs, dialogs, `DetailPanel`), `components/dashboard/` (charts, data table), `components/layout/` (sidebar, header, user menu, notifications bell)
+- **UI primitives** in `components/ui/` — radix-nova shadcn components (`radix-ui` monopackage) restyled on the Hearth tokens. **Owned locally**: edit them here (the old phmcare coupling is dropped); see `DESIGN.md`
+- **Page molecules** in `components/shared/` — `PageContainer`, `PageHeader`, `PageBreadcrumb`, `SectionCard`, `KpiCard`, `TableCard`, `ListTabs`, `RankedBars`, `ColumnChart`, `InitialsAvatar`, `StatusBadge`, `TagChip`, `Pagination`, `ClientTable`, `SearchField`, `SortableHead`, `EmptyState`, `CopyButton`, `AutocompleteInput`, `ConfirmDeleteDialog`
+- **Custom components**: `components/customer/` (profile card, KPI row, side cards + `DetailList`, Serviços/Documentos/Notas tabs, dialogs), `components/dashboard/` (dashboard cards + `format.ts`), `components/layout/` (sidebar, mobile top bar, user card, notifications bell; no desktop header)
 - **Icons**: Lucide React (`lucide-react`)
-- **Charts**: Recharts (`recharts`)
+- **Charts**: plain CSS/HTML (`shared/ColumnChart`, `shared/RankedBars`) with printed values and an sr-only table; no chart library
 - **Toast notifications**: Sonner via `components/ui/sonner` — `<Toaster>` mounted in `App.tsx`; `<TooltipProvider>` is mounted in `main.tsx`
 - **Tables**: TanStack Table for sortable/filterable data grids
-- **Drag & drop**: dnd-kit for the dashboard table row reordering
 
 ### Styling
 
-- **Design system: `DESIGN.md`** — a clone of the phmcare web-app system. Tokens in `src/index.css` (hex values, three layers), Inter Variable + Geist Mono Variable, `type-*` text utilities, 2px/4px radii
+- **Design system: `DESIGN.md`** ("Hearth", 2026-11) — rules; values and contrast in `docs/design/2026-11-hearth/tokens.json`, decisions and component map in `docs/design/2026-11-hearth/PLAN.md`. Tokens in `src/index.css`; Public Sans Variable (UI) + Source Serif 4 Variable (titles, big numbers) + Geist Mono Variable (codes only: NIF, IBAN, acesso, Nº serviço); `type-*` text utilities, no arbitrary `text-[…]`; radii 4/8/10/12/16 (cards `rounded-xl`); 0.5px hairlines via `--default-border-width`; focus = 2px blue outline
 - Tailwind CSS 4 via `@tailwindcss/vite` (no `tailwind.config.js`); `tw-animate-css` + `shadcn/tailwind.css`
-- Light only: dark mode is not supported, don't add `dark:` utilities
+- Light only (`color-scheme: light`): dark mode is not supported, don't add `dark:` utilities
 - Status colour comes from a tone (`StatusBadge` + `lib/status.ts`), never raw Tailwind palette classes
 - `cn()` utility from `lib/utils.ts` (clsx + tailwind-merge) for conditional classes
 
@@ -96,7 +68,7 @@ Hooks in `hooks/` abstract this — some call the real API, others call mock dat
 UI text, date formatting, and status labels are in **Portuguese (pt-PT)**. Formatting utilities in `lib/utils.ts`:
 - `formatDate()` / `formatDateTime()` — Portuguese locale
 - `formatRelativeTime()` — "Agora mesmo", "Há 5m", "Há 2h", etc.
-- `formatCurrency()` — EUR formatting
+- `formatCurrency()` — EUR formatting ("128,40 €"); `formatCount()` (pt-PT grouping), `formatDayMonthYear()` ("28 nov. 2026"), `formatServiceDate()` ("28/11/2026"), `formatFileSize()`
 - Status labels: active→Ativo, inactive→Inativo, read→Lido, unread→Não lido
 
 ### Environment Variables

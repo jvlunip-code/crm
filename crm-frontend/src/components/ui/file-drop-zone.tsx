@@ -68,18 +68,29 @@ export const FileDropZone = React.forwardRef<HTMLInputElement, FileDropZoneProps
       }
     };
 
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        handleClick();
+      }
+    };
+
     return (
       <div
+        role="button"
+        tabIndex={disabled ? -1 : 0}
+        aria-disabled={disabled || undefined}
         onClick={handleClick}
+        onKeyDown={handleKeyDown}
         onDragEnter={handleDragEnter}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
         className={cn(
-          'flex cursor-pointer flex-col items-center justify-center gap-1 rounded-sm border border-dashed px-6 py-8 text-center transition-colors',
+          'flex cursor-pointer flex-col items-center justify-center gap-1 rounded-lg border border-dashed px-6 py-8 text-center transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring',
           isDragOver
-            ? 'border-ring bg-selection'
-            : 'border-border-dashed bg-card hover:border-border-strong',
+            ? 'border-ring bg-status-info-bg'
+            : 'border-border-strong bg-background hover:bg-accent',
           disabled && 'pointer-events-none opacity-50',
           className,
         )}
@@ -96,8 +107,10 @@ export const FileDropZone = React.forwardRef<HTMLInputElement, FileDropZoneProps
         <span
           aria-hidden
           className={cn(
-            'mb-1 flex size-8 items-center justify-center rounded-sm border bg-muted/60 [&>svg]:size-4',
-            isDragOver ? 'border-ring text-link' : 'border-border text-muted-foreground',
+            'mb-2 flex size-9 items-center justify-center rounded-full border bg-surface-sunken [&>svg]:size-4',
+            isDragOver
+              ? 'border-ring text-status-info-fg'
+              : 'border-border text-foreground-secondary',
           )}
         >
           <Upload />
@@ -109,7 +122,7 @@ export const FileDropZone = React.forwardRef<HTMLInputElement, FileDropZoneProps
             <p className="type-section text-foreground">
               Arraste ficheiros para aqui ou clique para escolher
             </p>
-            <p className="type-caption text-muted-foreground">PDF, PNG, JPG, DOC, XLS, CSV, TXT</p>
+            <p className="type-dense text-muted-foreground">PDF, PNG, JPG, DOC, XLS, CSV, TXT</p>
           </>
         )}
       </div>

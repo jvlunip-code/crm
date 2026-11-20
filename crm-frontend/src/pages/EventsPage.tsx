@@ -10,22 +10,19 @@ import {
   type SortingState,
 } from '@tanstack/react-table';
 import { Activity } from 'lucide-react';
-import type { BadgeTone } from '@/components/ui/badge';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { Badge, type BadgeTone } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ClientTable } from '@/components/shared/ClientTable';
 import { EmptyState } from '@/components/shared/EmptyState';
+import { InitialsAvatar } from '@/components/shared/InitialsAvatar';
+import { ListTabs, type ListTab } from '@/components/shared/ListTabs';
+import { PageContainer } from '@/components/shared/PageContainer';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { SearchField } from '@/components/shared/SearchField';
 import { StatusBadge } from '@/components/shared/StatusBadge';
-import { TableToolbar } from '@/components/shared/TableToolbar';
+import { TableCard } from '@/components/shared/TableCard';
 import { useEvents } from '@/hooks/use-events';
+import { formatDateTime } from '@/lib/utils';
 import type { Event } from '@/types';
 
 /** Event action → label and tone (the label carries the meaning). */
@@ -45,6 +42,22 @@ const ENTITY_LABELS: Record<Event['entityType'], string> = {
   system: 'Sistema',
 };
 
+type EntityFilter = 'all' | Exclude<Event['entityType'], 'system'>;
+
+const ENTITY_TABS: { value: EntityFilter; label: string }[] = [
+  { value: 'all', label: 'Todos' },
+  { value: 'customer', label: 'Clientes' },
+  { value: 'service', label: 'Serviços' },
+  { value: 'notification', label: 'Notificações' },
+];
+
+/** Stable avatar fill for a name (events carry no user id). */
+function nameSeed(name: string): number {
+  let seed = 0;
+  for (const char of name) seed = (seed + char.charCodeAt(0)) % 997;
+  return seed;
+}
+
 const columns: ColumnDef<Event>[] = [
   {
     accessorKey: 'action',
@@ -59,35 +72,41 @@ const columns: ColumnDef<Event>[] = [
     },
   },
   {
-    accessorKey: 'entityType',
-    header: 'Entidade',
-    cell: ({ row }) => (
-      <span className="text-foreground-secondary">
-        {ENTITY_LABELS[row.original.entityType] ?? row.original.entityType}{' '}
-        <span className="type-mono text-xs text-muted-foreground">#{row.original.entityId}</span>
-      </span>
-    ),
-  },
-  {
     accessorKey: 'description',
     header: 'Descrição',
     cell: ({ row }) => (
-      <div className="max-w-[56ch] truncate text-foreground">{row.original.description}</div>
+      <div className="flex min-w-0 flex-col gap-0.5">
+        <span className="max-w-[56ch] truncate text-foreground">{row.original.description}</span>
+        <span className="type-dense text-muted-foreground tabular-nums">
+          {ENTITY_LABELS[row.original.entityType] ?? row.original.entityType} #
+          {row.original.entityId}
+        </span>
+      </div>
     ),
   },
   {
     accessorKey: 'performedBy',
     header: 'Executado por',
     cell: ({ row }) => (
-      <span className="text-foreground-secondary">{row.original.performedBy}</span>
+      <div className="flex items-center gap-2">
+        <InitialsAvatar
+          name={row.original.performedBy}
+          id={nameSeed(row.original.performedBy)}
+          size="sm"
+        />
+        <span className="whitespace-nowrap text-foreground-secondary">
+          {row.original.performedBy}
+        </span>
+      </div>
     ),
   },
   {
     accessorKey: 'createdAt',
     header: 'Data/hora',
+    meta: { className: 'text-right' },
     cell: ({ row }) => (
-      <span className="type-mono text-xs whitespace-nowrap text-foreground-secondary">
-        {new Date(row.original.createdAt).toLocaleString('pt-PT')}
+      <span className="whitespace-nowrap type-dense text-muted-foreground">
+        {formatDateTime(row.original.createdAt)}
       </span>
     ),
   },
@@ -101,13 +120,22 @@ export function EventsPage() {
     pageIndex: 0,
     pageSize: 10,
   });
-  const [entityTypeFilter, setEntityTypeFilter] = React.useState<string>('all');
+  const [entityTypeFilter, setEntityTypeFilter] = React.useState<EntityFilter>('all');
 
   const filteredEvents = React.useMemo(() => {
     if (!events) return [];
     if (entityTypeFilter === 'all') return events;
     return events.filter((e) => e.entityType === entityTypeFilter);
   }, [events, entityTypeFilter]);
+
+  const tabs: ListTab<EntityFilter>[] = ENTITY_TABS.map((tab) => ({
+    ...tab,
+    count: !events
+      ? null
+      : tab.value === 'all'
+        ? events.length
+        : events.filter((e) => e.entityType === tab.value).length,
+  }));
 
   const table = useReactTable({
     data: filteredEvents,
@@ -127,60 +155,65 @@ export function EventsPage() {
   });
 
   const query = (table.getColumn('description')?.getFilterValue() as string) ?? '';
-  const total = table.getFilteredRowModel().rows.length;
+  const setQuery = (value: string) => {
+    table.getColumn('description')?.setFilterValue(value);
+    table.setPageIndex(0);
+  };
 
   return (
-    <>
+    <PageContainer>
       <PageHeader
         title="Eventos"
-        description="Registo das ações realizadas no sistema sobre clientes, serviços e notificações."
+        meta={<Badge tone="chip">Dados de demonstração</Badge>}
+        description="Registo das ações sobre clientes, serviços e notificações."
       />
 
-      <div className="flex flex-col gap-3 px-4 py-4 lg:px-6">
-        <TableToolbar count={events ? `${total} evento${total === 1 ? '' : 's'}` : undefined}>
+      <ListTabs
+        value={entityTypeFilter}
+        onValueChange={(value) => {
+          setEntityTypeFilter(value);
+          setPagination((p) => ({ ...p, pageIndex: 0 }));
+        }}
+        tabs={tabs}
+        aria-label="Filtrar por entidade"
+        className="gap-6"
+      >
+        <div className="flex flex-col gap-6">
           <SearchField
             value={query}
-            onChange={(event) => table.getColumn('description')?.setFilterValue(event.target.value)}
-            onClear={() => table.getColumn('description')?.setFilterValue('')}
+            onChange={(event) => setQuery(event.target.value)}
+            onClear={() => setQuery('')}
             placeholder="Procurar eventos…"
             aria-label="Procurar eventos"
-            className="w-full sm:w-72"
+            className="w-full sm:max-w-105"
           />
-          <Select value={entityTypeFilter} onValueChange={setEntityTypeFilter}>
-            <SelectTrigger className="w-40" aria-label="Filtrar por entidade">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todas as entidades</SelectItem>
-              <SelectItem value="customer">Clientes</SelectItem>
-              <SelectItem value="service">Serviços</SelectItem>
-              <SelectItem value="notification">Notificações</SelectItem>
-            </SelectContent>
-          </Select>
-        </TableToolbar>
 
-        {isLoading ? (
-          <div className="flex flex-col gap-3" aria-busy>
-            {Array.from({ length: 5 }).map((_, i) => (
-              <Skeleton key={i} className="h-6 w-full" />
-            ))}
-          </div>
-        ) : (
-          <ClientTable
-            table={table}
-            empty={
-              <EmptyState
-                icon={<Activity />}
-                title={
-                  query || entityTypeFilter !== 'all'
-                    ? 'Nenhum evento corresponde ao filtro.'
-                    : 'Ainda não há eventos registados.'
-                }
-              />
-            }
-          />
-        )}
-      </div>
-    </>
+          {isLoading ? (
+            <TableCard aria-busy>
+              <div className="flex flex-col gap-3 p-6">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <Skeleton key={i} className="h-6 w-full" />
+                ))}
+              </div>
+            </TableCard>
+          ) : (
+            <ClientTable
+              table={table}
+              tableClassName="min-w-160"
+              empty={
+                <EmptyState
+                  icon={<Activity />}
+                  title={
+                    query || entityTypeFilter !== 'all'
+                      ? 'Nenhum evento corresponde ao filtro.'
+                      : 'Ainda não há eventos registados.'
+                  }
+                />
+              }
+            />
+          )}
+        </div>
+      </ListTabs>
+    </PageContainer>
   );
 }

@@ -1,5 +1,6 @@
 import { useRef } from 'react';
-import { Download, File, FileText, Image, MoreVertical, Upload } from 'lucide-react';
+import { Download, File, FileText, Image, MoreHorizontal } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -18,20 +19,29 @@ import {
 } from '@/components/ui/table';
 import { FileDropZone } from '@/components/ui/file-drop-zone';
 import { Skeleton } from '@/components/ui/skeleton';
-import { DetailPanel } from './DetailPanel';
 import { ConfirmDeleteDialog } from '@/components/shared/ConfirmDeleteDialog';
 import { useDeleteTarget } from '@/hooks/use-delete-target';
-import { UploadProgressList } from './UploadProgressList';
+import { UploadProgressList } from '@/components/customer/UploadProgressList';
 import { useDeleteDocument } from '@/hooks/use-customer-documents';
 import { useFileUpload } from '@/hooks/use-file-upload';
 import { customerDocumentsApi } from '@/lib/api-client';
 import type { CustomerDocument } from '@/types';
+import { formatFileSize } from '@/lib/utils';
 
 interface CustomerDocumentsTabProps {
   customerId: number;
   documents: CustomerDocument[];
   isLoading?: boolean;
 }
+
+/** pt-PT labels for the backend's inferred document categories. */
+const DOCUMENT_TYPE_LABEL: Record<string, string> = {
+  pdf: 'PDF',
+  image: 'Imagem',
+  document: 'Documento',
+  spreadsheet: 'Folha de cálculo',
+  other: 'Outro',
+};
 
 export function CustomerDocumentsTab({
   customerId,
@@ -53,14 +63,6 @@ export function CustomerDocumentsTab({
     }
   };
 
-  const formatFileSize = (bytes: number) => {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
-  };
-
   const pendingDelete = useDeleteTarget<CustomerDocument>();
   const confirmDelete = async () => {
     if (!pendingDelete.target) return;
@@ -80,28 +82,17 @@ export function CustomerDocumentsTab({
 
   if (isLoading) {
     return (
-      <DetailPanel title="Documentos">
-        <div className="flex flex-col gap-3 p-4" aria-busy>
-          {Array.from({ length: 3 }).map((_, i) => (
-            <Skeleton key={i} className="h-6 w-full" />
-          ))}
-        </div>
-      </DetailPanel>
+      <div className="flex flex-col gap-3 px-6 py-5" aria-busy>
+        {Array.from({ length: 3 }).map((_, i) => (
+          <Skeleton key={i} className="h-6 w-full" />
+        ))}
+      </div>
     );
   }
 
   return (
-    <DetailPanel
-      title="Documentos"
-      description="Contratos, acordos e outros ficheiros deste cliente"
-      action={
-        <Button size="sm" disabled={isUploading} onClick={() => fileInputRef.current?.click()}>
-          <Upload />
-          {isUploading ? 'A carregar…' : 'Carregar'}
-        </Button>
-      }
-    >
-      <div className="flex flex-col gap-4 p-4">
+    <div className="flex flex-col">
+      <div className="flex flex-col gap-4 px-6 pt-5 pb-4">
         <FileDropZone
           ref={fileInputRef}
           onFilesSelected={uploadFiles}
@@ -113,21 +104,23 @@ export function CustomerDocumentsTab({
           <UploadProgressList uploads={uploads} onClearCompleted={clearCompleted} />
         )}
 
-        {documents.length === 0 && (
-          <p className="text-center type-body text-muted-foreground">Sem documentos</p>
+        {documents.length === 0 && uploads.length === 0 && (
+          <p className="text-center type-body text-muted-foreground">
+            Ainda não há documentos deste cliente.
+          </p>
         )}
       </div>
 
       {documents.length > 0 && (
-        <div className="border-t border-border">
-          <Table>
+        <div className="pb-2">
+          <Table inset>
             <TableHeader>
               <TableRow>
                 <TableHead>Nome</TableHead>
                 <TableHead>Tipo</TableHead>
                 <TableHead className="text-right">Tamanho</TableHead>
                 <TableHead>Carregado</TableHead>
-                <TableHead className="w-10">
+                <TableHead className="w-12">
                   <span className="sr-only">Ações</span>
                 </TableHead>
               </TableRow>
@@ -136,34 +129,36 @@ export function CustomerDocumentsTab({
               {documents.map((document) => (
                 <TableRow key={document.id}>
                   <TableCell className="max-w-[48ch]">
-                    <div className="flex min-w-0 items-center gap-2">
+                    <div className="flex min-w-0 items-center gap-2.5">
                       {getFileIcon(document.type)}
                       <span className="truncate font-medium" title={document.name}>
                         {document.name}
                       </span>
                     </div>
                   </TableCell>
-                  <TableCell className="type-kbd text-foreground-secondary uppercase">
-                    {document.type}
+                  <TableCell>
+                    <Badge tone="chip">
+                      {DOCUMENT_TYPE_LABEL[document.type] ?? document.type}
+                    </Badge>
                   </TableCell>
-                  <TableCell className="text-right type-mono text-xs text-foreground-secondary">
+                  <TableCell className="text-right text-foreground-secondary">
                     {formatFileSize(document.size)}
                   </TableCell>
-                  <TableCell className="type-mono text-xs text-foreground-secondary">
+                  <TableCell className="text-foreground-secondary">
                     {new Date(document.uploadedAt).toLocaleDateString('pt-PT')}
                   </TableCell>
-                  <TableCell className="text-right">
+                  <TableCell className="w-12 text-right">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button
                           variant="ghost"
-                          size="icon-xs"
+                          size="icon-sm"
                           aria-label={`Ações para ${document.name}`}
                         >
-                          <MoreVertical />
+                          <MoreHorizontal />
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-36">
+                      <DropdownMenuContent align="end" className="w-40">
                         <DropdownMenuItem onClick={() => handleDownload(document)}>
                           <Download />
                           Transferir
@@ -195,6 +190,6 @@ export function CustomerDocumentsTab({
         confirmLabel="Eliminar documento"
         onConfirm={confirmDelete}
       />
-    </DetailPanel>
+    </div>
   );
 }

@@ -1,5 +1,7 @@
 import * as React from 'react';
-import { ChevronRight, MoreVertical, Package, Plus } from 'lucide-react';
+import { ChevronRight, MoreHorizontal, Package, Plus } from 'lucide-react';
+import { toast } from 'sonner';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -17,29 +19,41 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
-import { EmptyState } from '@/components/shared/EmptyState';
-import { DetailPanel } from './DetailPanel';
-import { cn, formatServiceDate } from '@/lib/utils';
-import { useDeleteCustomerService } from '@/hooks/use-customer-services';
-import { CustomerServiceDialog } from '@/components/customer/CustomerServiceDialog';
 import { ConfirmDeleteDialog } from '@/components/shared/ConfirmDeleteDialog';
+import { EmptyState } from '@/components/shared/EmptyState';
+import { StatusBadge } from '@/components/shared/StatusBadge';
+import type { ServiceDialogTarget } from '@/components/customer/CustomerServiceDialog';
+import { useDeleteCustomerService } from '@/hooks/use-customer-services';
 import { useDeleteTarget } from '@/hooks/use-delete-target';
+import { serviceEndUrgency, todayInLisbon } from '@/lib/status';
+import { cn, formatServiceDate } from '@/lib/utils';
 import type { CustomerService } from '@/types';
-import { toast } from 'sonner';
 
 interface CustomerServicesTabProps {
   customerId: number;
   services: CustomerService[];
   isLoading?: boolean;
+  /** Opens the page's service dialog (create, sub-service, edit or duplicate). */
+  onOpenServiceDialog: (target: ServiceDialogTarget) => void;
 }
 
-export function CustomerServicesTab({ customerId, services, isLoading }: CustomerServicesTabProps) {
+const formatMoney = (valor: number, moeda: string) =>
+  new Intl.NumberFormat('pt-PT', { style: 'currency', currency: moeda }).format(valor);
+
+/**
+ * Services table inside the detail page's records card. Keeps every column
+ * (PLAN decision 14) and scrolls sideways inside the card; parents expand to
+ * show their sub-services.
+ */
+export function CustomerServicesTab({
+  customerId,
+  services,
+  isLoading,
+  onOpenServiceDialog,
+}: CustomerServicesTabProps) {
   const [expandedRows, setExpandedRows] = React.useState<Set<number>>(new Set());
-  const [dialogOpen, setDialogOpen] = React.useState(false);
-  const [editingService, setEditingService] = React.useState<CustomerService | undefined>();
-  const [duplicatingService, setDuplicatingService] = React.useState<CustomerService | undefined>();
-  const [parentIdForNew, setParentIdForNew] = React.useState<number | undefined>();
   const deleteService = useDeleteCustomerService();
+  const today = todayInLisbon();
 
   const parentServices = services.filter((s) => !s.parentId);
   const getChildren = (parentId: number) => services.filter((s) => s.parentId === parentId);
@@ -56,35 +70,6 @@ export function CustomerServicesTab({ customerId, services, isLoading }: Custome
     });
   };
 
-  const handleCreate = () => {
-    setEditingService(undefined);
-    setDuplicatingService(undefined);
-    setParentIdForNew(undefined);
-    setDialogOpen(true);
-  };
-
-  const handleCreateSubService = (parentId: number) => {
-    setEditingService(undefined);
-    setDuplicatingService(undefined);
-    setParentIdForNew(parentId);
-    setDialogOpen(true);
-  };
-
-  const handleEdit = (service: CustomerService) => {
-    setEditingService(service);
-    setDuplicatingService(undefined);
-    setParentIdForNew(undefined);
-    setDialogOpen(true);
-  };
-
-  // Opens the create dialog pre-filled from `service` (same parent, no children copied).
-  const handleDuplicate = (service: CustomerService) => {
-    setEditingService(undefined);
-    setDuplicatingService(service);
-    setParentIdForNew(undefined);
-    setDialogOpen(true);
-  };
-
   const pendingDelete = useDeleteTarget<CustomerService>();
   const pendingChildren = pendingDelete.target ? getChildren(pendingDelete.target.id).length : 0;
   const confirmDelete = async () => {
@@ -93,39 +78,55 @@ export function CustomerServicesTab({ customerId, services, isLoading }: Custome
     toast.success('Serviço eliminado');
   };
 
-  const formatCurrency = (valor: number, moeda: string) => {
-    return new Intl.NumberFormat('pt-PT', {
-      style: 'currency',
-      currency: moeda,
-    }).format(valor);
-  };
-
   if (isLoading) {
     return (
-      <DetailPanel title="Serviços">
-        <div className="flex flex-col gap-3 p-4" aria-busy>
-          {Array.from({ length: 4 }).map((_, i) => (
-            <Skeleton key={i} className="h-6 w-full" />
-          ))}
-        </div>
-      </DetailPanel>
+      <div className="flex flex-col gap-3 px-6 py-5" aria-busy>
+        {Array.from({ length: 4 }).map((_, i) => (
+          <Skeleton key={i} className="h-6 w-full" />
+        ))}
+      </div>
     );
   }
 
-  const renderServiceRow = (service: CustomerService, isChild: boolean = false) => {
+  if (parentServices.length === 0) {
+    return (
+      <EmptyState
+        icon={<Package />}
+        title="Sem serviços"
+        description="Registe o primeiro serviço contratado por este cliente."
+        action={
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => onOpenServiceDialog({ mode: 'create' })}
+          >
+            <Plus aria-hidden />
+            Criar primeiro serviço
+          </Button>
+        }
+      />
+    );
+  }
+
+  const muted = (value: string) =>
+    value ? value : <span className="text-foreground-tertiary">—</span>;
+
+  const renderServiceRow = (service: CustomerService, isChild = false) => {
     const children = getChildren(service.id);
     const hasChildren = children.length > 0;
     const isExpanded = expandedRows.has(service.id);
+    const urgency = serviceEndUrgency(service.dataFim, today);
 
     return (
       <React.Fragment key={service.id}>
         <TableRow className={cn(isChild && 'bg-background/60')}>
           <TableCell className="font-medium">
-            <div className={cn('flex items-center gap-1.5', isChild && 'pl-7')}>
+            <div className={cn('flex items-center gap-1.5', isChild && 'pl-8')}>
               {!isChild && hasChildren ? (
                 <Button
                   variant="ghost"
                   size="icon-xs"
+                  className="-ml-1"
                   onClick={() => toggleExpand(service.id)}
                   aria-expanded={isExpanded}
                   aria-label={`${isExpanded ? 'Ocultar' : 'Mostrar'} sub-serviços de ${service.acesso}`}
@@ -133,54 +134,69 @@ export function CustomerServicesTab({ customerId, services, isLoading }: Custome
                   <ChevronRight className={cn('transition-transform', isExpanded && 'rotate-90')} />
                 </Button>
               ) : !isChild ? (
-                <span className="inline-block w-6" />
+                <span aria-hidden className="-ml-1 inline-block w-7" />
               ) : null}
               <span className="type-mono">{service.acesso}</span>
               {!isChild && hasChildren && (
                 <span className="type-caption text-muted-foreground tabular-nums">
-                  +{children.length}
+                  <span className="sr-only">, </span>+{children.length}
+                  <span className="sr-only"> sub-serviços</span>
                 </span>
               )}
             </div>
           </TableCell>
-          <TableCell>{service.tarifario}</TableCell>
-          <TableCell className="text-foreground-secondary">{service.operadora}</TableCell>
-          <TableCell className="text-right type-mono">
-            {formatCurrency(service.valor, service.moeda)}
+          <TableCell>{muted(service.tarifario)}</TableCell>
+          <TableCell>
+            {service.operadora ? <Badge tone="chip">{service.operadora}</Badge> : muted('')}
           </TableCell>
-          <TableCell className="type-mono text-xs text-foreground-secondary">
-            {service.conta || '—'}
+          <TableCell className="text-right whitespace-nowrap">
+            {formatMoney(service.valor, service.moeda)}
+            <span className="text-muted-foreground">/mês</span>
           </TableCell>
-          <TableCell className="type-mono text-xs text-foreground-secondary">
-            {service.cvp || '—'}
-          </TableCell>
-          <TableCell className="type-mono text-xs text-foreground-secondary">
-            {service.numClient || '—'}
-          </TableCell>
-          <TableCell className="type-mono text-xs text-foreground-secondary">
-            {service.numServico || '—'}
+          <TableCell className="text-foreground-secondary">{muted(service.conta)}</TableCell>
+          <TableCell className="text-foreground-secondary">{muted(service.cvp)}</TableCell>
+          <TableCell className="text-foreground-secondary">{muted(service.numClient)}</TableCell>
+          <TableCell className="text-foreground-secondary">
+            {service.numServico ? (
+              <span className="type-mono">{service.numServico}</span>
+            ) : (
+              muted('')
+            )}
           </TableCell>
           <TableCell
-            className="hidden max-w-[240px] truncate text-foreground-secondary 2xl:table-cell"
+            className="max-w-60 truncate text-foreground-secondary"
             title={service.morada || undefined}
           >
-            {service.morada || '—'}
+            {muted(service.morada)}
           </TableCell>
-          <TableCell className="type-mono text-xs">{formatServiceDate(service.dataFim)}</TableCell>
-          <TableCell className="text-right">
+          <TableCell>
+            <div className="flex items-center gap-2">
+              <span className={cn(!service.dataFim && 'text-foreground-tertiary')}>
+                {formatServiceDate(service.dataFim)}
+              </span>
+              {urgency?.urgent && <StatusBadge tone={urgency.tone}>{urgency.label}</StatusBadge>}
+            </div>
+          </TableCell>
+          <TableCell className="w-12 text-right">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon-xs" aria-label={`Ações para ${service.acesso}`}>
-                  <MoreVertical />
+                <Button variant="ghost" size="icon-sm" aria-label={`Ações para ${service.acesso}`}>
+                  <MoreHorizontal />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuItem onClick={() => handleEdit(service)}>Editar</DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleDuplicate(service)}>
+              <DropdownMenuContent align="end" className="w-52">
+                <DropdownMenuItem onClick={() => onOpenServiceDialog({ mode: 'edit', service })}>
+                  Editar
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => onOpenServiceDialog({ mode: 'duplicate', service })}
+                >
                   Duplicar
                 </DropdownMenuItem>
                 {!isChild && (
-                  <DropdownMenuItem onClick={() => handleCreateSubService(service.id)}>
+                  <DropdownMenuItem
+                    onClick={() => onOpenServiceDialog({ mode: 'create', parentId: service.id })}
+                  >
                     Adicionar sub-serviço
                   </DropdownMenuItem>
                 )}
@@ -202,49 +218,28 @@ export function CustomerServicesTab({ customerId, services, isLoading }: Custome
 
   return (
     <>
-      <DetailPanel
-        title="Serviços"
-        description="Serviços contratados para este cliente"
-        action={
-          <Button size="sm" onClick={handleCreate}>
-            <Plus />
-            Criar serviço
-          </Button>
-        }
-      >
-        {parentServices.length === 0 ? (
-          <EmptyState
-            icon={<Package />}
-            title="Sem serviços"
-            action={
-              <Button variant="outline" size="sm" onClick={handleCreate}>
-                Criar primeiro serviço
-              </Button>
-            }
-          />
-        ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Acesso (ID)</TableHead>
-                <TableHead>Tarifário</TableHead>
-                <TableHead>Operadora</TableHead>
-                <TableHead className="text-right">Valor</TableHead>
-                <TableHead>Conta</TableHead>
-                <TableHead>CVP</TableHead>
-                <TableHead>Nº cliente</TableHead>
-                <TableHead>Nº serviço</TableHead>
-                <TableHead className="hidden 2xl:table-cell">Morada</TableHead>
-                <TableHead>Data fim</TableHead>
-                <TableHead className="w-10">
-                  <span className="sr-only">Ações</span>
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>{parentServices.map((service) => renderServiceRow(service))}</TableBody>
-          </Table>
-        )}
-      </DetailPanel>
+      <div className="pb-2">
+        <Table inset>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Acesso (ID)</TableHead>
+              <TableHead>Tarifário</TableHead>
+              <TableHead>Operadora</TableHead>
+              <TableHead className="text-right">Valor</TableHead>
+              <TableHead>Conta</TableHead>
+              <TableHead>CVP</TableHead>
+              <TableHead>Nº cliente</TableHead>
+              <TableHead>Nº serviço</TableHead>
+              <TableHead>Morada</TableHead>
+              <TableHead>Data fim</TableHead>
+              <TableHead className="w-12">
+                <span className="sr-only">Ações</span>
+              </TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>{parentServices.map((service) => renderServiceRow(service))}</TableBody>
+        </Table>
+      </div>
 
       <ConfirmDeleteDialog
         open={pendingDelete.open}
@@ -257,15 +252,6 @@ export function CustomerServicesTab({ customerId, services, isLoading }: Custome
         }
         confirmLabel="Eliminar serviço"
         onConfirm={confirmDelete}
-      />
-
-      <CustomerServiceDialog
-        customerId={customerId}
-        parentId={parentIdForNew}
-        service={editingService}
-        duplicateOf={duplicatingService}
-        open={dialogOpen}
-        onOpenChange={setDialogOpen}
       />
     </>
   );

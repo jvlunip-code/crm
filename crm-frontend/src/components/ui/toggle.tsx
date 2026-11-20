@@ -7,18 +7,18 @@ import { Toggle as TogglePrimitive } from 'radix-ui';
 import { cn } from '@/lib/utils';
 
 const toggleVariants = cva(
-  "group/toggle inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-sm border border-transparent type-control whitespace-nowrap text-foreground-secondary transition-colors outline-none hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 aria-pressed:bg-muted aria-pressed:text-foreground data-[state=on]:bg-muted data-[state=on]:text-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+  "group/toggle inline-flex cursor-pointer items-center justify-center gap-2 rounded-md border border-transparent type-body whitespace-nowrap text-foreground-secondary transition-colors hover:bg-accent hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:pointer-events-none disabled:opacity-50 aria-pressed:bg-muted aria-pressed:font-medium aria-pressed:text-foreground data-[state=on]:bg-muted data-[state=on]:font-medium data-[state=on]:text-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
   {
     variants: {
       variant: {
         default: 'bg-transparent',
         outline:
-          'border-border bg-card hover:border-border-strong data-[state=on]:border-border-strong data-[state=on]:bg-muted',
+          'border-border-strong bg-card data-[state=on]:bg-muted',
       },
       size: {
-        default: 'h-8 min-w-8 px-2.5',
-        sm: "h-7 min-w-7 px-2 text-xs [&_svg:not([class*='size-'])]:size-3.5",
-        lg: 'h-9 min-w-9 px-3',
+        default: 'h-10 min-w-10 px-3.5',
+        sm: 'h-8 min-w-8 px-3',
+        lg: 'h-11 min-w-11 px-4',
       },
     },
     defaultVariants: {

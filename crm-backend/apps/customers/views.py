@@ -37,6 +37,9 @@ class CustomerViewSet(viewsets.ModelViewSet):
         tag = self.request.query_params.get('tag')
         if tag and tag.isdigit():
             queryset = queryset.filter(tags__id=tag)
+        status_filter = self.request.query_params.get('status')
+        if status_filter in Customer.Status.values:
+            queryset = queryset.filter(status=status_filter)
         return queryset.prefetch_related('tags')
 
     @action(detail=False, methods=['get'])

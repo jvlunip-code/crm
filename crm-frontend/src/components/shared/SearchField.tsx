@@ -1,45 +1,50 @@
 import * as React from 'react';
 import { SearchIcon, XIcon } from 'lucide-react';
 
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 
 /**
- * Search input with a leading icon and an optional clear button (shown when
- * `onClear` is given and there is a value). Pass `aria-label` — the field has
- * no visible label.
+ * Toolbar search (DESIGN.md › Space): 44px (`size="lg"`, the default) white
+ * field, r10, a 16px tertiary icon 14px in and the text from 40px; an
+ * optional clear button (shown when `onClear` is given and there is a value).
+ * Pass `aria-label`: the field has no visible label. In dialogs pass
+ * `size="sm"` or `"default"`.
  */
 export function SearchField({
   className,
   onClear,
   value,
+  size = 'lg',
   ...props
 }: React.ComponentProps<typeof Input> & { onClear?: () => void }) {
   const hasValue = typeof value === 'string' ? value.length > 0 : !!value;
+  const showClear = Boolean(onClear && hasValue);
   return (
     <div className={cn('relative min-w-0', className)}>
       <SearchIcon
         aria-hidden
-        className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground"
+        className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-foreground-tertiary"
       />
       <Input
         type="search"
         value={value}
-        className={cn(
-          'pl-8 [&::-webkit-search-cancel-button]:hidden',
-          onClear && hasValue && 'pr-8',
-        )}
+        size={size}
+        className={cn('pl-10 [&::-webkit-search-cancel-button]:hidden', showClear && 'pr-11')}
         {...props}
       />
-      {onClear && hasValue && (
-        <button
+      {showClear && (
+        <Button
           type="button"
+          variant="ghost"
+          size="icon-xs"
           onClick={onClear}
           aria-label="Limpar pesquisa"
-          className="absolute top-1/2 right-1 inline-flex size-6 -translate-y-1/2 items-center justify-center rounded-xs text-muted-foreground transition-colors outline-none hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
+          className="absolute top-1/2 right-2 -translate-y-1/2 text-muted-foreground"
         >
-          <XIcon className="size-3.5" />
-        </button>
+          <XIcon aria-hidden />
+        </Button>
       )}
     </div>
   );

@@ -32,7 +32,7 @@ function FieldLabel({
   return (
     <div className="flex items-center gap-1">
       {label}
-      <span aria-hidden className="type-label text-destructive">
+      <span aria-hidden className="type-label text-destructive-ink">
         *
       </span>
     </div>
@@ -43,7 +43,7 @@ function FieldDescription({ className, ...props }: React.ComponentProps<'p'>) {
   return (
     <p
       data-slot="field-description"
-      className={cn('type-caption text-muted-foreground', className)}
+      className={cn('type-dense text-muted-foreground', className)}
       {...props}
     />
   );
@@ -55,7 +55,7 @@ function FieldError({ className, children, ...props }: React.ComponentProps<'p'>
     <p
       data-slot="field-error"
       role="alert"
-      className={cn('type-caption text-destructive', className)}
+      className={cn('type-dense text-destructive-ink', className)}
       {...props}
     >
       {children}

@@ -5,7 +5,8 @@ import { CalendarIcon } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
-import { Input } from '@/components/ui/input';
+import { Input, type FieldSize } from '@/components/ui/input';
+import { cn } from '@/lib/utils';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
 interface DatePickerProps {
@@ -13,6 +14,8 @@ interface DatePickerProps {
   onChange: (value: string) => void;
   placeholder?: string;
   id?: string;
+  /** Field height: sm 32 (dialogs), default 40, lg 44. */
+  size?: FieldSize;
 }
 
 const DISPLAY_FORMAT = 'dd/MM/yyyy';
@@ -35,7 +38,13 @@ function toDisplay(value: string | null): string {
   return d ? format(d, DISPLAY_FORMAT) : '';
 }
 
-export function DatePicker({ value, onChange, placeholder = 'dd/mm/aaaa', id }: DatePickerProps) {
+export function DatePicker({
+  value,
+  onChange,
+  placeholder = 'dd/mm/aaaa',
+  id,
+  size = 'default',
+}: DatePickerProps) {
   const [open, setOpen] = React.useState(false);
   const [text, setText] = React.useState(() => toDisplay(value));
 
@@ -78,7 +87,8 @@ export function DatePicker({ value, onChange, placeholder = 'dd/mm/aaaa', id }: 
           }
         }}
         placeholder={placeholder}
-        className="pr-9"
+        size={size}
+        className={cn('tabular-nums', size === 'sm' ? 'pr-9' : 'pr-10')}
         inputMode="numeric"
         autoComplete="off"
         aria-invalid={invalid || undefined}
@@ -89,7 +99,10 @@ export function DatePicker({ value, onChange, placeholder = 'dd/mm/aaaa', id }: 
             type="button"
             variant="ghost"
             size="icon-xs"
-            className="absolute top-1/2 right-1 -translate-y-1/2"
+            className={cn(
+              'absolute top-1/2 -translate-y-1/2 text-muted-foreground',
+              size === 'sm' ? 'right-0.5' : 'right-1.5',
+            )}
             aria-label="Abrir calendário"
           >
             <CalendarIcon />

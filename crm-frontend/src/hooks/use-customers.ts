@@ -48,6 +48,8 @@ export function useCreateCustomer() {
     mutationFn: customersApi.create,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['customers'] });
+      // Customer totals and Ativos/Inativos counts (header, list tabs, dashboard).
+      queryClient.invalidateQueries({ queryKey: ['dashboard-summary'] });
     },
   });
 }
@@ -60,6 +62,8 @@ export function useUpdateCustomer() {
       customersApi.update(id, updates),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['customers'] });
+      // Customer totals and Ativos/Inativos counts (header, list tabs, dashboard).
+      queryClient.invalidateQueries({ queryKey: ['dashboard-summary'] });
     },
   });
 }
@@ -71,6 +75,8 @@ export function useDeleteCustomer() {
     mutationFn: customersApi.delete,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['customers'] });
+      // Customer totals and Ativos/Inativos counts (header, list tabs, dashboard).
+      queryClient.invalidateQueries({ queryKey: ['dashboard-summary'] });
     },
   });
 }

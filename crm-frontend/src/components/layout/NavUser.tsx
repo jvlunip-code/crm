@@ -1,36 +1,34 @@
 import { useNavigate } from 'react-router-dom';
-import { EllipsisVertical, LogOut } from 'lucide-react';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { ChevronsUpDown, LogOut } from 'lucide-react';
+import { Avatar, AvatarFallback, avatarFillFor } from '@/components/ui/avatar';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import {
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  useSidebar,
-} from '@/components/ui/sidebar';
+import { useSidebar } from '@/components/ui/sidebar';
 import { useAuth, useLogout } from '@/hooks/use-auth';
 
+function initialsOf(name: string): string {
+  const words = name.trim().split(/\s+/).filter(Boolean);
+  if (words.length >= 2) return `${words[0][0]}${words[words.length - 1][0]}`.toUpperCase();
+  return name.slice(0, 2).toUpperCase();
+}
+
+/**
+ * Sidebar user card (DESIGN.md › Shell): white, r12, hairline, 32px avatar,
+ * name + email. The whole card opens the account menu.
+ */
 export function NavUser() {
   const { isMobile } = useSidebar();
   const { user } = useAuth();
   const logout = useLogout();
   const navigate = useNavigate();
 
-  const hasFullName = !!(user?.firstName && user?.lastName);
-  const name = user ? (hasFullName ? `${user.firstName} ${user.lastName}` : user.username) : '';
-  const email = user?.email ?? '';
-  const initials = user
-    ? hasFullName
-      ? `${user.firstName[0]}${user.lastName[0]}`
-      : user.username.slice(0, 2).toUpperCase()
-    : '';
+  if (!user) return null;
+
+  const name = [user.firstName, user.lastName].filter(Boolean).join(' ') || user.username;
 
   const handleLogout = () => {
     logout.mutate(undefined, {
@@ -38,48 +36,36 @@ export function NavUser() {
     });
   };
 
-  const identity = (
-    <>
-      <Avatar>
-        <AvatarFallback>{initials}</AvatarFallback>
-      </Avatar>
-      <div className="grid flex-1 text-left type-nav leading-tight">
-        <span className="truncate font-medium text-foreground">{name}</span>
-        <span className="truncate type-caption text-foreground-secondary">{email}</span>
-      </div>
-    </>
-  );
-
   return (
-    <SidebarMenu>
-      <SidebarMenuItem>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <SidebarMenuButton
-              size="lg"
-              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
-            >
-              {identity}
-              <EllipsisVertical className="ml-auto size-4 text-muted-foreground" />
-            </SidebarMenuButton>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent
-            className="w-(--radix-dropdown-menu-trigger-width) min-w-56"
-            side={isMobile ? 'bottom' : 'right'}
-            align="end"
-            sideOffset={4}
-          >
-            <DropdownMenuLabel className="p-0 font-normal">
-              <div className="flex items-center gap-2 px-1 py-1.5 text-left">{identity}</div>
-            </DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleLogout}>
-              <LogOut />
-              Terminar sessão
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </SidebarMenuItem>
-    </SidebarMenu>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button
+          type="button"
+          className="flex w-full cursor-pointer items-center gap-2.5 rounded-lg border border-border bg-card px-3 py-2.5 text-left transition-colors hover:bg-accent data-[state=open]:bg-accent"
+        >
+          <Avatar fill={avatarFillFor(user.id)} aria-hidden>
+            <AvatarFallback>{initialsOf(name)}</AvatarFallback>
+          </Avatar>
+          <span className="grid min-w-0 flex-1">
+            <span className="truncate type-body font-medium text-foreground">{name}</span>
+            {user.email && (
+              <span className="truncate type-caption text-muted-foreground">{user.email}</span>
+            )}
+          </span>
+          <ChevronsUpDown aria-hidden className="size-4 shrink-0 text-muted-foreground" />
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent
+        className="w-(--radix-dropdown-menu-trigger-width) min-w-56"
+        side={isMobile ? 'top' : 'right'}
+        align="end"
+        sideOffset={8}
+      >
+        <DropdownMenuItem onSelect={handleLogout} disabled={logout.isPending}>
+          <LogOut aria-hidden />
+          Terminar sessão
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }

@@ -125,7 +125,7 @@ export function CustomerSearchCombobox({
             id={listId}
             role="listbox"
             aria-label="Sugestões de clientes"
-            className="max-h-96 overflow-y-auto py-1"
+            className="max-h-96 overflow-y-auto p-1"
           >
             {results.map((customer, i) => (
               <SuggestionOption
@@ -158,7 +158,8 @@ export function CustomerSearchCombobox({
                 event.currentTarget.closest('form')?.requestSubmit();
               }}
               className={cn(
-                'mt-1 flex cursor-pointer items-center gap-2 border-t border-border-subtle px-3 py-2 type-dense text-foreground-secondary',
+                // A hairline above the "see all" action, outside its rounded hover fill.
+                'relative mt-2 flex cursor-pointer items-center gap-2 rounded-sm px-3 py-2 type-dense text-foreground-secondary before:absolute before:inset-x-0 before:-top-1 before:border-t before:border-border-subtle',
                 active === results.length && 'bg-accent text-foreground',
               )}
             >
@@ -210,10 +211,13 @@ function SuggestionOption({
       aria-selected={active}
       onMouseEnter={onHover}
       onClick={onSelect}
-      className={cn('flex cursor-pointer items-center gap-3 px-3 py-2', active && 'bg-accent')}
+      className={cn(
+        'flex cursor-pointer items-center gap-3 rounded-sm px-3 py-2',
+        active && 'bg-accent',
+      )}
     >
       <div className="min-w-0 flex-1">
-        <div className="truncate type-dense font-medium text-foreground">{mark(customer.name)}</div>
+        <div className="truncate type-body font-medium text-foreground">{mark(customer.name)}</div>
         <div className="flex min-w-0 items-center gap-1.5 type-caption text-muted-foreground">
           {customer.company && (
             <span className="max-w-[45%] shrink-0 truncate">{mark(customer.company)}</span>
